@@ -1,10 +1,13 @@
 const bot = require(process.cwd() + '/libs/telegramBot');
 const auth = require('./auth');
 const routes = require('./routes');
+const command = require('./command');
 
 /* Models */
 const User = require(process.cwd() + '/app/controllers/user');
 const Account = require(process.cwd() + '/app/controllers/account');
+
+// User.cleaner();
 
 /* Обработка сообщений */
 bot.onText(/(.+)$/, function (msg, match) {
@@ -14,44 +17,49 @@ bot.onText(/(.+)$/, function (msg, match) {
     auth({
         id: msg.from.id,
         name: msg.from.first_name
-    }, (user) => {
+    }, (user, first) => {
 
-        bot.sendMessage(msg.from.id, 'Приветствую ' + user[0].name + ', у вас 2 аккаунта, активных заданий 0');
+        /* Пользователь только зарегистрировался */
+        if (first){
 
-        /* Отправляем кнопки */
-        bot.sendMessage(msg.from.id, 'Выберите действие', {
-            reply_markup: {
-                keyboard: [
-                    [
-                        {
-                            text: 'Добавить аккаунт'
-                        }
-                    ],
-                    [
-                        {
-                            text: 'Список аккаунтов'
-                        }
-                    ],
-                    [
-                        {
-                            text: 'Создать задания'
-                        }
-                    ]
-                ]
+            /* Отправляем приветствие */
+            command.start(msg);
+
+        } else {
+
+            /* Обработка Bot комманд */
+            if (typeof msg.entities == 'object'){
+                routes.command(msg);
+
+            } else {
+
+                /* Обработка текстовых комманд */
+                routes.text(msg);
             }
-        });
-
-        /* Получаем список аккаунтов пользователя */
-        // Account.list(id, (err, accounts) => {
-        //     if (accounts.length){
-        //
-        //         /* Есть зарегистрированные аккаунты */
-        //
-        //     } else {
-        //
-        //     }
-        // });
-
-
+        }
     });
 });
+
+
+/* Действия */
+bot.on("callback_query", function(callbackQuery) {
+
+    /* Роутер действий */
+    routes.callback(callbackQuery);
+
+    // const id = callbackQuery.from.id;
+    //
+    // /* Авторизация */
+    // auth({
+    //     id: callbackQuery.from.id,
+    //     name: callbackQuery.from.first_name
+    // }, () => {
+    //     console.log(callbackQuery)
+    //
+    //     /* Реакция */
+    //     bot.answerCallbackQuery(callbackQuery.id, 'Введите логин аккаунта', true);
+    //     // routes(callbackQuery);
+    // });
+});
+
+

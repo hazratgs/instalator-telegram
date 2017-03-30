@@ -14,7 +14,7 @@ module.exports = (data, callback) => {
     }).then((user) => {
 
         /* Пользователь существует */
-        callback(user);
+        callback(user, false);
 
     }, () => {
 
@@ -25,7 +25,7 @@ module.exports = (data, callback) => {
         }, (err, model) => {
 
             /* Зарегистрировали нового пользователя */
-            callback(model);
+            callback(model, true);
         })
     });
 };

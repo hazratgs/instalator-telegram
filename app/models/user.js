@@ -1,4 +1,4 @@
-let db = require(process.cwd() + '/libs/db');
+let db = require('../../libs/db');
 
 // Модель пользователя
 let UserSchema = new db.mongoose.Schema({
