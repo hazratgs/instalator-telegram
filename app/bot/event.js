@@ -53,8 +53,7 @@ event.on('back:home', (msg) => {
                         text: constants.ACCOUNT_LIST
                     }
                 ]
-            ],
-            resize_keyboard: true
+            ] 
         }
     })
 });

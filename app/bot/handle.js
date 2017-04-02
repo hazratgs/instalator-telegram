@@ -22,6 +22,9 @@ exports.event = (msg) => {
         // Назад
         case constants.BACK:
             event.emit('back:home', msg);
+
+            // Удаляем состояние при возврате на главную
+            delete state[msg.from.id];
             break;
 
         // Ввод аккаунта
