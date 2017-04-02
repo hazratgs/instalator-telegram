@@ -1,31 +1,21 @@
-const User = require(process.cwd() + '/app/controllers/user');
+const User = require('../../app/controllers/user');
 
 module.exports = (data, callback) => {
-    let auth = new Promise ((resolve, reject) => {
-        User.contains(data.id, function (err, user) {
+    new Promise ((resolve, reject) =>
 
-            /* Поиск пользователя */
-            if (user.length){
-                resolve(user);
-            } else {
-                reject();
-            }
-        });
-    }).then((user) => {
+        // Поиск пользователя
+        User.contains(data.id, (err, user) =>
+            user.length
+                ? resolve(user)
+                : reject()
+        ))
 
-        /* Пользователь существует */
-        callback(user, false);
+        // Пользователь зарегистрирован
+        .then((user) => callback(true))
 
-    }, () => {
-
-        /* Новый пользователь */
-        User.create({
+        // Новый пользователь
+        .catch(() => User.create({
             id: data.id,
             name: data.name
-        }, (err, model) => {
-
-            /* Зарегистрировали нового пользователя */
-            callback(model, true);
-        })
-    });
+        }, () => callback(false)));
 };

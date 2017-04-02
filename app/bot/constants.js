@@ -1,10 +1,9 @@
-exports.CREATE_TASK = 'Создать задание';
+exports.TASK_LIST = 'Активность';
+exports.TASK_CREATE = 'Создать задание';
 
-exports.TASKS = 'Активность';
-
-exports.ACCOUNTS = 'Аккаунты';
-exports.ADD_ACCOUNT = '📝 Добавить аккаунт';
-exports.AWAIT_ACCOUNT = 'Ожидает аккаунта';
+exports.ACCOUNT_LIST = 'Аккаунты';
+exports.ACCOUNT_ADD = '📝 Добавить аккаунт';
+exports.ACCOUNT_AWAIT = 'Ожидает аккаунта';
 
 exports.BACK = '⬅ Назад';
 
