@@ -51,7 +51,7 @@ exports.command = (msg) => {
 
         // Главное меню
         case '/home':
-            command.emit('/start', msg);
+            command.emit('/home', msg);
             break;
 
         default:
