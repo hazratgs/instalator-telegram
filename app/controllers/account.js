@@ -4,12 +4,12 @@ const db  = require(process.cwd() + '/libs/db');
 
 const Model  = require('../models/account');
 
-/* Список аккаунтов */
+// Список аккаунтов
 exports.list = (user, callback) => {
     Model.Account.find({user: user}, (err, accounts) => callback(err, accounts))
 };
 
-/* Добавление аккаунта */
+// Добавление аккаунта
 exports.add = (user, login, password, callback) => {
     let AddAccount = new Model.Account({
         user: user,

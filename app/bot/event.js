@@ -2,11 +2,12 @@ const events = require('events');
 const event = new events.EventEmitter();
 const bot = require('../../libs/telegramBot');
 const constants = require('./constants');
+const location = require('./location');
 
 const Account = require('../controllers/account');
 
 // Создание задания
-event.on('task:create', (msg) => {
+event.on('task:create', (msg, type) => {
     Account.list(msg.from.id, (err, accounts) => {
 
         // Аккаунтов нет, предлогаем добавить
@@ -31,10 +32,11 @@ event.on('task:create', (msg) => {
             }
         });
     });
+    location.event.emit('location:next', msg.from.id, type);
 });
 
 // На главную
-event.on('back:home', (msg) => {
+event.on('back', (msg) => {
     bot.sendMessage(msg.from.id, 'Выберите действие', {
         reply_markup: {
             keyboard: [
@@ -53,13 +55,16 @@ event.on('back:home', (msg) => {
                         text: constants.ACCOUNT_LIST
                     }
                 ]
-            ] 
+            ]
         }
-    })
+    });
+
+    // Шаг назад
+    location.event.emit('location:back', msg.from.id);
 });
 
 // Список аккаунтов
-event.on('account:list', (msg) => {
+event.on('account:list', (msg, type) => {
     Account.list(msg.from.id, (err, accounts) => {
 
         // Аккаунтов нет, предлогаем добавить
@@ -169,6 +174,17 @@ event.on('account:add:save', (msg, login, password, callback) => {
             callback();
         }
     })
+});
+
+// Выбор аккаунта
+event.on('account:select', (msg) => {
+
+    // Проверка содержания аккаунта
+    
+});
+
+event.on('account:contains', (user, account) => {
+
 });
 
 // Экспортируем объект события

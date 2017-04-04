@@ -2,6 +2,7 @@ const events = require('events');
 const event = new events.EventEmitter();
 const bot = require('../../libs/telegramBot');
 const constants = require('./constants');
+const location = require('./location');
 
 event.on('/start', (msg) => {
     let text = 'Привет ' + msg.from.first_name + ', ' +
