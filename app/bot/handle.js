@@ -30,13 +30,16 @@ exports.router = (msg) => {
 
 // Команды bot
 exports.command = (msg) => {
+
+    // При выполнении bot-команд, необходимо
+    // очищать состояние пользователя
+    event.state[msg.from.id] = [];
+
     switch (msg.text){
 
         // Приветствие новых пользователей
         case '/start':
             command.emit('/start', msg);
-
-            //
             break;
 
         // Главное меню
