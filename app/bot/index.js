@@ -14,7 +14,7 @@ bot.on('message', (msg) => {
             // Авторизован
             msg.hasOwnProperty('entities') ?
                 handle.command(msg) :
-                handle.event(msg)
+                handle.router(msg)
 
         } else {
 
