@@ -36,7 +36,6 @@ exports.router = (msg) => {
         }, map);
 
         // проверяем существование метода
-        console.log(reducer.children)
         if (reducer.children.hasOwnProperty(msg.text)){
             let action = reducer.children[msg.text];
 
@@ -50,8 +49,14 @@ exports.router = (msg) => {
 
                 // Вызов действия
                 event.event.emit(action.event, msg, action);
+            } else {
+
+                // Обработка методов
+                // event.event.emit(reducer.event, msg, reducer);
             }
         }
+
+        setTimeout(() => console.log(event.state[msg.from.id]), 2000)
     }
 };
 
