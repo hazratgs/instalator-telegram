@@ -18,7 +18,20 @@ module.exports = {
             children: {}
         },
         'Аккаунты': {
-            event: 'account:list'
+            event: 'account:list',
+            children: {
+                'Добавить': {
+                    event: 'account:add',
+                    children: {
+                        '*': {
+                            event: 'account:await'
+                        }
+                    }
+                },
+                'Назад': {
+                    event: 'location:back'
+                }
+            }
         }
     }
 };

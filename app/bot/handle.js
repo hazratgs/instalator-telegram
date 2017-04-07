@@ -13,17 +13,44 @@ exports.router = (msg) => {
         event.state[msg.from.id] = [];
     } else {
 
-        // Редьюсер
+        // Переход в нужную ветку
         const reducer = event.state[msg.from.id].reduce((path, item) => {
-            return !path.children ? path : path.children[item]
+
+            // Если нет дочерних разделов
+            if (!path.children){
+                return path;
+            } else {
+
+                if (path.children.hasOwnProperty(item)){
+                    return path.children[item]
+                } else {
+
+                    // Если нет подходящей ветки, то пытаемся использовать общую ветку
+                    if (path.children.hasOwnProperty('*')){
+                        return path.children['*'];
+                    } else {
+                        return path;
+                    }
+                }
+            }
         }, map);
 
         // проверяем существование метода
+        console.log(reducer.children)
         if (reducer.children.hasOwnProperty(msg.text)){
             let action = reducer.children[msg.text];
 
             // Вызов действия
             event.event.emit(action.event, msg, action);
+        } else {
+
+            // Если нет подходящей ветки, то пытаемся использовать общую ветку
+            if (reducer.children.hasOwnProperty('*')){
+                let action = reducer.children['*'];
+
+                // Вызов действия
+                event.event.emit(action.event, msg, action);
+            }
         }
     }
 };
