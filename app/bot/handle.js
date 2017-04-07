@@ -49,10 +49,6 @@ exports.router = (msg) => {
 
                 // Вызов действия
                 event.event.emit(action.event, msg, action);
-            } else {
-
-                // Обработка методов
-                // event.event.emit(reducer.event, msg, reducer);
             }
         }
 
