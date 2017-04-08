@@ -5,7 +5,7 @@ module.exports = {
         'Создать задание': {
             event: 'task:create',
             children: {
-                'febox': {
+                '*': {
                     event: 'task:select'
                 },
                 'Назад': {
@@ -32,7 +32,8 @@ module.exports = {
                     event: 'account:add',
                     children: {
                         '*': {
-                            event: 'account:await'
+                            event: 'account:await',
+                            await: true
                         }
                     }
                 },

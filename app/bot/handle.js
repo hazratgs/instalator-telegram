@@ -41,6 +41,10 @@ exports.router = (msg) => {
 
             // Вызов действия
             event.event.emit(action.event, msg, action);
+
+            // Фиксирование перехода
+            if (action.event != 'location:back' && !action.await) event.event.emit('location:next', msg.from.id, msg.text)
+
         } else {
 
             // Если нет подходящей ветки, то пытаемся использовать общую ветку
@@ -49,10 +53,13 @@ exports.router = (msg) => {
 
                 // Вызов действия
                 event.event.emit(action.event, msg, action);
+
+                // Фиксирование перехода
+                if (action.event != 'location:back' && !action.await) event.event.emit('location:next', msg.from.id, msg.text)
             }
         }
 
-        setTimeout(() => console.log(event.state[msg.from.id]), 2000)
+        setTimeout(() => console.log(event.state[msg.from.id]), 1000)
     }
 };
 

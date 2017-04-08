@@ -9,10 +9,11 @@ const state = {};
 const Account = require('../controllers/account');
 
 // Изменение расположения пользователя
-event.on('location:next', (msg) => {
-    if (msg.text == 'Назад') return false;
+event.on('location:next', (user, type) => {
+    if (type == 'Назад') return false;
+
     // Добавляем новый путь
-    state[msg.from.id].push(msg.text);
+    state[user].push(type);
 });
 
 // Возврат на один шаг назад
@@ -75,23 +76,23 @@ event.on('task:create', (msg) => {
         // Отправляем аккаунты на выбор
         let opt = [];
         for (let i in accounts){
-            opt.push({
+            opt.push([{
                 text: accounts[i].login
-            })
+            }])
         }
 
         // Добавляем кнопку возврата в главное меню
-        opt.push({
+        opt.push([{
             text: 'Назад'
-        });
+        }]);
 
         bot.sendMessage(msg.from.id, 'Выберите аккаунт', {
             reply_markup: {
-                keyboard: [opt]
+                keyboard: opt
             }
         });
     });
-    event.emit('location:next', msg);
+    // event.emit('location:next', msg.from.id, 'Создать задание');
 });
 
 // Список аккаунтов
@@ -128,7 +129,7 @@ event.on('account:list', (msg) => {
             }
         });
 
-        event.emit('location:next', msg);
+        // event.emit('location:next', msg.from.id, 'Аккаунты');
     });
 });
 
@@ -150,7 +151,7 @@ event.on('account:empty', (msg) => {
             ]
         }
     });
-    event.emit('location:next', msg);
+    // event.emit('location:next', msg.from.id, msg.text);
 });
 
 // Добавить аккаунт
@@ -160,7 +161,7 @@ event.on('account:add', (msg) => {
             remove_keyboard: true
         }
     });
-    event.emit('location:next', msg);
+    // event.emit('location:next', msg.from.id, 'Добавить');
 });
 
 // Ожидание ввода аккаунта
@@ -175,9 +176,7 @@ event.on('account:await', (msg) => {
         ? event.emit('account:add:err', msg)
 
         // Успещно добавлен
-        : event.emit('account:add:save', msg, login, password)
-
-    event.emit('location:next', msg);
+        : event.emit('account:add:save', msg, login, password);
 });
 
 // Ошибка добавления аккаунта, не передан логин/пароль
@@ -195,8 +194,6 @@ event.on('account:add:save', (msg, login, password) => {
         bot.sendMessage(msg.from.id, 'Аккаунт ' + login + ' успешно добавлен');
         event.emit('location:back', msg);
     });
-
-    event.emit('location:back', msg);
 });
 
 // Выбор аккаунта
@@ -232,9 +229,9 @@ event.on('account:select', (msg) => {
             ]
         }
     });
-    event.emit('location:next', msg);
+    // event.emit('location:next', msg.from.id, msg.text);
 });
-//
+
 // event.on('account:contains', (user, account) => {
 //
 // });
