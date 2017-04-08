@@ -10,9 +10,6 @@ const Account = require('../controllers/account');
 
 // Изменение расположения пользователя
 event.on('location:next', (user, type) => {
-    if (type == 'Назад') return false;
-
-    // Добавляем новый путь
     state[user].push(type);
 });
 
@@ -92,7 +89,6 @@ event.on('task:create', (msg) => {
             }
         });
     });
-    // event.emit('location:next', msg.from.id, 'Создать задание');
 });
 
 // Список аккаунтов
@@ -128,8 +124,6 @@ event.on('account:list', (msg) => {
                 keyboard: opt
             }
         });
-
-        // event.emit('location:next', msg.from.id, 'Аккаунты');
     });
 });
 
@@ -151,7 +145,6 @@ event.on('account:empty', (msg) => {
             ]
         }
     });
-    // event.emit('location:next', msg.from.id, msg.text);
 });
 
 // Добавить аккаунт
@@ -161,7 +154,6 @@ event.on('account:add', (msg) => {
             remove_keyboard: true
         }
     });
-    // event.emit('location:next', msg.from.id, 'Добавить');
 });
 
 // Ожидание ввода аккаунта
@@ -229,12 +221,11 @@ event.on('account:select', (msg) => {
             ]
         }
     });
-    // event.emit('location:next', msg.from.id, msg.text);
 });
 
-// event.on('account:contains', (user, account) => {
-//
-// });
+event.on('account:contains', (user, account) => {
+
+});
 
 // Экспортируем объект события
 exports.event = event;
