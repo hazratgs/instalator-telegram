@@ -23,6 +23,18 @@ module.exports = {
                 '*': {
                     event: 'account:select',
                     children: {
+                        'Добавить задание': {
+                            event: 'location:back'
+                        },
+                        'Активность': {
+                            event: 'location:back'
+                        },
+                        'Редактировать': {
+                            event: 'location:back'
+                        },
+                        'Удалить': {
+                            event: 'location:back'
+                        },
                         'Назад': {
                             event: 'location:back'
                         }

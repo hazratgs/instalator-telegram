@@ -1,7 +1,8 @@
 const events = require('events');
 const event = new events.EventEmitter();
-
+const send = require('./method');
 const map = require('./map');
+const bot = require('../../libs/telegramBot');
 
 // Фиксирование расположение пользователя
 const state = {};
@@ -54,41 +55,13 @@ event.on('home', (msg, action) => {
         }])
     }
 
-    bot.sendMessage(msg.from.id, 'Выберите действие', {
-        reply_markup: {
-            keyboard: keyboard
-        }
-    });
+    // Отправляем пользователю
+    send.keyboard(msg.from.id, 'Выберите действие', keyboard);
 });
 
 // Создание задания
 event.on('task:create', (msg) => {
-    Account.list(msg.from.id, (err, accounts) => {
-
-        // Аккаунтов нет, предлогаем добавить
-        if (!accounts.length){
-            return event.on('account:empty');
-        }
-
-        // Отправляем аккаунты на выбор
-        let opt = [];
-        for (let i in accounts){
-            opt.push([{
-                text: accounts[i].login
-            }])
-        }
-
-        // Добавляем кнопку возврата в главное меню
-        opt.push([{
-            text: 'Назад'
-        }]);
-
-        bot.sendMessage(msg.from.id, 'Выберите аккаунт', {
-            reply_markup: {
-                keyboard: opt
-            }
-        });
-    });
+    event.emit('account:list', msg);
 });
 
 // Список аккаунтов
@@ -119,41 +92,30 @@ event.on('account:list', (msg) => {
             text: 'Назад'
         }]);
 
-        bot.sendMessage(msg.from.id, 'Выберите аккаунт', {
-            reply_markup: {
-                keyboard: opt
-            }
-        });
+        send.keyboard(msg.from.id, 'Выберите аккаунт', opt)
     });
 });
 
 // Нет добавленных аккаунтов
 event.on('account:empty', (msg) => {
-    bot.sendMessage(msg.from.id, 'У вас нет ни одного аккаунта', {
-        reply_markup: {
-            keyboard: [
-                [
-                    {
-                        text: 'Добавить'
-                    }
-                ],
-                [
-                    {
-                        text: 'Назад'
-                    }
-                ]
-            ]
-        }
-    });
+    let opt = [
+        [
+            {
+                text: 'Добавить'
+            }
+        ],
+        [
+            {
+                text: 'Назад'
+            }
+        ]
+    ];
+    send.keyboard(msg.from.id, 'У вас нет ни одного аккаунта', opt)
 });
 
 // Добавить аккаунт
 event.on('account:add', (msg) => {
-    bot.sendMessage(msg.from.id, 'Введите логин и пароль через пробел', {
-        reply_markup: {
-            remove_keyboard: true
-        }
-    });
+    send.messageHiddenKeyboard(msg.from.id, 'Введите логин и пароль через пробел')
 });
 
 // Ожидание ввода аккаунта
@@ -173,54 +135,20 @@ event.on('account:await', (msg) => {
 
 // Ошибка добавления аккаунта, не передан логин/пароль
 event.on('account:add:err', (msg) => {
-    bot.sendMessage(msg.from.id, 'Не передан логин или пароль, повторите еще раз', {
-        reply_markup: {
-            remove_keyboard: true
-        }
-    });
+    send.messageHiddenKeyboard(msg.from.id, 'Введите логин и пароль через пробел')
 });
 
 // Сохранение аккаунта
 event.on('account:add:save', (msg, login, password) => {
     Account.add(msg.from.id, login, password, () => {
-        bot.sendMessage(msg.from.id, 'Аккаунт ' + login + ' успешно добавлен');
+        send.message(msg.from.id, 'Аккаунт ' + login + ' успешно добавлен');
         event.emit('location:back', msg);
     });
 });
 
 // Выбор аккаунта
-event.on('account:select', (msg) => {
-    bot.sendMessage(msg.from.id, 'Выберите действия для ' + msg.text, {
-        reply_markup: {
-            keyboard: [
-                [
-                    {
-                        text: 'Добавить задание'
-                    }
-                ],
-                [
-                    {
-                        text: 'Активность'
-                    }
-                ],
-                [
-                    {
-                        text: 'Редактировать'
-                    }
-                ],
-                [
-                    {
-                        text: 'Удалить'
-                    }
-                ],
-                [
-                    {
-                        text: 'Назад'
-                    }
-                ]
-            ]
-        }
-    });
+event.on('account:select', (msg, action) => {
+    send.keyboardMap(msg.from.id, 'Выберите действия для ' + msg.text, action);
 });
 
 event.on('account:contains', (user, account) => {
