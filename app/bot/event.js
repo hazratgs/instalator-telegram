@@ -1,6 +1,6 @@
 const events = require('events');
 const event = new events.EventEmitter();
-const bot = require('../../libs/telegramBot');
+
 const map = require('./map');
 
 // Фиксирование расположение пользователя
