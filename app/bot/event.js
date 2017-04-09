@@ -1,8 +1,7 @@
 const events = require('events');
 const event = new events.EventEmitter();
 const send = require('./method');
-const map = require('./map');
-const bot = require('../../libs/telegramBot');
+const map = require('./map'); 
 
 // Фиксирование расположение пользователя
 const state = {};
@@ -54,8 +53,6 @@ event.on('home', (msg, action) => {
             text: key
         }])
     }
-
-    // Отправляем пользователю
     send.keyboard(msg.from.id, 'Выберите действие', keyboard);
 });
 
