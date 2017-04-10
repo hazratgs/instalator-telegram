@@ -19,4 +19,9 @@ exports.add = (user, login, password, callback) => {
     AddAccount.save((err) => callback(err, AddAccount))
 };
 
-/*  */
+// Удаление аккаунта
+exports.remove = (user, login, callback) => {
+    let Account = new Model.Account();
+    Account.find();
+
+};

@@ -12,9 +12,15 @@ bot.on('message', (msg) => {
         if (registered){
 
             // Авторизован
-            msg.hasOwnProperty('entities') ?
-                handle.command(msg) :
+            if (msg.hasOwnProperty('entities') && msg.entities.type === 'bot_command'){
+
+                // bot команды
+                handle.command(msg)
+            } else {
+
+                // Текстовые команды
                 handle.router(msg)
+            }
 
         } else {
 

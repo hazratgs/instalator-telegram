@@ -36,6 +36,23 @@ exports.keyboardMap = (user, message, action) => {
     });
 };
 
+// Отправка Сообщения с клавиатурой, данные клавиатуры из массива
+exports.keyboardArr = (user, message, arr) => {
+    let opt = arr.map((item) => {
+        return [{
+            text: item
+        }]
+    });
+
+    bot.sendMessage(user, message, {
+        reply_markup: {
+            keyboard: opt,
+            resize_keyboard: true,
+            one_time_keyboard: true
+        }
+    });
+};
+
 // Отправить сообщение с скрытием клавиатуры
 exports.messageHiddenKeyboard = (user, message) => {
     bot.sendMessage(user, message, {

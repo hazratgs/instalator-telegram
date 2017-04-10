@@ -1,7 +1,7 @@
 const events = require('events');
 const event = new events.EventEmitter();
 const send = require('./method');
-const map = require('./map'); 
+const map = require('./map');
 
 // Фиксирование расположение пользователя
 const state = {};
@@ -67,7 +67,7 @@ event.on('account:list', (msg) => {
 
         // Аккаунтов нет, предлогаем добавить
         if (!accounts.length){
-            return event.on('account:empty');
+            return event.emit('account:empty', msg);
         }
 
         // Отправляем аккаунты на выбор
@@ -95,24 +95,12 @@ event.on('account:list', (msg) => {
 
 // Нет добавленных аккаунтов
 event.on('account:empty', (msg) => {
-    let opt = [
-        [
-            {
-                text: 'Добавить'
-            }
-        ],
-        [
-            {
-                text: 'Назад'
-            }
-        ]
-    ];
-    send.keyboard(msg.from.id, 'У вас нет ни одного аккаунта', opt)
+    send.keyboardArr(msg.from.id, 'У вас нет ни одного аккаунта', ['Добавить', 'Назад'])
 });
 
 // Добавить аккаунт
 event.on('account:add', (msg) => {
-    send.messageHiddenKeyboard(msg.from.id, 'Введите логин и пароль через пробел')
+    send.keyboardArr(msg.from.id, 'Введите логин и пароль через пробел', ['Назад'])
 });
 
 // Ожидание ввода аккаунта
@@ -132,7 +120,7 @@ event.on('account:await', (msg) => {
 
 // Ошибка добавления аккаунта, не передан логин/пароль
 event.on('account:add:err', (msg) => {
-    send.messageHiddenKeyboard(msg.from.id, 'Введите логин и пароль через пробел')
+    send.keyboardArr(msg.from.id, 'Не передан пароль', ['Назад'])
 });
 
 // Сохранение аккаунта
@@ -146,6 +134,11 @@ event.on('account:add:save', (msg, login, password) => {
 // Выбор аккаунта
 event.on('account:select', (msg, action) => {
     send.keyboardMap(msg.from.id, 'Выберите действия для ' + msg.text, action);
+});
+
+// Удаление аккаунты
+event.on('account:delete', (msg, action) => {
+
 });
 
 event.on('account:contains', (user, account) => {

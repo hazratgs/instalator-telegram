@@ -46,6 +46,9 @@ module.exports = {
                         '*': {
                             event: 'account:await',
                             await: true
+                        },
+                        'Назад': {
+                            event: 'location:back'
                         }
                     }
                 },

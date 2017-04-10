@@ -1,7 +1,7 @@
 {
   "port": 3000,
   "mongoose": {
-    "uri": "mongodb://localhost/instalator"
+    "uri": "mongodb://localhost/instalator2"
   },
   "telegram": {
     "token": "375640146:AAH38weB7LxWZteVywJyTKGOubAzcQvpbYw",
