@@ -137,8 +137,28 @@ event.on('account:select', (msg, action) => {
 });
 
 // Удаление аккаунты
-event.on('account:delete', (msg, action) => {
+event.on('account:delete', (msg) => {
+    let login = state[msg.from.id][state[msg.from.id].length - 1];
 
+    // Проверяем существование аккаунта
+    Account.contains(msg.from.id, login, (accounts) => {
+
+        // Обработка ошибки
+        if (!accounts.length){
+            send.message(msg.from.id, 'Аккаунт не найден!');
+
+            // Шаг назад
+            return event.emit('location.back', msg);
+        }
+
+        // Удаление
+        Account.remove(msg.from.id, login, () => {
+            send.message(msg.from.id, `Аккаунт ${login} удален`);
+
+            // Шаг назад
+            event.emit('location:back', msg);
+        })
+    })
 });
 
 event.on('account:contains', (user, account) => {

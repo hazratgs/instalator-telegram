@@ -33,7 +33,8 @@ module.exports = {
                             event: 'location:back'
                         },
                         'Удалить': {
-                            event: 'location:back'
+                            event: 'account:delete',
+                            await: true
                         },
                         'Назад': {
                             event: 'location:back'

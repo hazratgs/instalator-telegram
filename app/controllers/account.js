@@ -19,9 +19,18 @@ exports.add = (user, login, password, callback) => {
     AddAccount.save((err) => callback(err, AddAccount))
 };
 
+// Проверка существование аккаунта
+exports.contains = (user, login, callback) => {
+    Model.Account.find({
+        user: user,
+        login: login
+    }, (err, accounts) => callback(accounts))
+};
+
 // Удаление аккаунта
 exports.remove = (user, login, callback) => {
-    let Account = new Model.Account();
-    Account.find();
-
+    Model.Account.remove({
+        user: user,
+        login: login
+    }, () => callback())
 };
