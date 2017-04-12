@@ -1,9 +1,13 @@
 const command = require('./command');
 const event = require('./event');
 const map = require('./map');
+const emoji = require('./emoji');
 
 // Редьюсер текстовых команд
 exports.router = (msg) => {
+
+    // Декодируем эмодзи
+    msg.text = emoji.decode(msg.text);
 
     // Нет состояния  у пользователя, отдаем главное меню
     if (!event.state.hasOwnProperty(msg.from.id)){

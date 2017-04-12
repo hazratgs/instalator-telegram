@@ -1,19 +1,9 @@
 const bot = require('../../libs/telegramBot');
+const emoji = require('./emoji');
 
 // Отправки сообщения
 exports.message = (user, message) => {
     bot.sendMessage(user, message);
-};
-
-// Отправка Сообщения с клавиатурой
-exports.keyboard = (user, message, keyboards) => {
-    bot.sendMessage(user, message, {
-        reply_markup: {
-            keyboard: keyboards,
-            resize_keyboard: true,
-            one_time_keyboard: true
-        }
-    });
 };
 
 // Отправка Сообщения с клавиатурой, данные клавиатуры из ветки (obj)
@@ -23,7 +13,7 @@ exports.keyboardMap = (user, message, action) => {
     // Данные берем из текущей ветки "map"
     for (let key in action.children){
         opt.push([{
-            text: key
+            text: emoji.encode(key)
         }])
     }
 
@@ -40,7 +30,7 @@ exports.keyboardMap = (user, message, action) => {
 exports.keyboardArr = (user, message, arr) => {
     let opt = arr.map((item) => {
         return [{
-            text: item
+            text: emoji.encode(item)
         }]
     });
 
@@ -60,7 +50,7 @@ exports.messageHiddenKeyboard = (user, message) => {
             remove_keyboard: true
         }
     });
-}
+};
 
 // Отправка изображений
 exports.image = () => {}

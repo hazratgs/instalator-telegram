@@ -47,13 +47,7 @@ event.on('location:back', (msg) => {
 
 // Главная меню
 event.on('home', (msg, action) => {
-    let keyboard = [];
-    for (let key in action.children){
-        keyboard.push([{
-            text: key
-        }])
-    }
-    send.keyboard(msg.from.id, 'Выберите действие', keyboard);
+    send.keyboardMap(msg.from.id, 'Выберите действие', action);
 });
 
 // Создание задания
@@ -64,32 +58,12 @@ event.on('task:create', (msg) => {
 // Список аккаунтов
 event.on('account:list', (msg) => {
     Account.list(msg.from.id, (err, accounts) => {
-
-        // Аккаунтов нет, предлогаем добавить
         if (!accounts.length){
+            // Аккаунтов нет, предлогаем добавить
             return event.emit('account:empty', msg);
         }
-
-        // Отправляем аккаунты на выбор
-        let opt = [];
-
-        for (let i in accounts){
-            opt.push([{
-                text: accounts[i].login
-            }])
-        }
-
-        // Добавить аккаунт
-        opt.push([{
-            text: 'Добавить'
-        }]);
-
-        // Кнопка назад
-        opt.push([{
-            text: 'Назад'
-        }]);
-
-        send.keyboard(msg.from.id, 'Выберите аккаунт', opt)
+        let elements = accounts.map((item) => item.login);
+        send.keyboardArr(msg.from.id, 'Выберите аккаунт', [...elements, 'Добавить', 'Назад'])
     });
 });
 
