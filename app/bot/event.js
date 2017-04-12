@@ -133,7 +133,11 @@ event.on('account:add:save', (msg, login, password) => {
 
 // Выбор аккаунта
 event.on('account:select', (msg, action) => {
-    send.keyboardMap(msg.from.id, 'Выберите действия для ' + msg.text, action);
+    Account.contains(msg.from.id, msg.text, (accounts) => {
+        !accounts.length
+            ? send.message(msg.from.id, `Аккаунт ${msg.text} не существует, выберите другой`)
+            : send.keyboardMap(msg.from.id, 'Выберите действия для ' + msg.text, action)
+    });
 });
 
 // Удаление аккаунты
