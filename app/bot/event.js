@@ -9,8 +9,14 @@ const state = {};
 const Account = require('../controllers/account');
 
 // Изменение расположения пользователя
-event.on('location:next', (user, type) => {
-    state[user].push(type);
+event.on('location:next', (msg, action) => {
+
+    // Ожидаем изменения с location, задержка 100ms
+    setTimeout(() => {
+        if (action.event != 'location:back' && !action.await && msg.location){
+            state[msg.from.id].push(msg.text);
+        }
+    }, 100)
 });
 
 // Возврат на один шаг назад
@@ -66,8 +72,6 @@ event.on('task:select', (msg) => {
             send.message(msg.from.id, `Аккаунт ${msg.text} не существует, выберите другой`)
         }
     });
-
-
 });
 
 // Список аккаунтов
@@ -123,9 +127,12 @@ event.on('account:add:save', (msg, login, password) => {
 // Выбор аккаунта
 event.on('account:select', (msg, action) => {
     Account.contains(msg.from.id, msg.text, (accounts) => {
-        !accounts.length
-            ? send.message(msg.from.id, `Аккаунт ${msg.text} не существует, выберите другой`)
-            : send.keyboardMap(msg.from.id, 'Выберите действия для ' + msg.text, action)
+        if (!accounts.length){
+            msg.location = false;
+            send.message(msg.from.id, `Аккаунт ${msg.text} не существует, выберите другой`)
+        } else {
+            send.keyboardMap(msg.from.id, 'Выберите действия для ' + msg.text, action)
+        }
     });
 });
 

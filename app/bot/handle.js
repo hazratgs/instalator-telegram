@@ -50,8 +50,10 @@ exports.router = (msg) => {
             event.event.emit(action.event, msg, action);
 
             // Фиксирование перехода
-            if (action.event != 'location:back' && !action.await && msg.location)
-                event.event.emit('location:next', msg.from.id, msg.text)
+            event.event.emit('location:next', msg, action)
+
+            // if (action.event != 'location:back' && !action.await && msg.location)
+            //     event.event.emit('location:next', msg.from.id, msg.text)
 
         } else {
 
@@ -60,17 +62,23 @@ exports.router = (msg) => {
                 let action = reducer.children['*'];
 
                 // Вызов действия
-                event.event.emit(action.event, msg, action)
+                event.event.emit(action.event, msg, action);
 
                 // Фиксирование перехода
-                if (action.event != 'location:back' && !action.await && msg.location)
-                    event.event.emit('location:next', msg.from.id, msg.text)
+                event.event.emit('location:next', msg, action)
+
+                // if (action.event != 'location:back' && !action.await && msg.location)
+                //     event.event.emit('location:next', msg.from.id, msg.text)
+
             }
         }
 
         setTimeout(() => console.log(event.state[msg.from.id]), 1000)
     }
 };
+
+//
+
 
 // Команды bot
 exports.command = (msg) => {
