@@ -9,6 +9,9 @@ exports.router = (msg) => {
     // Декодируем эмодзи
     msg.text = emoji.decode(msg.text);
 
+    // Свойство для редактирования состояния
+    msg.location = true;
+
     // Нет состояния  у пользователя, отдаем главное меню
     if (!event.state.hasOwnProperty(msg.from.id)){
         command.emit('/home', msg);
@@ -47,7 +50,8 @@ exports.router = (msg) => {
             event.event.emit(action.event, msg, action);
 
             // Фиксирование перехода
-            if (action.event != 'location:back' && !action.await) event.event.emit('location:next', msg.from.id, msg.text)
+            if (action.event != 'location:back' && !action.await && msg.location)
+                event.event.emit('location:next', msg.from.id, msg.text)
 
         } else {
 
@@ -56,10 +60,11 @@ exports.router = (msg) => {
                 let action = reducer.children['*'];
 
                 // Вызов действия
-                event.event.emit(action.event, msg, action);
+                event.event.emit(action.event, msg, action)
 
                 // Фиксирование перехода
-                if (action.event != 'location:back' && !action.await) event.event.emit('location:next', msg.from.id, msg.text)
+                if (action.event != 'location:back' && !action.await && msg.location)
+                    event.event.emit('location:next', msg.from.id, msg.text)
             }
         }
 

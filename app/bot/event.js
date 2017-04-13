@@ -52,7 +52,22 @@ event.on('home', (msg, action) => {
 
 // Создание задания
 event.on('task:create', (msg) => {
-    event.emit('account:list', msg);
+    event.emit('account:list', msg)
+});
+
+// Выбор аккаунта для задания
+event.on('task:select', (msg) => {
+    Account.contains(msg.from.id, msg.text, (accounts) => {
+        if (!accounts.length){
+
+            // Запрещаем редактировать состояние
+            msg.location = false;
+
+            send.message(msg.from.id, `Аккаунт ${msg.text} не существует, выберите другой`)
+        }
+    });
+
+
 });
 
 // Список аккаунтов
@@ -63,7 +78,7 @@ event.on('account:list', (msg) => {
             return event.emit('account:empty', msg);
         }
         let elements = accounts.map((item) => item.login);
-        send.keyboardArr(msg.from.id, 'Выберите аккаунт', [...elements, 'Добавить', 'Назад'])
+        send.keyboardArr(msg.from.id, 'Выберите аккаунт', [...elements, 'Добавить', 'Назад']);
     });
 });
 
