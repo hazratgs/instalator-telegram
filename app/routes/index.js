@@ -1,5 +1,3 @@
-'use strict';
-
 const path = process.cwd();
 
 const bot = require(path + '/libs/telegramBot');
@@ -7,7 +5,7 @@ const conf = require(path + '/conf/index');
 const log = require(path + '/libs/log')(module);
 
 // Routes
-// const page = require('./page');
+const source = require('./source');
 
 module.exports = (app) => {
 
@@ -15,7 +13,7 @@ module.exports = (app) => {
     app.get('/', (req, res) => res.sendFile(path + '/public/index.html'));
 
     // RESTful api
-    // page(app);
+    source(app);
 
     // Если нет обработчиков, 404
     app.use((req, res, next) => {

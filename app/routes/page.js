@@ -1,5 +1,3 @@
-'use strict';
-
 const page = require(process.cwd() + '/app/controllers/page');
 const url = require('url');
 

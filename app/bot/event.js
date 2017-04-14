@@ -2,21 +2,19 @@ const events = require('events');
 const event = new events.EventEmitter();
 const send = require('./method');
 const map = require('./map');
+const instanode = require('./instanode');
 
 // Фиксирование расположение пользователя
 const state = {};
 
 const Account = require('../controllers/account');
+const Source = require('../controllers/source');
 
 // Изменение расположения пользователя
 event.on('location:next', (msg, action) => {
-
-    // Ожидаем изменения с location, задержка 100ms
-    setTimeout(() => {
-        if (action.event != 'location:back' && !action.await && msg.location){
-            state[msg.from.id].push(msg.text);
-        }
-    }, 100)
+    if (action.event != 'location:back' && !action.await){
+        state[msg.from.id].push(msg.text);
+    }
 });
 
 // Возврат на один шаг назад
@@ -51,53 +49,98 @@ event.on('location:back', (msg) => {
     event.emit(reducer.event, msg, reducer);
 });
 
+// Перейти на главную
+event.on('location:home', (msg) => {
+    state[msg.from.id] = [];
+    event.emit('location:back', msg);
+});
+
 // Главная меню
-event.on('home', (msg, action) => {
+event.on('home', (msg, action, next) => {
     send.keyboardMap(msg.from.id, 'Выберите действие', action);
+    next ? next() : null
 });
 
 // Создание задания
-event.on('task:create', (msg) => {
-    event.emit('account:list', msg)
+event.on('task:create', (msg, action, next) => {
+    event.emit('account:list', msg);
+    next ? next() : null
 });
 
 // Выбор аккаунта для задания
-event.on('task:select', (msg) => {
+event.on('task:select', (msg, action, next) => {
     Account.contains(msg.from.id, msg.text, (accounts) => {
         if (!accounts.length){
-
-            // Запрещаем редактировать состояние
-            msg.location = false;
-
-            send.message(msg.from.id, `Аккаунт ${msg.text} не существует, выберите другой`)
+            send.message(msg.from.id, `Аккаунт ${msg.text} не существует, выберите другой`);
+            return null;
         }
+
+        send.keyboardMap(msg.from.id, `Выберите действие`, action);
+        next ? next() : null
     });
+});
+
+// Выбор типа задания
+event.on('task:select:type', (msg, action, next) => {
+    let types = ['Лайк + Подписка', 'Лайк', 'Подписка', 'Отписка'];
+    if (!types.includes(msg.text)){
+        send.message(msg.from.id, `Ошибка, выберите действие`);
+        return null;
+    }
+
+    // Выбранное действие
+    send.keyboardArr(msg.from.id, `Выберите источник`, Source.list());
+    next ? next() : null
+});
+
+// Список источников
+event.on('task:select:source', (msg, action, next) => {
+    if (!Source.list().includes(msg.text)){
+        send.message(msg.from.id, 'Ошибка, неверный источник');
+        return null;
+    }
+
+    // Кол. действия
+    send.keyboardArr(msg.from.id, 'Введите количество действий', ['2500', '5000', '7500']);
+    next ? next() : null
+});
+
+// Количество действий
+event.on('task:select:action', (msg, action, next) => {
+    send.message(msg.from.id, 'Добавлено в задание!');
+
+    // Переходим на главную
+    event.emit('location:home', msg);
 });
 
 // Список аккаунтов
-event.on('account:list', (msg) => {
+event.on('account:list', (msg, action, next) => {
     Account.list(msg.from.id, (err, accounts) => {
         if (!accounts.length){
+
             // Аккаунтов нет, предлогаем добавить
             return event.emit('account:empty', msg);
         }
+
         let elements = accounts.map((item) => item.login);
         send.keyboardArr(msg.from.id, 'Выберите аккаунт', [...elements, 'Добавить', 'Назад']);
     });
+    next ? next() : null
 });
 
 // Нет добавленных аккаунтов
-event.on('account:empty', (msg) => {
+event.on('account:empty', (msg, action, next) => {
     send.keyboardArr(msg.from.id, 'У вас нет ни одного аккаунта', ['Добавить', 'Назад'])
 });
 
 // Добавить аккаунт
-event.on('account:add', (msg) => {
-    send.keyboardArr(msg.from.id, 'Введите логин и пароль через пробел', ['Назад'])
+event.on('account:add', (msg, action, next) => {
+    send.keyboardArr(msg.from.id, 'Введите логин и пароль через пробел', ['Назад']);
+    next ? next() : null
 });
 
 // Ожидание ввода аккаунта
-event.on('account:await', (msg) => {
+event.on('account:await', (msg, action, next) => {
     let account = msg.text.split(' '),
         login = account[0],
         password = account[1];
@@ -112,27 +155,49 @@ event.on('account:await', (msg) => {
 });
 
 // Ошибка добавления аккаунта, не передан логин/пароль
-event.on('account:add:err', (msg) => {
+event.on('account:add:err', (msg, action, next) => {
     send.keyboardArr(msg.from.id, 'Не передан пароль', ['Назад'])
 });
 
 // Сохранение аккаунта
 event.on('account:add:save', (msg, login, password) => {
-    Account.add(msg.from.id, login, password, () => {
-        send.message(msg.from.id, 'Аккаунт ' + login + ' успешно добавлен');
-        event.emit('location:back', msg);
+
+    // Проверяем, есть ли аккаунт у других пользователей
+    Account.containsAllUsers(login, (result) => {
+        if (result.length){
+            send.message(msg.from.id, `${login} уже используется!`);
+            return null;
+        }
+
+        send.message(msg.from.id, `Подождите немного, пытаюсь авторизоваться`);
+
+        // Входим в аккаунт
+        instanode.auth(login, password, (error, stdout, stderr) => {
+
+            // Логин пароль не верны
+            if (stdout.trim() != 'success'){
+                send.message(msg.from.id, stdout.trim());
+                return null;
+            }
+
+            // Сохраняем
+            Account.add(msg.from.id, login, password, () => {
+                send.message(msg.from.id, `Аккаунт ${login} успешно добавлен, войдите в Instagram и подтвердите, что это были вы`);
+                event.emit('location:back', msg);
+            });
+        });
     });
 });
 
 // Выбор аккаунта
-event.on('account:select', (msg, action) => {
+event.on('account:select', (msg, action, next) => {
     Account.contains(msg.from.id, msg.text, (accounts) => {
         if (!accounts.length){
-            msg.location = false;
-            send.message(msg.from.id, `Аккаунт ${msg.text} не существует, выберите другой`)
-        } else {
-            send.keyboardMap(msg.from.id, 'Выберите действия для ' + msg.text, action)
+            return send.message(msg.from.id, `Аккаунт ${msg.text} не существует, выберите другой`);
         }
+
+        send.keyboardMap(msg.from.id, 'Выберите действия для ' + msg.text, action)
+        next ? next() : null
     });
 });
 
@@ -142,13 +207,10 @@ event.on('account:delete', (msg) => {
 
     // Проверяем существование аккаунта
     Account.contains(msg.from.id, login, (accounts) => {
-
-        // Обработка ошибки
         if (!accounts.length){
             send.message(msg.from.id, 'Аккаунт не найден!');
-
-            // Шаг назад
-            return event.emit('location.back', msg);
+            event.emit('location.back', msg);
+            return null;
         }
 
         // Удаление
@@ -161,9 +223,14 @@ event.on('account:delete', (msg) => {
     })
 });
 
+
 event.on('account:contains', (user, account) => {
 
 });
+
+//
+// event.on('instanode:')
+
 
 // Экспортируем объект события
 exports.event = event;

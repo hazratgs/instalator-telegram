@@ -6,7 +6,50 @@ module.exports = {
             event: 'task:create',
             children: {
                 '*': {
-                    event: 'task:select'
+                    event: 'task:select',
+                    children: {
+                        'Лайк + Подписка': {
+                            event: 'task:select:type',
+                            children: {
+                                '*': {
+                                    event: 'task:select:source',
+                                    children: {
+                                        '*': {
+                                            event: 'task:select:action',
+                                            await: true
+                                        }
+                                    }
+                                },
+                                'Назад': {
+                                    event: 'location:back'
+                                }
+                            }
+                        },
+                        'Лайк': {
+                            event: 'task:select:type'
+                        },
+                        'Подписка': {
+                            event: 'task:select:type'
+                        },
+                        'Отписка': {
+                            event: 'task:select:type'
+                        },
+                        'Назад': {
+                            event: 'location:back'
+                        }
+                    }
+                },
+                'Добавить': {
+                    event: 'account:add',
+                    children: {
+                        '*': {
+                            event: 'account:await',
+                            await: true
+                        },
+                        'Назад': {
+                            event: 'location:back'
+                        }
+                    }
                 },
                 'Назад': {
                     event: 'location:back'

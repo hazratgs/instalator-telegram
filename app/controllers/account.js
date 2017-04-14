@@ -27,6 +27,13 @@ exports.contains = (user, login, callback) => {
     }, (err, accounts) => callback(accounts))
 };
 
+// Проверка существование аккаунта у всех пользователей
+exports.containsAllUsers = (login, callback) => {
+    Model.Account.find({
+        login: login
+    }, (err, result) => callback(result))
+};
+
 // Удаление аккаунта
 exports.remove = (user, login, callback) => {
     Model.Account.remove({

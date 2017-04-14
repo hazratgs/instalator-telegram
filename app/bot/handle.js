@@ -9,9 +9,6 @@ exports.router = (msg) => {
     // Декодируем эмодзи
     msg.text = emoji.decode(msg.text);
 
-    // Свойство для редактирования состояния
-    msg.location = true;
-
     // Нет состояния  у пользователя, отдаем главное меню
     if (!event.state.hasOwnProperty(msg.from.id)){
         command.emit('/home', msg);
@@ -47,13 +44,9 @@ exports.router = (msg) => {
             let action = reducer.children[msg.text];
 
             // Вызов действия
-            event.event.emit(action.event, msg, action);
-
-            // Фиксирование перехода
-            event.event.emit('location:next', msg, action)
-
-            // if (action.event != 'location:back' && !action.await && msg.location)
-            //     event.event.emit('location:next', msg.from.id, msg.text)
+            event.event.emit(action.event, msg, action, () => {
+                event.event.emit('location:next', msg, action)
+            })
 
         } else {
 
@@ -62,22 +55,16 @@ exports.router = (msg) => {
                 let action = reducer.children['*'];
 
                 // Вызов действия
-                event.event.emit(action.event, msg, action);
-
-                // Фиксирование перехода
-                event.event.emit('location:next', msg, action)
-
-                // if (action.event != 'location:back' && !action.await && msg.location)
-                //     event.event.emit('location:next', msg.from.id, msg.text)
-
+                event.event.emit(action.event, msg, action, () => {
+                    event.event.emit('location:next', msg, action)
+                })
             }
         }
 
+        // trace
         setTimeout(() => console.log(event.state[msg.from.id]), 1000)
     }
 };
-
-//
 
 
 // Команды bot
