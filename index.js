@@ -1,5 +1,3 @@
-'use strict';
-
 /*!
  * nodeapp
  * Copyright(c) 2017 Hazrat Gadjikerimov
@@ -8,9 +6,17 @@
 
 const express = require('express');
 const app = express();
+const bodyParser = require('body-parser');
 
 // Winston Log
 const log = require('./libs/log')(module);
+
+// Поддержка JSON
+app.use(bodyParser.json({limit: '5mb'}));
+app.use(bodyParser.urlencoded({
+    extended: true,
+    limit: '5mb'
+}));
 
 // HTTP Сервер
 const server = require('./bin/server');

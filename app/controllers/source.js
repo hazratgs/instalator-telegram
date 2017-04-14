@@ -4,9 +4,27 @@ const db  = require(process.cwd() + '/libs/db');
 
 const Model  = require('../models/source');
 
-const source = ['myderbent_plus', 'tut.dagestan'];
-
 // Источники
-exports.list = () => {
-    return source
+exports.list = (callback) => {
+    Model.find({}, (err, result) => callback(result))
+};
+
+// Добавить новый источник
+exports.create = (data, callback) => {
+    let Source = new Model.Source({
+        name: data.name,
+        source: data.source,
+        count: data.source.length
+    });
+    Source.save((err) => callback(err, Source));
+};
+
+// Проверить существование источника
+exports.contains = (name, callback) => {
+    Model.Source.find({name: name}, (err, source) => callback(source))
+};
+
+// Удаление
+exports.remove = (name, callback) => {
+    Model.Source.remove({name: name}, (err, source) => callback(source))
 };

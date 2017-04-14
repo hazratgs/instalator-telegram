@@ -1,4 +1,4 @@
-const page = require(process.cwd() + '/app/controllers/page');
+const page = require('../../app/controllers/page');
 const url = require('url');
 
 module.exports = (app) => {
@@ -17,7 +17,8 @@ module.exports = (app) => {
                     res.status(500).json({
                         "ok": false,
                         "error_code": 500,
-                        "description": "Возникла ошибка при добавлении"});
+                        "description": "Возникла ошибка при добавлении"
+                    });
                 } else {
                     res.json({
                         "ok": true,

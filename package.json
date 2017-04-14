@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "app-root-path": "^2.0.1",
+    "body-parser": "^1.17.1",
     "express": "^4.14.0",
     "mongoose": "^4.7.6",
     "mongoose-url-slugs": "^0.2.1",

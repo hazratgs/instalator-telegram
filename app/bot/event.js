@@ -88,9 +88,24 @@ event.on('task:select:type', (msg, action, next) => {
         return null;
     }
 
-    // Выбранное действие
-    send.keyboardArr(msg.from.id, `Выберите источник`, Source.list());
-    next ? next() : null
+    // Обработка источников
+    Source.list((result) => {
+        if (!result.length){
+            send.message(msg.from.id, 'К сожалению нет источников');
+            event.emit('location:home', msg);
+            return null;
+        }
+
+        console.log(result);
+
+        // let names = result.map((item) => {
+        //     return item.name
+        // });
+        //
+        // // Выбранное действие
+        // send.keyboardArr(msg.from.id, `Выберите источник`, names);
+        // next ? next() : null
+    });
 });
 
 // Список источников
