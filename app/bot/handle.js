@@ -28,7 +28,6 @@ exports.router = (msg) => {
                 if (path.children.hasOwnProperty(item)){
                     return path.children[item]
                 } else {
-
                     // Если нет подходящей ветки, то пытаемся использовать общую ветку
                     if (path.children.hasOwnProperty('*')){
                         return path.children['*'];

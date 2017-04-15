@@ -15,8 +15,15 @@ module.exports = {
                                     event: 'task:select:source',
                                     children: {
                                         '*': {
-                                            event: 'task:select:action',
-                                            await: true
+                                            event: 'task:select:follow',
+                                            children: {
+                                                '*': {
+                                                    event: 'task:select:likes'
+                                                }
+                                            }
+                                        },
+                                        'Назад': {
+                                            event: 'location:back'
                                         }
                                     }
                                 },
@@ -25,12 +32,12 @@ module.exports = {
                                 }
                             }
                         },
-                        'Лайк': {
-                            event: 'task:select:type'
-                        },
-                        'Подписка': {
-                            event: 'task:select:type'
-                        },
+                        // 'Лайк': {
+                        //     event: 'task:select:type'
+                        // },
+                        // 'Подписка': {
+                        //     event: 'task:select:type'
+                        // },
                         'Отписка': {
                             event: 'task:select:type'
                         },

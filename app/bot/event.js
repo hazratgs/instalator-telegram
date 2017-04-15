@@ -37,6 +37,13 @@ event.on('location:back', (msg) => {
 
                 // Если нет подходящей ветки, то пытаемся использовать общую ветку
                 if (path.children.hasOwnProperty('*')){
+
+                    // Используем значение из состояния для общей ветки,
+                    // что бы не было такого, например возврат из общей ветки в общую
+                    // приводил бы к выбору, например пользователя с ником Назад
+                    // пр этой причине, подставляем текст, так как событие Назад уже отработало
+                    msg.text = item;
+
                     return path.children['*'];
                 } else {
                     return path;
@@ -96,33 +103,59 @@ event.on('task:select:type', (msg, action, next) => {
             return null;
         }
 
-        console.log(result);
+        let source = result.map((item) => {
+            return item.name
+        });
 
-        // let names = result.map((item) => {
-        //     return item.name
-        // });
-        //
-        // // Выбранное действие
-        // send.keyboardArr(msg.from.id, `Выберите источник`, names);
-        // next ? next() : null
+        // Выбранное действие
+        send.keyboardArr(msg.from.id, `Выберите источник`, [...source, 'Назад']);
+        next ? next() : null
     });
 });
 
 // Список источников
 event.on('task:select:source', (msg, action, next) => {
-    if (!Source.list().includes(msg.text)){
-        send.message(msg.from.id, 'Ошибка, неверный источник');
-        return null;
-    }
+    Source.contains(msg.text, (source) => {
+        if (!source.length){
+            send.message(msg.from.id, 'Ошибка, нет такого источника');
+            return null;
+        }
 
-    // Кол. действия
-    send.keyboardArr(msg.from.id, 'Введите количество действий', ['2500', '5000', '7500']);
-    next ? next() : null
+        // Кол. действия
+        send.keyboardArr(msg.from.id, 'Введите количество Подписок', ['2500', '5000', '7500']);
+        next ? next() : null
+    });
 });
 
 // Количество действий
-event.on('task:select:action', (msg, action, next) => {
-    send.message(msg.from.id, 'Добавлено в задание!');
+event.on('task:select:follow', (msg, action, next) => {
+    let length = parseInt(msg.text);
+    if (isNaN(length) || length > 7500){
+        send.message(msg.from.id, 'Не более 7500 подписчиков в одном задании');
+        return null;
+    }
+
+    // Просим ввести кол. лайков к профилю
+    send.keyboardArr(msg.from.id, 'Сколько лайков ставить?', ['1', '2', '3', '4', '5']);
+    next ? next() : null
+});
+
+// Количество лайков к фотографии
+event.on('task:select:likes', (msg, action, next) => {
+    let length = parseInt(msg.text);
+    if (isNaN(length) || length > 5){
+        send.message(msg.from.id, 'Думаю это слишко много...');
+        return null;
+    }
+    next();
+
+    // Сохранение задания
+    event.emit('task:create:save', msg, action);
+});
+
+// Создаем задание
+event.on('task:create:save', (msg, action) => {
+    send.message(msg.from.id, 'Задание успешно добавлено');
 
     // Переходим на главную
     event.emit('location:home', msg);

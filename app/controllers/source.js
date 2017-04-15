@@ -6,7 +6,7 @@ const Model  = require('../models/source');
 
 // Источники
 exports.list = (callback) => {
-    Model.find({}, (err, result) => callback(result))
+    Model.Source.find({}, (err, result) => callback(result))
 };
 
 // Добавить новый источник
