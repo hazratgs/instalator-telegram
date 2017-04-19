@@ -9,10 +9,11 @@ const state = {};
 
 const Account = require('../controllers/account');
 const Source = require('../controllers/source');
+const Task = require('../controllers/task');
 
 // Изменение расположения пользователя
 event.on('location:next', (msg, action) => {
-    if (action.event != 'location:back' && !action.await){
+    if (action.event !== 'location:back' && !action.await){
         state[msg.from.id].push(msg.text);
     }
 });
@@ -32,6 +33,7 @@ event.on('location:back', (msg) => {
         } else {
 
             if (path.children.hasOwnProperty(item)){
+                msg.text = item;
                 return path.children[item]
             } else {
 
@@ -99,7 +101,7 @@ event.on('task:select:type', (msg, action, next) => {
     Source.list((result) => {
         if (!result.length){
             send.message(msg.from.id, 'К сожалению нет источников');
-            event.emit('location:home', msg);
+            event.emit('location:back', msg);
             return null;
         }
 
@@ -122,13 +124,13 @@ event.on('task:select:source', (msg, action, next) => {
         }
 
         // Кол. действия
-        send.keyboardArr(msg.from.id, 'Введите количество Подписок', ['2500', '5000', '7500']);
+        send.keyboardArr(msg.from.id, 'Введите количество Подписок', ['2500', '5000', '7500', 'Назад']);
         next ? next() : null
     });
 });
 
 // Количество действий
-event.on('task:select:follow', (msg, action, next) => {
+event.on('task:select:action', (msg, action, next) => {
     let length = parseInt(msg.text);
     if (isNaN(length) || length > 7500){
         send.message(msg.from.id, 'Не более 7500 подписчиков в одном задании');
@@ -136,12 +138,25 @@ event.on('task:select:follow', (msg, action, next) => {
     }
 
     // Просим ввести кол. лайков к профилю
-    send.keyboardArr(msg.from.id, 'Сколько лайков ставить?', ['1', '2', '3', '4', '5']);
+    send.keyboardArr(msg.from.id, 'К скольким в день подписываться?', ['300', '500', '750', '1000', 'Назад']);
+    next ? next() : null
+});
+
+// Количество действий в день
+event.on('task:select:actionPerDay', (msg, action, next) => {
+    let length = parseInt(msg.text);
+    if (isNaN(length) || length > 1200){
+        send.message(msg.from.id, 'Слишком много, могут заблокировать. Попробуй еще раз...');
+        return null;
+    }
+
+    // Просим ввести кол. лайков к профилю
+    send.keyboardArr(msg.from.id, 'Сколько лайков ставить?', ['1', '2', '3', '4', '5', 'Назад']);
     next ? next() : null
 });
 
 // Количество лайков к фотографии
-event.on('task:select:likes', (msg, action, next) => {
+event.on('task:select:like', (msg, action, next) => {
     let length = parseInt(msg.text);
     if (isNaN(length) || length > 5){
         send.message(msg.from.id, 'Думаю это слишко много...');
@@ -155,10 +170,28 @@ event.on('task:select:likes', (msg, action, next) => {
 
 // Создаем задание
 event.on('task:create:save', (msg, action) => {
-    send.message(msg.from.id, 'Задание успешно добавлено');
+    let data = state[msg.from.id].splice(0, 2);
+    Task.create({
+        name: msg.from.id,
+        type: data[0],
+        source: data[1],
+        action: parseInt(data[2]),
+        actionPerDay: parseInt(data[3]),
+        like: parseInt(data[4]),
+    }, (err) => {
+        console.log(err) 
+        if (!err){
+            send.message(msg.from.id, 'Задание успешно добавлено, подробнее можете посмотреть в активности');
 
-    // Переходим на главную
-    event.emit('location:home', msg);
+            // Переходим на главную
+            event.emit('location:home', msg);
+        } else {
+            send.message(msg.from.id, 'Возникла ошибка, пожалуйста повторите еще раз!');
+
+            // Переходим на главную
+            event.emit('location:home', msg);
+        }
+    });
 });
 
 // Список аккаунтов
@@ -193,7 +226,7 @@ event.on('account:await', (msg, action, next) => {
         login = account[0],
         password = account[1];
 
-    account.length != 2
+    account.length !== 2
 
         // Не передан один из параметров
         ? event.emit('account:add:err', msg)
@@ -223,7 +256,7 @@ event.on('account:add:save', (msg, login, password) => {
         instanode.auth(login, password, (error, stdout, stderr) => {
 
             // Логин пароль не верны
-            if (stdout.trim() != 'success'){
+            if (stdout.trim() !== 'success'){
                 send.message(msg.from.id, stdout.trim());
                 return null;
             }
@@ -270,14 +303,6 @@ event.on('account:delete', (msg) => {
         })
     })
 });
-
-
-event.on('account:contains', (user, account) => {
-
-});
-
-//
-// event.on('instanode:')
 
 
 // Экспортируем объект события

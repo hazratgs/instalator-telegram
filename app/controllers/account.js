@@ -1,6 +1,6 @@
-const conf = require(process.cwd() + '/conf');
-const log = require(process.cwd() + '/libs/log')(module);
-const db  = require(process.cwd() + '/libs/db');
+const conf = require('../../conf');
+const log = require('../../libs/log')(module);
+const db  = require('../../libs/db');
 
 const Model  = require('../models/account');
 

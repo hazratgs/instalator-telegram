@@ -15,10 +15,21 @@ module.exports = {
                                     event: 'task:select:source',
                                     children: {
                                         '*': {
-                                            event: 'task:select:follow',
+                                            event: 'task:select:action',
                                             children: {
                                                 '*': {
-                                                    event: 'task:select:likes'
+                                                    event: 'task:select:actionPerDay',
+                                                    children: {
+                                                        '*': {
+                                                            event: 'task:select:like'
+                                                        },
+                                                        'Назад': {
+                                                            event: 'location:back'
+                                                        }
+                                                    }
+                                                },
+                                                'Назад': {
+                                                    event: 'location:back'
                                                 }
                                             }
                                         },
@@ -32,12 +43,6 @@ module.exports = {
                                 }
                             }
                         },
-                        // 'Лайк': {
-                        //     event: 'task:select:type'
-                        // },
-                        // 'Подписка': {
-                        //     event: 'task:select:type'
-                        // },
                         'Отписка': {
                             event: 'task:select:type'
                         },
@@ -73,14 +78,8 @@ module.exports = {
                 '*': {
                     event: 'account:select',
                     children: {
-                        'Добавить задание': {
-                            event: 'location:back'
-                        },
-                        'Активность': {
-                            event: 'location:back'
-                        },
                         'Редактировать': {
-                            event: 'location:back'
+                            event: 'location:read'
                         },
                         'Удалить': {
                             event: 'account:delete',
