@@ -27,25 +27,23 @@ event.on('location:back', (msg) => {
     // Редьюсер
     const reducer = state[msg.from.id].reduce((path, item) => {
 
+        // Используем значение из состояния для общей ветки,
+        // что бы не было такого, например возврат из общей ветки в общую
+        // приводил бы к выбору, например пользователя с ником Назад
+        // пр этой причине, подставляем текст, так как событие Назад уже отработало
+        msg.text = item;
+
         // Если нет дочерних разделов
         if (!path.children){
             return path;
         } else {
 
             if (path.children.hasOwnProperty(item)){
-                msg.text = item;
                 return path.children[item]
             } else {
 
                 // Если нет подходящей ветки, то пытаемся использовать общую ветку
                 if (path.children.hasOwnProperty('*')){
-
-                    // Используем значение из состояния для общей ветки,
-                    // что бы не было такого, например возврат из общей ветки в общую
-                    // приводил бы к выбору, например пользователя с ником Назад
-                    // пр этой причине, подставляем текст, так как событие Назад уже отработало
-                    msg.text = item;
-
                     return path.children['*'];
                 } else {
                     return path;
@@ -170,16 +168,17 @@ event.on('task:select:like', (msg, action, next) => {
 
 // Создаем задание
 event.on('task:create:save', (msg, action) => {
-    let data = state[msg.from.id].splice(0, 2);
+    let data = state[msg.from.id];
+    data.splice(0, 2);
+
     Task.create({
         name: msg.from.id,
         type: data[0],
         source: data[1],
-        action: parseInt(data[2]),
-        actionPerDay: parseInt(data[3]),
-        like: parseInt(data[4]),
+        action: data[2],
+        actionPerDay: data[3],
+        like: data[4],
     }, (err) => {
-        console.log(err) 
         if (!err){
             send.message(msg.from.id, 'Задание успешно добавлено, подробнее можете посмотреть в активности');
 

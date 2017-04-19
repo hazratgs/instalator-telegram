@@ -61,7 +61,7 @@ exports.router = (msg) => {
         }
 
         // trace
-        setTimeout(() => console.log(event.state[msg.from.id]), 1000)
+        // setTimeout(() => console.log(event.state[msg.from.id]), 1000)
     }
 };
 
