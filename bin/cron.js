@@ -17,7 +17,7 @@ cron.schedule('*/10 * * * * *', () => {
 
             // Поиск данных аккаунта
             new Promise((resolve, reject) => {
-                Account.contains(item.user, item.account, (account) => resolve(account));
+                Account.contains(item.user, item.login, (account) => resolve(account));
             }).then((account) => {
 
                 // Поиск источника

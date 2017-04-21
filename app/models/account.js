@@ -3,7 +3,7 @@ const db = require('../../libs/db');
 // Модель аккаунта
 const AccountSchema = new db.mongoose.Schema({
     user: {type: Number, required: [true, "userRequired"]},
-    account: {type: String, required: [true, "accountRequired"]},
+    login: {type: String, required: [true, "loginRequired"]},
     password: {type: String, required: [true, "passwordRequired"]},
     verified: {type: Boolean, default: false},
     date: {type: Date, default: Date.now}
@@ -12,7 +12,7 @@ const AccountSchema = new db.mongoose.Schema({
 // Модель выполненых задач
 const AccountFollowSchema = new db.mongoose.Schema({
     user: {type: Number, required: [true, "userRequired"]},
-    account: {type: String, required: [true, "accountRequired"]},
+    login: {type: String, required: [true, "loginRequired"]},
     data: {type: Array, default: []}
 });
 

@@ -8,7 +8,7 @@ const Model  = require('../models/task');
 exports.create = (data, callback) => {
     let Task = new Model.Task({
         user: data.user,
-        account: data.account,
+        login: data.login,
         type: data.type,
         source: data.source,
         action: data.action,
@@ -26,10 +26,10 @@ exports.list = (user, callback) => {
 };
 
 // Текущее задание аккаунта
-exports.current = (user, account, callback) => {
+exports.current = (user, login, callback) => {
     Model.Task.find({
         user: user,
-        account: account,
+        login: login,
         status: 'active'
     }, (err, tasks) => callback(err, tasks))
 };
@@ -41,14 +41,27 @@ exports.currentList = (callback) => {
     }, (err, tasks) => callback(err, tasks))
 };
 
+// Завершение задания
+exports.finish = (user, login, callback) => {
+    Model.Task.update({
+        user: user,
+        login: login
+    }, {
+        $set: {
+            status: 'success'
+        }
+    }, (err) => callback(err))
+};
+
 // Инкримент задания
 exports.currentIncrement = (user, login, callback) => {
     Model.Task.update({
         user: user,
-        account: login
+        login: login
     }, {
         $inc: {
             current: 1
         }
     }, (err) => callback(err))
 };
+

@@ -10,45 +10,45 @@ exports.list = (user, callback) => {
 };
 
 // Добавление аккаунта
-exports.add = (user, account, password, callback) => {
+exports.add = (user, login, password, callback) => {
     let AddAccount = new Model.Account({
         user: user,
-        account: account,
+        login: login,
         password: password
     });
     AddAccount.save((err) => callback(err, AddAccount))
 };
 
 // Проверка существование аккаунта
-exports.contains = (user, account, callback) => {
+exports.contains = (user, login, callback) => {
     Model.Account.find({
         user: user,
-        account: account
+        login: login
     }, (err, account) => callback(account))
 };
 
 // Проверка существование аккаунта у всех пользователей
-exports.containsAllUsers = (account, callback) => {
+exports.containsAllUsers = (login, callback) => {
     Model.Account.find({
-        account: account
+        login: login
     }, (err, result) => callback(result))
 };
 
 // Удаление аккаунта
-exports.remove = (user, account, callback) => {
+exports.remove = (user, login, callback) => {
     Model.Account.remove({
         user: user,
-        account: account
+        login: login
     }, () => callback())
 };
 
 // Записать информацию о подписке
-exports.follow = (user, account, follow, callback) => {
-    this.followList(user, account, (err, result) => {
+exports.follow = (user, login, follow, callback) => {
+    this.followList(user, login, (err, result) => {
         if (result){
             Model.AccountFollow.update({
                 user: user,
-                account: account
+                login: login
             }, {
                 $push: {
                     data: follow
@@ -60,7 +60,7 @@ exports.follow = (user, account, follow, callback) => {
             // База не найдена, добавляем базу
             new Model.AccountFollow({
                 user: user,
-                account: account,
+                login: login,
                 data: [follow]
             }).save((err) => callback(err))
         }
@@ -68,10 +68,10 @@ exports.follow = (user, account, follow, callback) => {
 };
 
 // Список подписок пользователя
-exports.followList = (user, account, callback) => {
+exports.followList = (user, login, callback) => {
     Model.AccountFollow.findOne({
         user: user,
-        account: account
+        login: login
     }, (err, result) => {
         if (!err){
             callback(err, result);
@@ -80,19 +80,19 @@ exports.followList = (user, account, callback) => {
 };
 
 // Проверить, подписан ли
-exports.followCheck = (user, account, follow, callback) => {
+exports.followCheck = (user, login, follow, callback) => {
     Model.AccountFollow.findOne({
         user: user,
-        account: account,
+        login: login,
         data: {$in: [follow]}
     }, (err, result) => result === null ? callback(false) : callback(true));
 };
 
 // Очистить список подписчиков
-exports.followClear = (user, account, callback) => {
+exports.followClear = (user, login, callback) => {
     Model.AccountFollow.update({
         user: user,
-        account: account
+        login: login
     }, {
         $set: {
             data: []

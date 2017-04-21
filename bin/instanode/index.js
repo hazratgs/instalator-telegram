@@ -1,7 +1,6 @@
-const path = require('path');
-const fs = require('fs');
 const exec = require("child_process").exec;
 const dir = process.cwd();
+const send = require('../../app/bot/method');
 
 const Account = require('../../app/controllers/account');
 const Task = require('../../app/controllers/task');
@@ -20,6 +19,11 @@ exports.auths = (login, password, callback) => {
 // Запуск подписа+лайк
 exports.follow = (task, account, source, callback) => {
 
+    // Account.followClear(account.user, account.login, (err) => {
+    //     console.log('Очищено')
+    // });
+    // return false;
+
     // Остаток действий
     let actionBalance = task.action - task.current;
 
@@ -27,16 +31,23 @@ exports.follow = (task, account, source, callback) => {
     if (actionBalance){
 
         // Кол. действий, которые необходимо выполнить
-        // let actions = (actionBalance / task.actionPerDay) < 1 ? actionBalance : task.actionPerDay;
-        let actions = 10;
+        let actions = task.actionPerDay;
 
         // кол. новых подписок
         let newFollow = 0;
 
-        // Account.followClear(account.user, account.login, (err) => {
-        //     console.log('Очищено')
-        // });
-        // return false
+        // Задание не завершено
+        let finish = false;
+
+        // Последняя выполнение программы
+        if ((actionBalance / task.actionPerDay) < 1){
+
+            // Изменяем кол. действий на остаток
+            actions = actionBalance;
+
+            // Задание подходит к концу
+            finish = true;
+        }
 
         // Авторизация
         this.auths(account.login, account.password, (error, stdout, stderr) => {
@@ -65,8 +76,8 @@ exports.follow = (task, account, source, callback) => {
 
                                                 // Инкримент
                                                 Task.currentIncrement(account.user, account.login, (err) => {
-                                                    console.log(err)
                                                     if (!err){
+
                                                         // Задача выполнена, переходи к другому пользователю
                                                         resolve(true);
                                                     }
@@ -114,20 +125,29 @@ exports.follow = (task, account, source, callback) => {
                         await fetch(item);
                     }
 
-                    Task.current(account.user, account.login, (err, tasks) => {
-                        console.log(tasks)
-                    })
+                    // Если задание завершено
+                    if (finish){
+                        Task.finish(account.user, account.login, (err) => {
+                            if (!err){
+                                send.message(account.user, `Задание Лайк+Подписка успешно завершено для аккаунта ${account.login}`);
+                            }
+                        })
+                    }
                 })();
             } else {
 
                 // Авторизация не прошла, необходимо оповестить пользователя
-
+                send.message(account.user, `Возникла ошибка при выполнении задания для ${account.login}: ошибка авторизации, проверьте правильность логина/пароля`);
             }
         });
 
     } else {
 
         // Все действия выполнены, сохраняем информацию о завершении задачи
-
+        Task.finish(account.user, account.login, (err) => {
+            if (!err){
+                send.message(account.user, `Задание Лайк+Подписка успешно завершено для аккаунта ${account.login}`);
+            }
+        })
     }
 };

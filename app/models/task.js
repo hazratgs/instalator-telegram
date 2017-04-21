@@ -3,7 +3,7 @@ let db = require('../../libs/db');
 // Модель задания
 let TaskSchema = new db.mongoose.Schema({
     user: {type: Number, required: [true, 'userRequired']},
-    account: {type: String, required: [true, 'accountRequired']},
+    login: {type: String, required: [true, 'loginRequired']},
     type: {type: String, required: [true, 'typeRequired']},
     source: {type: String, required: [true, 'sourceRequired']},
     action: {type: Number, required: [true, 'actionRequired']}, // кол. действий

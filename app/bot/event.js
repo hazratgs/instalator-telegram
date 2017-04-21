@@ -186,7 +186,7 @@ event.on('task:create:save', (msg, action) => {
         if (!tasks.length){
             Task.create({
                 user: msg.from.id,
-                account: data[0],
+                login: data[0],
                 type: data[1],
                 source: data[2],
                 action: data[3],
