@@ -2,7 +2,7 @@ const events = require('events');
 const event = new events.EventEmitter();
 const send = require('./method');
 const map = require('./map');
-const instanode = require('./instanode');
+const instanode = require('../../bin/instanode');
 
 // Фиксирование расположение пользователя
 const state = {};
@@ -37,7 +37,6 @@ event.on('location:back', (msg) => {
         if (!path.children){
             return path;
         } else {
-
             if (path.children.hasOwnProperty(item)){
                 return path.children[item]
             } else {
@@ -82,14 +81,25 @@ event.on('task:select', (msg, action, next) => {
             return null;
         }
 
-        send.keyboardMap(msg.from.id, `Выберите действие`, action);
-        next ? next() : null
+        // Проверяем, есть ли активные задания у аккаунта
+        Task.current(msg.from.id, msg.text, (err, tasks) => {
+            if (tasks.length){
+
+                // Активное задание есть
+                send.message(msg.from.id, `Есть активное задание у ${msg.text}, попробуйте позже.`);
+                event.emit('account:list', msg);
+
+            } else {
+                send.keyboardMap(msg.from.id, `Выберите действие`, action);
+                next ? next() : null
+            }
+        });
     });
 });
 
 // Выбор типа задания
 event.on('task:select:type', (msg, action, next) => {
-    let types = ['Лайк + Подписка', 'Лайк', 'Подписка', 'Отписка'];
+    let types = ['Лайк + Подписка', 'Отписка'];
     if (!types.includes(msg.text)){
         send.message(msg.from.id, `Ошибка, выберите действие`);
         return null;
@@ -169,23 +179,34 @@ event.on('task:select:like', (msg, action, next) => {
 // Создаем задание
 event.on('task:create:save', (msg, action) => {
     let data = state[msg.from.id];
-    data.splice(0, 2);
+    data.splice(0, 1);
 
-    Task.create({
-        name: msg.from.id,
-        type: data[0],
-        source: data[1],
-        action: data[2],
-        actionPerDay: data[3],
-        like: data[4],
-    }, (err) => {
-        if (!err){
-            send.message(msg.from.id, 'Задание успешно добавлено, подробнее можете посмотреть в активности');
+    // Проверка существования задачи
+    Task.current(msg.from.id, data[0], (err, tasks) => {
+        if (!tasks.length){
+            Task.create({
+                user: msg.from.id,
+                account: data[0],
+                type: data[1],
+                source: data[2],
+                action: data[3],
+                actionPerDay: data[4],
+                like: data[5],
+            }, (err) => {
+                if (!err){
+                    send.message(msg.from.id, 'Задание успешно добавлено, подробнее можете посмотреть в активности');
 
-            // Переходим на главную
-            event.emit('location:home', msg);
+                    // Переходим на главную
+                    event.emit('location:home', msg);
+                } else {
+                    send.message(msg.from.id, 'Возникла ошибка, пожалуйста повторите еще раз!');
+
+                    // Переходим на главную
+                    event.emit('location:home', msg);
+                }
+            });
         } else {
-            send.message(msg.from.id, 'Возникла ошибка, пожалуйста повторите еще раз!');
+            send.message(msg.from.id, 'У этого аккаунта есть активное задание, дождитесь завершения.');
 
             // Переходим на главную
             event.emit('location:home', msg);

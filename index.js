@@ -27,6 +27,9 @@ const routes = require('./app/routes');
 // Telegram bot
 const bot = require('./app/bot');
 
+// Запланированные задачи
+const cron = require('./bin/cron');
+
 // Отдача статики
 app.use(express.static(process.cwd() + '/public'));
 

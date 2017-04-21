@@ -24,7 +24,7 @@ exports.contains = (user, login, callback) => {
     Model.Account.find({
         user: user,
         login: login
-    }, (err, accounts) => callback(accounts))
+    }, (err, account) => callback(account))
 };
 
 // Проверка существование аккаунта у всех пользователей
@@ -41,3 +41,72 @@ exports.remove = (user, login, callback) => {
         login: login
     }, () => callback())
 };
+
+// Записать информацию о подписке
+exports.follow = (user, login, follow, callback) => {
+    this.followList(user, login, (err, result) => {
+        if (result){
+            Model.AccountFollow.update({
+                user: user,
+                login: login
+            }, {
+                $push: {
+                    data: follow
+                }
+            }, (err) => callback(err, result))
+
+        } else {
+
+            // База не найдена, добавляем базу
+            new Model.AccountFollow({
+                user: user,
+                login: login,
+                data: [follow]
+            }).save((err) => callback(err))
+        }
+    });
+};
+
+// Список подписок пользователя
+exports.followList = (user, login, callback) => {
+    Model.AccountFollow.findOne({
+        user: user,
+        login: login
+    }, (err, result) => {
+        if (!err){
+            callback(err, result);
+        }
+    });
+};
+
+// Проверить, подписан ли
+exports.followCheck = (user, login, follow, callback) => {
+    Model.AccountFollow.findOne({
+        user: user,
+        login: login,
+        data: {$in: [follow]}
+    }, (err, result) => result === null ? callback(false) : callback(true));
+};
+
+// Очистить список подписчиков
+exports.followClear = (user, login, callback) => {
+    Model.AccountFollow.update({
+        user: user,
+        login: login
+    }, {
+        $set: {
+            data: []
+        }
+    }, (err) => callback(err))
+};
+
+
+
+
+
+
+
+
+
+
+

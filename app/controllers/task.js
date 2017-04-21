@@ -7,12 +7,48 @@ const Model  = require('../models/task');
 // Добавить задание
 exports.create = (data, callback) => {
     let Task = new Model.Task({
-        user: data.name,
+        user: data.user,
+        account: data.account,
         type: data.type,
         source: data.source,
         action: data.action,
         actionPerDay: data.actionPerDay,
-        like: data.like,
+        like: data.like
     });
     Task.save((err) => callback(err));
+};
+
+// Список задач пользователя
+exports.list = (user, callback) => {
+    Model.Task.find({
+        user: user
+    }, (err, tasks) => callback(err, tasks))
+};
+
+// Текущее задание аккаунта
+exports.current = (user, account, callback) => {
+    Model.Task.find({
+        user: user,
+        account: account,
+        status: 'active'
+    }, (err, tasks) => callback(err, tasks))
+};
+
+// Активные задания
+exports.currentList = (callback) => {
+    Model.Task.find({
+        status: 'active'
+    }, (err, tasks) => callback(err, tasks))
+};
+
+// Инкримент задания
+exports.currentIncrement = (user, login, callback) => {
+    Model.Task.update({
+        user: user,
+        account: login
+    }, {
+        $inc: {
+            current: 1
+        }
+    }, (err) => callback(err))
 };
