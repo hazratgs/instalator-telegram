@@ -36,6 +36,9 @@ exports.follow = (task, account, source, callback) => {
         // кол. новых подписок
         let newFollow = 0;
 
+        // кол. новых лайков
+        let newLike = 0;
+
         // Задание не завершено
         let finish = false;
 
@@ -67,6 +70,25 @@ exports.follow = (task, account, source, callback) => {
                                 });
 
                                 follow.then((result) => {
+
+                                    // Ссылки на фотографии
+                                    let link = [];
+
+                                    // Ищем в выводе ссылки
+                                    if (result.indexOf('|') !== -1){
+                                        let param = result.split('|');
+
+                                        // Сохраняем
+                                        for (let item of param[1].split('\n')){
+                                            if (item.trim() === '') continue;
+
+                                            link.push(item.trim());
+                                        }
+
+                                        // Статус
+                                        result = param[0].trim();
+                                    }
+
                                     switch (result.trim()){
 
                                         // Успешно подписались
@@ -75,13 +97,15 @@ exports.follow = (task, account, source, callback) => {
                                                 newFollow++;
 
                                                 // Инкримент
-                                                Task.currentIncrement(account.user, account.login, (err) => {
-                                                    if (!err){
+                                                Task.currentIncrement(account.user, account.login, (err) => {});
 
-                                                        // Задача выполнена, переходи к другому пользователю
+                                                if (link.length){
+                                                    this.like(account.user, account.login, link, () => {
                                                         resolve(true);
-                                                    }
-                                                });
+                                                    });
+                                                } else {
+                                                    resolve(true);
+                                                }
                                             });
                                             break;
 
@@ -99,7 +123,7 @@ exports.follow = (task, account, source, callback) => {
 
                                         // Не предвиденная ошибка
                                         default:
-                                            resolve(false);
+                                            // resolve(false);
                                             break;
                                     }
                                 });
@@ -150,4 +174,60 @@ exports.follow = (task, account, source, callback) => {
             }
         })
     }
+};
+
+//
+exports.like = async (user, login, link, callback) => {
+
+    let like = (item) => {
+        return new Promise((resolve, reject) => {
+
+            // Проверяем, лайкали мы ранее фотографии
+            Account.likeCheck(user, login, item, (status) => {
+                if (!status){
+
+                    // Лайкаем
+                    let getLike = new Promise((_resolve, _reject) => {
+                        exec(`phantomjs --cookies-file=${dir}/bin/instanode/cookies/${login}.txt ${dir}/bin/instanode/like.js ${item}`, (error, stdout, stderr) => {
+                            _resolve(stdout.trim());
+                        });
+                    });
+
+                    getLike.then((status) => {
+                        if (status === 'success'){
+
+                            // Успешно поставили лайк, записываем информацию в базе
+                            Account.like(user, login, item, () => {
+
+                                // Инкримент в задание
+                                Task.currentIncrement(user, login, (err) => {
+                                    resolve(true);
+                                });
+                            })
+
+                        } else if (status === 'before'){
+
+                            // Лайк был установлен ранее
+                            resolve(false)
+
+                        } else {
+
+                            // Ошибка, почему то не удалось подписаться
+                            resolve(false)
+                        }
+                    });
+                } else {
+
+                    // Был лайкнут ранее
+                    resolve(false)
+                }
+            });
+        });
+    };
+
+    for (let item of link){
+        await like(item);
+    }
+
+    callback();
 };

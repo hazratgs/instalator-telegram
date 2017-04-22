@@ -100,7 +100,51 @@ exports.followClear = (user, login, callback) => {
     }, (err) => callback(err))
 };
 
+// Записать информацию о лайке
+exports.like = (user, login, like, callback) => {
+    this.likeList(user, login, (err, result) => {
+        if (result){
+            Model.AccountLike.update({
+                user: user,
+                login: login
+            }, {
+                $push: {
+                    data: like
+                }
+            }, (err) => callback(err, result))
 
+        } else {
+
+            // База не найдена, добавляем базу
+            new Model.AccountLike({
+                user: user,
+                login: login,
+                data: [like]
+            }).save((err) => callback(err))
+        }
+    });
+};
+
+// Список лайков пользователя
+exports.likeList = (user, login, callback) => {
+    Model.AccountLike.findOne({
+        user: user,
+        login: login
+    }, (err, result) => {
+        if (!err){
+            callback(err, result);
+        }
+    });
+};
+
+// Проверить, лайкнул ли
+exports.likeCheck = (user, login, like, callback) => {
+    Model.AccountLike.findOne({
+        user: user,
+        login: login,
+        data: {$in: [like]}
+    }, (err, result) => result === null ? callback(false) : callback(true));
+};
 
 
 

@@ -53,7 +53,7 @@ exports.finish = (user, login, callback) => {
     }, (err) => callback(err))
 };
 
-// Инкримент задания
+// Инкримент подписчиков
 exports.currentIncrement = (user, login, callback) => {
     Model.Task.update({
         user: user,
@@ -61,6 +61,18 @@ exports.currentIncrement = (user, login, callback) => {
     }, {
         $inc: {
             current: 1
+        }
+    }, (err) => callback(err))
+};
+
+// Инкримент лайков
+exports.likeIncrement = (user, login, callback) => {
+    Model.Task.update({
+        user: user,
+        login: login
+    }, {
+        $inc: {
+            like: 1
         }
     }, (err) => callback(err))
 };

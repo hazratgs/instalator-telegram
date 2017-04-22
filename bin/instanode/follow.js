@@ -20,18 +20,21 @@ if(phantom.cookies === ""){
 }
 
 console.log('success');
+console.log('|');
+console.log('https://www.instagram.com/p/BS25YGGAAjQ/' + Math.random());
+console.log('https://www.instagram.com/p/BTEktADgyVt/' + Math.random());
 phantom.exit();
 
 page.open('https://www.instagram.com/'+ user +'/', function() {
     setTimeout(function () {
 
-        /* Кнопка подписки */
+        // Кнопка подписки
         var follow = page.evaluate(function () {
             var button = document.querySelector('button._ah57t');
 
             if (button){
 
-                /* Если не подписан, то подписываемся */
+                // Если не подписан, то подписываемся
                 if (button.innerHTML == 'Follow' || button.innerHTML == 'Подписаться'){
 
                     return {
@@ -41,19 +44,19 @@ page.open('https://www.instagram.com/'+ user +'/', function() {
                     }
                 } else {
 
-                    /* Если подписаны, игнорируем */
+                    // Если подписаны, игнорируем
                     return button.innerHTML;
                 }
             } else {
 
-                /* Профиль не существует */
+                // Профиль не существует
                 return false;
             }
         });
 
         if (typeof follow == 'object'){
 
-            /* Подписываемся к пользователю */
+            // Подписываемся к пользователю
             page.sendEvent('click', follow.x, follow.y);
 
             setTimeout(function () {
@@ -69,7 +72,7 @@ page.open('https://www.instagram.com/'+ user +'/', function() {
                 ){
                     console.log('success');
 
-                    /* Обрабатываем фотографии */
+                    // Обрабатываем фотографии
                     getLinkImages();
 
                 } else {
@@ -90,7 +93,7 @@ page.open('https://www.instagram.com/'+ user +'/', function() {
                             console.log('error follow');
                         }
 
-                        /* Обрабатываем фотографии */
+                        // Обрабатываем фотографии
                         getLinkImages();
 
                     }, timeout);
@@ -100,14 +103,14 @@ page.open('https://www.instagram.com/'+ user +'/', function() {
 
         } else if (typeof follow == 'string'){
 
-            /* Скорее всего мы уже подписаны на пользователя */
+            // Скорее всего мы уже подписаны на пользователя
             console.log('following');
 
-            /* Обрабатываем фотографии */
+            // Обрабатываем фотографии
             getLinkImages();
         } else {
 
-            /* Кнопки нет, видимо нет страницы */
+            // Кнопки нет, видимо нет страницы
             console.log(404);
             phantom.exit();
         }
@@ -118,12 +121,12 @@ function getLinkImages() {
     var photos = page.evaluate(function () {
         var links = document.querySelectorAll('a._8mlbc');
 
-        /* У пользователя нет фотографий || закрытый аккаунт */
+        // У пользователя нет фотографий || закрытый аккаунт
         if (!links.length){
             return false;
         }
 
-        /* Нам нужно не больше 3х фотографий */
+        // Нам нужно не больше 3х фотографий
         var data = [];
         for (var i = 0; i < links.length; i++){
             if (i == 3) break;
@@ -133,13 +136,11 @@ function getLinkImages() {
         return data;
     });
 
-    if (photos){
-        /* Записываем url фотографий в dat файл для дальнейшей обработки */
-        fs.write(path + 'photos.json', JSON.stringify(photos, null, 4), 'w');
-        phantom.exit();
+    if (photos.length){
+        console.log('|');
 
-    } else {
-        fs.write(path + 'photos.json', JSON.stringify([], null, 4), 'w');
-        phantom.exit();
+        photos.forEach(function (item) {
+            console.log(item);
+        });
     }
 }

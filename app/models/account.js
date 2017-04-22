@@ -9,8 +9,15 @@ const AccountSchema = new db.mongoose.Schema({
     date: {type: Date, default: Date.now}
 });
 
-// Модель выполненых задач
+// Модель подписок
 const AccountFollowSchema = new db.mongoose.Schema({
+    user: {type: Number, required: [true, "userRequired"]},
+    login: {type: String, required: [true, "loginRequired"]},
+    data: {type: Array, default: []}
+});
+
+// Модель лайков
+const AccountLikeSchema = new db.mongoose.Schema({
     user: {type: Number, required: [true, "userRequired"]},
     login: {type: String, required: [true, "loginRequired"]},
     data: {type: Array, default: []}
@@ -18,3 +25,4 @@ const AccountFollowSchema = new db.mongoose.Schema({
 
 exports.Account = db.connect.model("Account", AccountSchema);
 exports.AccountFollow = db.connect.model("AccountFollow", AccountFollowSchema);
+exports.AccountLike = db.connect.model("AccountLike", AccountLikeSchema);
