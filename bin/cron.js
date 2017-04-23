@@ -7,7 +7,7 @@ const Source = require('../app/controllers/source');
 const Instanode = require('../bin/instanode');
 
 // Запускаем активные задания
-cron.schedule('23 22 * * *', () => {
+cron.schedule('23 11 * * *', () => {
 
     // Получаем все активные задания
     Task.currentList((err, tasks) => {
@@ -34,6 +34,3 @@ cron.schedule('23 22 * * *', () => {
         });
     });
 });
-
-
-

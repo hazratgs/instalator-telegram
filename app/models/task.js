@@ -9,7 +9,8 @@ let TaskSchema = new db.mongoose.Schema({
     action: {type: Number, required: [true, 'actionRequired']}, // кол. действий
     actionPerDay: {type: Number, required: [true, 'actionPerDayRequired']}, // кол. действий
     current: {type: Number, default: 0}, // текущее кол. действий
-    like: {type: Number, default: 2}, // кол. лайков профилю
+    like: {type: Number, default: 1}, // кол. лайков профилю
+    likeCurrent: {type: Number, default: 0}, // текущее кол. лайков
     status: {type: String, default: 'active'}, // Статус задания (active, cancel, success)
     date: {type: Date, default: Date.now}
 });

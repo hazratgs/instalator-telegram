@@ -72,7 +72,7 @@ exports.likeIncrement = (user, login, callback) => {
         login: login
     }, {
         $inc: {
-            like: 1
+            likeCurrent: 1
         }
     }, (err) => callback(err))
 };

@@ -12,17 +12,8 @@ exports.auth = (login, password, callback) => {
     });
 };
 
-exports.auths = (login, password, callback) => {
-    callback(null, 'success', null);
-};
-
 // Запуск подписа+лайк
 exports.follow = (task, account, source, callback) => {
-
-    // Account.followClear(account.user, account.login, (err) => {
-    //     console.log('Очищено')
-    // });
-    // return false;
 
     // Остаток действий
     let actionBalance = task.action - task.current;
@@ -35,9 +26,6 @@ exports.follow = (task, account, source, callback) => {
 
         // кол. новых подписок
         let newFollow = 0;
-
-        // кол. новых лайков
-        let newLike = 0;
 
         // Задание не завершено
         let finish = false;
@@ -53,7 +41,7 @@ exports.follow = (task, account, source, callback) => {
         }
 
         // Авторизация
-        this.auths(account.login, account.password, (error, stdout, stderr) => {
+        this.auth(account.login, account.password, (error, stdout, stderr) => {
             if (stdout === 'success'){
                 const fetch = (item) => {
                     return new Promise((resolve, reject) => {
@@ -101,6 +89,8 @@ exports.follow = (task, account, source, callback) => {
 
                                                 if (link.length){
                                                     this.like(account.user, account.login, link, () => {
+
+                                                        // Переход к следующему пользователю
                                                         resolve(true);
                                                     });
                                                 } else {
@@ -119,10 +109,14 @@ exports.follow = (task, account, source, callback) => {
 
                                         // Нет такой страницы
                                         case 404:
+
+                                            // В будушем, необходимо удалять такую страницу из источника
                                             break;
 
                                         // Не предвиденная ошибка
                                         default:
+
+                                            // Отправлять ошибку разработчику
                                             // resolve(false);
                                             break;
                                     }
@@ -200,7 +194,7 @@ exports.like = async (user, login, link, callback) => {
                             Account.like(user, login, item, () => {
 
                                 // Инкримент в задание
-                                Task.currentIncrement(user, login, (err) => {
+                                Task.likeIncrement(user, login, (err) => {
                                     resolve(true);
                                 });
                             })
@@ -226,6 +220,8 @@ exports.like = async (user, login, link, callback) => {
     };
 
     for (let item of link){
+
+        // Запускаем процесс
         await like(item);
     }
 

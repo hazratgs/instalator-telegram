@@ -38,3 +38,43 @@ routes(app);
 
 // Запуск сервера
 server.create(app);
+
+const Client = require('instagram-private-api').V1;
+const device = new Client.Device('halicha.ru');
+const storage = new Client.CookieFileStorage('./cookies/halicha.ru.txt');
+const _ = require('underscore');
+const Promise = require('bluebird');
+
+// And go for login
+Client.Session.create(device, storage).then((session) => {
+    return [session, Client.Account.searchForUser(session, 'febox26')]
+}).spread((session, account) => {
+    let feed = new Client.Feed.AccountFollowing(session, account.id);
+
+    Promise.mapSeries(_.range(0, 50), async () => {
+        let result;
+
+        let func = async () => {
+            return new Promise((resolve, reject) => {
+                setTimeout(() => {
+                    result = feed.get();
+                    resolve();
+                }, 2000)
+            });
+        };
+
+        await func();
+
+        return result;
+    }).then((results) => {
+        let followers = [];
+
+        for (let item of results){
+            for (let user of item){
+                followers.push(user._params.username);
+            }
+        }
+
+        console.log(followers.length)
+    })
+});
