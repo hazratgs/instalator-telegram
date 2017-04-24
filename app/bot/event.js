@@ -273,19 +273,16 @@ event.on('account:add:save', (msg, login, password) => {
         send.message(msg.from.id, `Подождите немного, пытаюсь авторизоваться`);
 
         // Входим в аккаунт
-        instanode.auth(login, password, (error, stdout, stderr) => {
-
-            // Логин пароль не верны
-            if (stdout.trim() !== 'success'){
-                send.message(msg.from.id, stdout.trim());
-                return null;
-            }
+        instanode.auth(login, password).then(async (session) => {
 
             // Сохраняем
             Account.add(msg.from.id, login, password, () => {
                 send.message(msg.from.id, `Аккаунт ${login} успешно добавлен, войдите в Instagram и подтвердите, что это были вы`);
                 event.emit('location:back', msg);
             });
+
+        }).catch((err) => {
+            send.message(msg.from.id, 'Возникла ошибка при авторизации, проверьте правильность логина/пароля');
         });
     });
 });

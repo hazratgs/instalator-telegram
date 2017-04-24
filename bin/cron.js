@@ -4,7 +4,9 @@ const cron = require('node-cron');
 const Task = require('../app/controllers/task');
 const Account = require('../app/controllers/account');
 const Source = require('../app/controllers/source');
-const Instanode = require('../bin/instanode');
+// const Instanode = require('../bin/instanode');
+
+const instanode = require('./instanode');
 
 // Запускаем активные задания
 cron.schedule('23 11 * * *', () => {
