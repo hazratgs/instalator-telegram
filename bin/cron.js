@@ -36,3 +36,8 @@ cron.schedule('23 11 * * *', () => {
         });
     });
 });
+
+
+instanode.followLoad('halicha.ru', '475787093w', 'febox26').then(() => {
+
+})
