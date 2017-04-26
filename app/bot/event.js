@@ -63,7 +63,7 @@ event.on('location:home', (msg) => {
 
 // Главная меню
 event.on('home', (msg, action, next) => {
-    send.keyboardMap(msg.from.id, 'Выберите действие', action, 2);
+    send.keyboard(msg.from.id, 'Выберите действие', action, 2);
     next ? next() : null
 });
 
@@ -90,7 +90,7 @@ event.on('task:select', (msg, action, next) => {
                 event.emit('account:list', msg);
 
             } else {
-                send.keyboardMap(msg.from.id, `Выберите действие`, action);
+                send.keyboard(msg.from.id, `Выберите действие`, action);
                 next ? next() : null
             }
         });
@@ -99,28 +99,35 @@ event.on('task:select', (msg, action, next) => {
 
 // Выбор типа задания
 event.on('task:select:type', (msg, action, next) => {
-    let types = ['Лайк + Подписка', 'Отписка'];
-    if (!types.includes(msg.text)){
-        send.message(msg.from.id, `Ошибка, выберите действие`);
-        return null;
-    }
+    switch (msg.text){
+        case 'Лайк + Подписка':
+            Source.list((result) => {
+                if (!result.length){
+                    send.message(msg.from.id, 'К сожалению нет источников');
+                    event.emit('location:back', msg);
+                    return null;
+                }
 
-    // Обработка источников
-    Source.list((result) => {
-        if (!result.length){
-            send.message(msg.from.id, 'К сожалению нет источников');
-            event.emit('location:back', msg);
+                let source = result.map((item) => {
+                    return item.name
+                });
+
+                // Выбранное действие
+                send.keyboard(msg.from.id, `Выберите источник`, [...source, 'Назад']);
+                next ? next() : null;
+            });
+            break;
+
+        case 'Отписка':
+            send.keyboard(msg.from.id, `Сколько отписок в день совершать?`, ['50', '150', '300', '500', 'Назад'], 4);
+            next ? next() : null;
+            break;
+
+        default:
+            send.message(msg.from.id, `Ошибка, выберите действие`);
             return null;
-        }
-
-        let source = result.map((item) => {
-            return item.name
-        });
-
-        // Выбранное действие
-        send.keyboardArr(msg.from.id, `Выберите источник`, [...source, 'Назад']);
-        next ? next() : null
-    });
+            break;
+    }
 });
 
 // Список источников
@@ -132,7 +139,7 @@ event.on('task:select:source', (msg, action, next) => {
         }
 
         // Кол. действия
-        send.keyboardArr(msg.from.id, 'Введите количество Подписок', ['2500', '5000', '7500', 'Назад']);
+        send.keyboard(msg.from.id, 'Введите количество Подписок', ['2500', '5000', '7500', 'Назад']);
         next ? next() : null
     });
 });
@@ -146,7 +153,7 @@ event.on('task:select:action', (msg, action, next) => {
     }
 
     // Просим ввести кол. лайков к профилю
-    send.keyboardArr(msg.from.id, 'К скольким в день подписываться?', ['300', '500', '750', '1000', 'Назад']);
+    send.keyboard(msg.from.id, 'К скольким в день подписываться?', ['300', '500', '750', '1000', 'Назад']);
     next ? next() : null
 });
 
@@ -159,7 +166,7 @@ event.on('task:select:actionPerDay', (msg, action, next) => {
     }
 
     // Просим ввести кол. лайков к профилю
-    send.keyboardArr(msg.from.id, 'Сколько лайков ставить?', ['1', '2', '3', '4', '5', 'Назад']);
+    send.keyboard(msg.from.id, 'Сколько лайков ставить?', ['1', '2', '3', '4', '5', 'Назад']);
     next ? next() : null
 });
 
@@ -224,19 +231,19 @@ event.on('account:list', (msg, action, next) => {
         }
 
         let elements = accounts.map((item) => item.login);
-        send.keyboardArr(msg.from.id, 'Выберите аккаунт', [...elements, 'Добавить', 'Назад']);
+        send.keyboard(msg.from.id, 'Выберите аккаунт', [...elements, 'Добавить', 'Назад']);
     });
     next ? next() : null
 });
 
 // Нет добавленных аккаунтов
 event.on('account:empty', (msg, action, next) => {
-    send.keyboardArr(msg.from.id, 'У вас нет ни одного аккаунта', ['Добавить', 'Назад'])
+    send.keyboard(msg.from.id, 'У вас нет ни одного аккаунта', ['Добавить', 'Назад'])
 });
 
 // Добавить аккаунт
 event.on('account:add', (msg, action, next) => {
-    send.keyboardArr(msg.from.id, 'Введите логин и пароль через пробел', ['Назад']);
+    send.keyboard(msg.from.id, 'Введите логин и пароль через пробел', ['Назад']);
     next ? next() : null
 });
 
@@ -257,7 +264,7 @@ event.on('account:await', (msg, action, next) => {
 
 // Ошибка добавления аккаунта, не передан логин/пароль
 event.on('account:add:err', (msg, action, next) => {
-    send.keyboardArr(msg.from.id, 'Не передан пароль', ['Назад'])
+    send.keyboard(msg.from.id, 'Не передан пароль', ['Назад'])
 });
 
 // Сохранение аккаунта
@@ -294,7 +301,7 @@ event.on('account:select', (msg, action, next) => {
             return send.message(msg.from.id, `Аккаунт ${msg.text} не существует, выберите другой`);
         }
 
-        send.keyboardMap(msg.from.id, 'Выберите действия для ' + msg.text, action)
+        send.keyboard(msg.from.id, 'Выберите действия для ' + msg.text, action)
         next ? next() : null
     });
 });

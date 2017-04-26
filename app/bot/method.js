@@ -6,43 +6,41 @@ exports.message = (user, message) => {
     bot.sendMessage(user, message);
 };
 
-// Отправка Сообщения с клавиатурой, данные клавиатуры из ветки (obj)
-exports.keyboardMap = (user, message, action, inline = 1) => {
-    let opt = [];
-    let i = 0;
+// Отправка Сообщения с клавиатурой
+exports.keyboard = (user, message, data, inline = 2) => {
+    let opt = [],
+        arr = [],
+        i = 0;
 
-    // Данные берем из текущей ветки "map"
-    for (let key in action.children){
+    // Если поступил объект map, берем данные из текущей ветки
+    if (!Array.isArray(data)){
+        for (let item in data.children){
+            arr.push(item)
+        }
+    } else {
+
+        // Поступил обычный массив
+        arr = data;
+    }
+
+    for (let key of arr){
+        console.log(i)
 
         // Если inline больше 1, то вставляем inline элеменов в одну строку
         if (i < inline && opt[opt.length - 1] !== undefined){
             opt[opt.length - 1].push({
                 text: emoji.encode(key)
-            })
+            });
         } else {
+            if (i === inline) i = 0;
+
             opt.push([{
                 text: emoji.encode(key)
-            }])
+            }]);
         }
-        i++;
+
+        i++
     }
-
-    bot.sendMessage(user, message, {
-        reply_markup: {
-            keyboard: opt,
-            resize_keyboard: true,
-            one_time_keyboard: true
-        }
-    });
-};
-
-// Отправка Сообщения с клавиатурой, данные клавиатуры из массива
-exports.keyboardArr = (user, message, arr) => {
-    let opt = arr.map((item) => {
-        return [{
-            text: emoji.encode(item)
-        }]
-    });
 
     bot.sendMessage(user, message, {
         reply_markup: {

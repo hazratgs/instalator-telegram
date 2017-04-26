@@ -50,7 +50,16 @@ module.exports = {
                             }
                         },
                         'Отписка': {
-                            event: 'task:select:type'
+                            event: 'task:select:type',
+                            children: {
+                                '*': {
+                                    event: 'task:select:type:unfollow',
+                                    await: true
+                                },
+                                'Назад': {
+                                    event: 'location:back'
+                                }
+                            }
                         },
                         'Назад': {
                             event: 'location:back'

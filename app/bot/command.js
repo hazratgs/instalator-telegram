@@ -8,11 +8,11 @@ event.on('/start', (msg) => {
         'я instalator - комплекс для автоматизации продвижения аккаунтов instagram. ' +
         'Первое, что необходимо сделать, это добавить аккаунт';
 
-    send.keyboardMap(msg.from.id, text, map);
+    send.keyboard(msg.from.id, text, map);
 });
 
 event.on('/home', (msg) => {
-    send.keyboardMap(msg.from.id, 'Выберите действие', map, 2);
+    send.keyboard(msg.from.id, 'Выберите действие', map, 2);
 });
 
 // Экспортируем объект события
