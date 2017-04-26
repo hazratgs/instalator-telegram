@@ -12,7 +12,7 @@ event.on('/start', (msg) => {
 });
 
 event.on('/home', (msg) => {
-    send.keyboardMap(msg.from.id, 'Выберите действие', map);
+    send.keyboardMap(msg.from.id, 'Выберите действие', map, 2);
 });
 
 // Экспортируем объект события

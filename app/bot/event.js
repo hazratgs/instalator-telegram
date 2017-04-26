@@ -63,7 +63,7 @@ event.on('location:home', (msg) => {
 
 // Главная меню
 event.on('home', (msg, action, next) => {
-    send.keyboardMap(msg.from.id, 'Выберите действие', action);
+    send.keyboardMap(msg.from.id, 'Выберите действие', action, 2);
     next ? next() : null
 });
 

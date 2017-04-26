@@ -9,7 +9,7 @@ const Source = require('../app/controllers/source');
 const instanode = require('./instanode');
 
 // Запускаем активные задания
-cron.schedule('23 11 * * *', () => {
+cron.schedule('0 11 * * *', () => {
 
     // Получаем все активные задания
     Task.currentList((err, tasks) => {
@@ -36,8 +36,3 @@ cron.schedule('23 11 * * *', () => {
         });
     });
 });
-
-
-instanode.followLoad('halicha.ru', '475787093w', 'febox26').then(() => {
-
-})

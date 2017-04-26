@@ -10,7 +10,6 @@ module.exports = (data, callback) => {
                 : reject()
         )
     })
-
         // Пользователь зарегистрирован
         .then((user) => callback(true))
 

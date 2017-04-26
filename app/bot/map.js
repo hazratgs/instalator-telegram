@@ -8,6 +8,12 @@ module.exports = {
                 '*': {
                     event: 'task:select',
                     children: {
+                        'Лайк': {
+                            event: 'task:select:type'
+                        },
+                        'Подписка': {
+                            event: 'task:select:type'
+                        },
                         'Лайк + Подписка': {
                             event: 'task:select:type',
                             children: {
@@ -68,19 +74,16 @@ module.exports = {
                 }
             }
         },
-        'Активность': {
-            event: '',
-            children: {}
-        },
+        // 'Активность': {
+        //     event: '',
+        //     children: {}
+        // },
         'Аккаунты': {
             event: 'account:list',
             children: {
                 '*': {
                     event: 'account:select',
                     children: {
-                        'Редактировать': {
-                            event: 'location:read'
-                        },
                         'Удалить': {
                             event: 'account:delete',
                             await: true
