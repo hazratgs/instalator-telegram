@@ -4,12 +4,12 @@ const cron = require('node-cron');
 const Task = require('../app/controllers/task');
 const Account = require('../app/controllers/account');
 const Source = require('../app/controllers/source');
-// const Instanode = require('../bin/instanode');
+const Instanode = require('../bin/instanode');
 
 const instanode = require('./instanode');
 
 // Запускаем активные задания
-cron.schedule('0 11 * * *', () => {
+cron.schedule('*/5 * * * * *', () => {
 
     // Получаем все активные задания
     Task.currentList((err, tasks) => {
@@ -17,22 +17,19 @@ cron.schedule('0 11 * * *', () => {
 
         tasks.forEach((item) => {
 
-            // Поиск данных аккаунта
-            new Promise((resolve, reject) => {
-                Account.contains(item.user, item.login, (account) => resolve(account));
-            }).then((account) => {
+            switch (item.type){
+                case 'Лайк + Подписка':
 
-                // Поиск источника
-                new Promise((resolve, reject) => {
-                    Source.contains(item.source, (result) => resolve(result));
-                }).then((source) => {
+                    break;
 
-                    // Запускаем задачу
-                    if (item.type === 'Лайк + Подписка'){
-                        Instanode.follow(item, account[0], source[0].source);
-                    }
-                });
-            });
+                case 'Отписка':
+                    break;
+
+                default:
+                    break;
+            }
         });
     });
 });
+
+

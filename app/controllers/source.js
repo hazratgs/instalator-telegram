@@ -20,8 +20,10 @@ exports.create = (data, callback) => {
 };
 
 // Проверить существование источника
-exports.contains = (name, callback) => {
-    Model.Source.find({name: name}, (err, source) => callback(source))
+exports.contains = (name) => {
+    return new Promise((resolve) => {
+        Model.Source.find({name: name}, (err, source) => resolve(source))
+    });
 };
 
 // Удаление

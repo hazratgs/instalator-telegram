@@ -20,11 +20,13 @@ exports.add = (user, login, password, callback) => {
 };
 
 // Проверка существование аккаунта
-exports.contains = (user, login, callback) => {
-    Model.Account.find({
-        user: user,
-        login: login
-    }, (err, account) => callback(account))
+exports.contains = (user, login) => {
+    return Promise((resolve, reject) => {
+        Model.Account.find({
+            user: user,
+            login: login
+        }, (err, account) => resolve(account))
+    });
 };
 
 // Проверка существование аккаунта у всех пользователей
