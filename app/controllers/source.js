@@ -8,8 +8,8 @@ const Model  = require('../models/source');
 exports.list = () => {
     return new Promise((resolve, reject) => {
         Model.Source.find({}, (err, result) => {
-            if (!err || result){
-                resolve(result)
+            if (!err){
+                result.length ? resolve(result) : reject(err)
             } else {
                 reject(err)
             }
@@ -33,8 +33,8 @@ exports.create = data => {
 exports.contains = name => {
     return new Promise((resolve, reject) => {
         Model.Source.find({name: name}, (err, source) => {
-            if (!err || source){
-                resolve(source)
+            if (!err){
+                source.length ? resolve(source) : reject(err)
             } else {
                 reject(err)
             }

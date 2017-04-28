@@ -8,8 +8,8 @@ const Model  = require('../models/account');
 exports.list = (user) => {
     return new Promise((resolve, reject) => {
         Model.Account.find({user: user}, (err, accounts) => {
-            if (!err || accounts){
-                resolve(accounts)
+            if (!err){
+                accounts.length ? resolve(accounts) : reject(err)
             } else {
                 reject(err)
             }
@@ -36,8 +36,8 @@ exports.contains = (user, login) => {
             user: user,
             login: login
         }, (err, account) => {
-            if (!err || account){
-                resolve(account)
+            if (!err){
+                account.length ? resolve(account) : reject(err)
             } else {
                 reject(err)
             }
@@ -51,8 +51,8 @@ exports.containsAllUsers = (login) => {
         Model.Account.find({
             login: login
         }, (err, result) => {
-            if (!err || result){
-                resolve(result)
+            if (!err){
+                result.length ? resolve(result) : reject(err)
             } else {
                 reject(err)
             }
@@ -122,7 +122,7 @@ exports.followCheck = (user, login, follow) => {
             user: user,
             login: login,
             data: {$in: [follow]}
-        }, (err, result) => result !== null ? resolve() : reject());
+        }, (err, result) => result.length ? resolve() : reject());
     });
 };
 

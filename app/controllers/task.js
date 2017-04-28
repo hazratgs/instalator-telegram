@@ -11,16 +11,18 @@ exports.create = data => {
             user: data.user,
             login: data.login,
             type: data.type,
-            source: data.source,
-            action: data.action,
-            actionPerDay: data.actionPerDay,
-            like: data.like
+            params: {
+                source: data.source, // источник
+                actionFollow: data.action, // кол. подписок необходимо выполнить
+                actionFollowDay: data.actionDay, // кол. в день
+                actionLikeDay: data.like // кол. лайков в день
+            }
         });
         Task.save((err) => {
             if (!err){
-                resolve(true)
+                resolve()
             } else {
-                reject(false)
+                reject()
             }
         });
     });
@@ -43,8 +45,8 @@ exports.current = (user, login) => {
             login: login,
             status: 'active'
         }, (err, tasks) => {
-            if (!err || tasks){
-                resolve(tasks)
+            if (!err){
+                tasks.length ? resolve(tasks) : reject(err)
             } else {
                 reject(err)
             }

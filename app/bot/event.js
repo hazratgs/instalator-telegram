@@ -194,7 +194,7 @@ event.on('task:create:save', (msg, action) => {
                 type: data[1],
                 source: data[2],
                 action: data[3],
-                actionPerDay: data[4],
+                actionDay: data[4],
                 like: data[5],
             })
                 .catch((err) => {
@@ -286,6 +286,7 @@ event.on('account:add:save', (msg, login, password) => {
                 })
         })
         .then(result => {
+            console.log(result)
             send.message(msg.from.id, `${login} уже используется!`);
         });
 });
