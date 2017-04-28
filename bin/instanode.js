@@ -24,10 +24,10 @@ exports.followLike = async (task) => {
         .then(res => source = res);
 
     // Авторизовываемся в системе и получаем сессию
-    await this.auth(account.login, account.password)
-        .then((res) => {
-            session = res
-        });
+    // await this.auth(account.login, account.password)
+    //     .then((res) => {
+    //         session = res
+    //     });
 };
 
 // Получить подписчиков аккаунта

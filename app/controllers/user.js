@@ -5,22 +5,29 @@ const db  = require(process.cwd() + '/libs/db');
 const Model  = require('../models/user');
 
 /* Проверка существования пользователя */
-exports.contains = (id, callback) => {
-    Model.User.find({id: id}, (err, users) => callback(err, users))
+exports.contains = id => {
+    return new Promise((resolve, reject) => {
+        Model.User.find({id: id}, (err, user) => resolve(user))
+    })
 };
 
 /* Добавление нового пользователя */
-exports.create = (data, callback) => {
-    let CreateUser = new Model.User({
-        id: data.id,
-        name: data.name
+exports.create = data => {
+    return new Promise((resolve, reject) => {
+        let CreateUser = new Model.User({
+            id: data.id,
+            name: data.name
+        });
+        CreateUser.save((err) => resolve(true))
     });
-    CreateUser.save((err) => callback(err, CreateUser))
 };
 
 /* Очистка базы пользователей */
 exports.cleaner = () => {
-    Model.User.remove({}, (err) => {
-        console.log('Очистка: выполнено');
+    return new Promise((resolve, reject) => {
+        Model.User.remove({}, (err) => {
+            console.log('Очистка: выполнено');
+            resolve();
+        });
     });
 };

@@ -19,7 +19,7 @@ exports.decode = (text) => {
 
     // Обходим эмодзи в поисках контекста
     for (let key in emoji){
-        if (key == val[1]) return key
+        if (key === val[1]) return key
     }
 
     return text

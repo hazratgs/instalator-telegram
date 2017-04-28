@@ -5,18 +5,28 @@ const db  = require('../../libs/db');
 const Model  = require('../models/account');
 
 // Список аккаунтов
-exports.list = (user, callback) => {
-    Model.Account.find({user: user}, (err, accounts) => callback(err, accounts))
+exports.list = (user) => {
+    return new Promise((resolve, reject) => {
+        Model.Account.find({user: user}, (err, accounts) => {
+            if (!err || accounts){
+                resolve(accounts)
+            } else {
+                reject(err)
+            }
+        })
+    });
 };
 
 // Добавление аккаунта
-exports.add = (user, login, password, callback) => {
-    let AddAccount = new Model.Account({
-        user: user,
-        login: login,
-        password: password
+exports.add = (user, login, password) => {
+    return new Promise((resolve, reject) => {
+        let addAccount = new Model.Account({
+            user: user,
+            login: login,
+            password: password
+        });
+        addAccount.save((err) => resolve(addAccount))
     });
-    AddAccount.save((err) => callback(err, AddAccount))
 };
 
 // Проверка существование аккаунта
@@ -25,127 +35,158 @@ exports.contains = (user, login) => {
         Model.Account.find({
             user: user,
             login: login
-        }, (err, account) => resolve(account))
+        }, (err, account) => {
+            if (!err || account){
+                resolve(account)
+            } else {
+                reject(err)
+            }
+        })
     });
 };
 
 // Проверка существование аккаунта у всех пользователей
-exports.containsAllUsers = (login, callback) => {
-    Model.Account.find({
-        login: login
-    }, (err, result) => callback(result))
+exports.containsAllUsers = (login) => {
+    return new Promise((resolve, reject) => {
+        Model.Account.find({
+            login: login
+        }, (err, result) => {
+            if (!err || result){
+                resolve(result)
+            } else {
+                reject(err)
+            }
+        })
+    });
 };
 
 // Удаление аккаунта
-exports.remove = (user, login, callback) => {
-    Model.Account.remove({
-        user: user,
-        login: login
-    }, () => callback())
+exports.remove = (user, login) => {
+    return new Promise((resolve, reject) => {
+        Model.Account.remove({
+            user: user,
+            login: login
+        }, (err) => {
+            if (!err){
+                resolve()
+            } else {
+                reject(err)
+            }
+        })
+    });
+
 };
 
 // Записать информацию о подписке
-exports.follow = (user, login, follow, callback) => {
-    this.followList(user, login, (err, result) => {
-        if (result){
-            Model.AccountFollow.update({
-                user: user,
-                login: login
-            }, {
-                $push: {
-                    data: follow
+exports.follow = (user, login, follow) => {
+    let self = this;
+    return new Promise(async (resolve, reject) => {
+        await self.followList(user, login)
+            .then((result) => {
+                if (result){
+                    Model.AccountFollow.update({
+                        user: user,
+                        login: login
+                    }, {
+                        $push: {
+                            data: follow
+                        }
+                    }, (err) => resolve())
+                } else {
+
+                    // База не найдена, добавляем базу
+                    new Model.AccountFollow({
+                        user: user,
+                        login: login,
+                        data: [follow]
+                    }).save(() => resolve())
                 }
-            }, (err) => callback(err, result))
-
-        } else {
-
-            // База не найдена, добавляем базу
-            new Model.AccountFollow({
-                user: user,
-                login: login,
-                data: [follow]
-            }).save((err) => callback(err))
-        }
+            });
     });
 };
 
 // Список подписок пользователя
-exports.followList = (user, login, callback) => {
-    Model.AccountFollow.findOne({
-        user: user,
-        login: login
-    }, (err, result) => {
-        if (!err){
-            callback(err, result);
-        }
+exports.followList = (user, login) => {
+    return new Promise((resolve, reject) => {
+        Model.AccountFollow.findOne({
+            user: user,
+            login: login
+        }, (err, result) => resolve(result));
     });
 };
 
 // Проверить, подписан ли
-exports.followCheck = (user, login, follow, callback) => {
-    Model.AccountFollow.findOne({
-        user: user,
-        login: login,
-        data: {$in: [follow]}
-    }, (err, result) => result === null ? callback(false) : callback(true));
+exports.followCheck = (user, login, follow) => {
+    return new Promise((resolve, reject) => {
+        Model.AccountFollow.findOne({
+            user: user,
+            login: login,
+            data: {$in: [follow]}
+        }, (err, result) => result !== null ? resolve() : reject());
+    });
 };
 
 // Очистить список подписчиков
 exports.followClear = (user, login, callback) => {
-    Model.AccountFollow.update({
-        user: user,
-        login: login
-    }, {
-        $set: {
-            data: []
-        }
-    }, (err) => callback(err))
+    return new Promise((resolve, reject) => {
+        Model.AccountFollow.update({
+            user: user,
+            login: login
+        }, {
+            $set: {
+                data: []
+            }
+        }, (err) => resolve())
+    });
 };
 
 // Записать информацию о лайке
-exports.like = (user, login, like, callback) => {
-    this.likeList(user, login, (err, result) => {
-        if (result){
-            Model.AccountLike.update({
-                user: user,
-                login: login
-            }, {
-                $push: {
-                    data: like
+exports.like = (user, login, like) => {
+    let self = this;
+    return new Promise((resolve, reject) => {
+        self.likeList(user, login)
+            .then(result => {
+                if (result){
+                    Model.AccountLike.update({
+                        user: user,
+                        login: login
+                    }, {
+                        $push: {
+                            data: like
+                        }
+                    }, (err) => resolve())
+                } else {
+
+                    // База не найдена, добавляем базу
+                    new Model.AccountLike({
+                        user: user,
+                        login: login,
+                        data: [like]
+                    }).save((err) => resolve())
                 }
-            }, (err) => callback(err, result))
-
-        } else {
-
-            // База не найдена, добавляем базу
-            new Model.AccountLike({
-                user: user,
-                login: login,
-                data: [like]
-            }).save((err) => callback(err))
-        }
+            })
     });
 };
 
 // Список лайков пользователя
-exports.likeList = (user, login, callback) => {
-    Model.AccountLike.findOne({
-        user: user,
-        login: login
-    }, (err, result) => {
-        if (!err){
-            callback(err, result);
-        }
+exports.likeList = (user, login) => {
+    return new Promise((resolve, reject) => {
+        Model.AccountLike.findOne({
+            user: user,
+            login: login
+        }, (err, result) => result ? resolve(result) : reject(err));
     });
 };
 
 // Проверить, лайкнул ли
-exports.likeCheck = (user, login, like, callback) => {
-    Model.AccountLike.findOne({
-        user: user,
-        login: login,
-        data: {$in: [like]}
-    }, (err, result) => result === null ? callback(false) : callback(true));
+exports.likeCheck = (user, login, like) => {
+    return new Promise((resolve, reject) => {
+        Model.AccountLike.findOne({
+            user: user,
+            login: login,
+            data: {$in: [like]}
+        }, (err, result) => result !== null ? resolve(true) : resolve(false));
+    });
 };
 
 

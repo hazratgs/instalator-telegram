@@ -5,28 +5,46 @@ const db  = require(process.cwd() + '/libs/db');
 const Model  = require('../models/source');
 
 // Источники
-exports.list = (callback) => {
-    Model.Source.find({}, (err, result) => callback(result))
+exports.list = () => {
+    return new Promise((resolve, reject) => {
+        Model.Source.find({}, (err, result) => {
+            if (!err || result){
+                resolve(result)
+            } else {
+                reject(err)
+            }
+        })
+    });
 };
 
 // Добавить новый источник
-exports.create = (data, callback) => {
-    let Source = new Model.Source({
-        name: data.name,
-        source: data.source,
-        count: data.source.length
+exports.create = data => {
+    return new Promise((resolve, reject) => {
+        let Source = new Model.Source({
+            name: data.name,
+            source: data.source,
+            count: data.source.length
+        });
+        Source.save((err) => resolve(Source));
     });
-    Source.save((err) => callback(err, Source));
 };
 
 // Проверить существование источника
-exports.contains = (name) => {
-    return new Promise((resolve) => {
-        Model.Source.find({name: name}, (err, source) => resolve(source))
+exports.contains = name => {
+    return new Promise((resolve, reject) => {
+        Model.Source.find({name: name}, (err, source) => {
+            if (!err || source){
+                resolve(source)
+            } else {
+                reject(err)
+            }
+        })
     });
 };
 
 // Удаление
-exports.remove = (name, callback) => {
-    Model.Source.remove({name: name}, (err, source) => callback(source))
+exports.remove = name => {
+    return new Promise((resolve, reject) => {
+        Model.Source.remove({name: name}, (err, source) => resolve(source))
+    });
 };

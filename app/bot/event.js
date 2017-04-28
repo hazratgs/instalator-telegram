@@ -75,47 +75,45 @@ event.on('task:create', (msg, action, next) => {
 
 // Выбор аккаунта для задания
 event.on('task:select', (msg, action, next) => {
-    Account.contains(msg.from.id, msg.text, (accounts) => {
-        if (!accounts.length){
+    Account.contains(msg.from.id, msg.text)
+        .catch(err => {
             send.message(msg.from.id, `Аккаунт ${msg.text} не существует, выберите другой`);
-            return null;
-        }
+        })
+        .then(account => {
 
-        // Проверяем, есть ли активные задания у аккаунта
-        Task.current(msg.from.id, msg.text, (err, tasks) => {
-            if (tasks.length){
+            // Проверяем, есть ли активные задания у аккаунта
+            Task.current(msg.from.id, msg.text)
+                .catch(err => {
+                    send.keyboard(msg.from.id, `Выберите действие`, action);
+                    next ? next() : null
+                })
 
                 // Активное задание есть
-                send.message(msg.from.id, `Есть активное задание у ${msg.text}, попробуйте позже.`);
-                event.emit('account:list', msg);
-
-            } else {
-                send.keyboard(msg.from.id, `Выберите действие`, action);
-                next ? next() : null
-            }
+                .then(tasks => {
+                    send.message(msg.from.id, `Есть активное задание у ${msg.text}, попробуйте позже.`);
+                    event.emit('account:list', msg);
+                })
         });
-    });
 });
 
 // Выбор типа задания
 event.on('task:select:type', (msg, action, next) => {
     switch (msg.text){
         case 'Лайк + Подписка':
-            Source.list((result) => {
-                if (!result.length){
+            Source.list()
+                .catch(err => {
                     send.message(msg.from.id, 'К сожалению нет источников');
                     event.emit('location:back', msg);
-                    return null;
-                }
+                })
+                .then(result => {
+                    let source = result.map((item) => {
+                        return item.name
+                    });
 
-                let source = result.map((item) => {
-                    return item.name
+                    // Выбранное действие
+                    send.keyboard(msg.from.id, `Выберите источник`, [...source, 'Назад']);
+                    next ? next() : null;
                 });
-
-                // Выбранное действие
-                send.keyboard(msg.from.id, `Выберите источник`, [...source, 'Назад']);
-                next ? next() : null;
-            });
             break;
 
         case 'Отписка':
@@ -132,16 +130,15 @@ event.on('task:select:type', (msg, action, next) => {
 
 // Список источников
 event.on('task:select:source', (msg, action, next) => {
-    Source.contains(msg.text, (source) => {
-        if (!source.length){
+    Source.contains(msg.text)
+        .catch(err => {
             send.message(msg.from.id, 'Ошибка, нет такого источника');
-            return null;
-        }
-
-        // Кол. действия
-        send.keyboard(msg.from.id, 'Введите количество Подписок', ['2500', '5000', '7500', 'Назад']);
-        next ? next() : null
-    });
+        })
+        .then(source => {
+            // Кол. действия
+            send.keyboard(msg.from.id, 'Введите количество Подписок', ['2500', '5000', '7500', 'Назад']);
+            next ? next() : null
+        });
 });
 
 // Количество действий
@@ -189,8 +186,8 @@ event.on('task:create:save', (msg, action) => {
     data.splice(0, 1);
 
     // Проверка существования задачи
-    Task.current(msg.from.id, data[0], (err, tasks) => {
-        if (!tasks.length){
+    Task.current(msg.from.id, data[0])
+        .catch(err => {
             Task.create({
                 user: msg.from.id,
                 login: data[0],
@@ -199,41 +196,40 @@ event.on('task:create:save', (msg, action) => {
                 action: data[3],
                 actionPerDay: data[4],
                 like: data[5],
-            }, (err) => {
-                if (!err){
-                    send.message(msg.from.id, 'Задание успешно добавлено, подробнее можете посмотреть в активности');
-
-                    // Переходим на главную
-                    event.emit('location:home', msg);
-                } else {
+            })
+                .catch((err) => {
                     send.message(msg.from.id, 'Возникла ошибка, пожалуйста повторите еще раз!');
 
                     // Переходим на главную
                     event.emit('location:home', msg);
-                }
-            });
-        } else {
+                })
+                .then(() => {
+                    send.message(msg.from.id, 'Задание успешно добавлено, подробнее можете посмотреть в активности');
+
+                    // Переходим на главную
+                    event.emit('location:home', msg);
+                })
+        })
+        .then(task => {
             send.message(msg.from.id, 'У этого аккаунта есть активное задание, дождитесь завершения.');
 
             // Переходим на главную
             event.emit('location:home', msg);
-        }
-    });
+        });
 });
 
 // Список аккаунтов
 event.on('account:list', (msg, action, next) => {
-    Account.list(msg.from.id, (err, accounts) => {
-        if (!accounts.length){
+    Account.list(msg.from.id)
 
-            // Аккаунтов нет, предлогаем добавить
-            return event.emit('account:empty', msg);
-        }
+        // Аккаунтов нет, предлогаем добавить
+        .catch(err => event.emit('account:empty', msg))
 
-        let elements = accounts.map((item) => item.login);
-        send.keyboard(msg.from.id, 'Выберите аккаунт', [...elements, 'Добавить', 'Назад']);
-    });
-    next ? next() : null
+        .then(accounts => {
+            let elements = accounts.map((item) => item.login);
+            send.keyboard(msg.from.id, 'Выберите аккаунт', [...elements, 'Добавить', 'Назад']);
+            next ? next() : null
+        });
 });
 
 // Нет добавленных аккаунтов
@@ -271,39 +267,37 @@ event.on('account:add:err', (msg, action, next) => {
 event.on('account:add:save', (msg, login, password) => {
 
     // Проверяем, есть ли аккаунт у других пользователей
-    Account.containsAllUsers(login, (result) => {
-        if (result.length){
+    Account.containsAllUsers(login)
+        .catch(err => {
+            send.message(msg.from.id, `Подождите немного, пытаюсь авторизоваться`);
+
+            // Входим в аккаунт
+            instanode.auth(login, password)
+                .catch((err) => {
+                    send.message(msg.from.id, 'Возникла ошибка при авторизации, проверьте правильность логина/пароля');
+                })
+                .then(async (session) => {
+
+                    // Сохраняем
+                    Account.add(msg.from.id, login, password, () => {
+                        send.message(msg.from.id, `Аккаунт ${login} успешно добавлен, войдите в Instagram и подтвердите, что это были вы`);
+                        event.emit('location:back', msg);
+                    });
+                })
+        })
+        .then(result => {
             send.message(msg.from.id, `${login} уже используется!`);
-            return null;
-        }
-
-        send.message(msg.from.id, `Подождите немного, пытаюсь авторизоваться`);
-
-        // Входим в аккаунт
-        instanode.auth(login, password).then(async (session) => {
-
-            // Сохраняем
-            Account.add(msg.from.id, login, password, () => {
-                send.message(msg.from.id, `Аккаунт ${login} успешно добавлен, войдите в Instagram и подтвердите, что это были вы`);
-                event.emit('location:back', msg);
-            });
-
-        }).catch((err) => {
-            send.message(msg.from.id, 'Возникла ошибка при авторизации, проверьте правильность логина/пароля');
         });
-    });
 });
 
 // Выбор аккаунта
 event.on('account:select', (msg, action, next) => {
-    Account.contains(msg.from.id, msg.text, (accounts) => {
-        if (!accounts.length){
-            return send.message(msg.from.id, `Аккаунт ${msg.text} не существует, выберите другой`);
-        }
-
-        send.keyboard(msg.from.id, 'Выберите действия для ' + msg.text, action)
-        next ? next() : null
-    });
+    Account.contains(msg.from.id, msg.text)
+        .catch(err => send.message(msg.from.id, `Аккаунт ${msg.text} не существует, выберите другой`))
+        .then(account => {
+            send.keyboard(msg.from.id, 'Выберите действия для ' + msg.text, action);
+            next ? next() : null
+        })
 });
 
 // Удаление аккаунты
@@ -311,21 +305,24 @@ event.on('account:delete', (msg) => {
     let login = state[msg.from.id][state[msg.from.id].length - 1];
 
     // Проверяем существование аккаунта
-    Account.contains(msg.from.id, login, (accounts) => {
-        if (!accounts.length){
+    Account.contains(msg.from.id, login)
+        .catch(err => {
             send.message(msg.from.id, 'Аккаунт не найден!');
             event.emit('location.back', msg);
-            return null;
-        }
-
-        // Удаление
-        Account.remove(msg.from.id, login, () => {
-            send.message(msg.from.id, `Аккаунт ${login} удален`);
-
-            // Шаг назад
-            event.emit('location:back', msg);
         })
-    })
+        .then(() => {
+
+            // Удаление
+            Account.remove(msg.from.id, login)
+                .catch(err => {
+                    send.message(msg.from.id, `Возникла ошибка, пожалуйста повторите позже.`);
+                    event.emit('location:back', msg);
+                })
+                .then(() => {
+                    send.message(msg.from.id, `Аккаунт ${login} удален`);
+                    event.emit('location:back', msg);
+                });
+        })
 });
 
 

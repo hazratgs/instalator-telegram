@@ -1,4 +1,3 @@
-// Карта действий
 module.exports = {
     event: 'home',
     children: {

@@ -24,7 +24,6 @@ exports.keyboard = (user, message, data, inline = 2) => {
     }
 
     for (let key of arr){
-        console.log(i)
 
         // Если inline больше 1, то вставляем inline элеменов в одну строку
         if (i < inline && opt[opt.length - 1] !== undefined){
