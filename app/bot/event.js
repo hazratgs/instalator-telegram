@@ -222,14 +222,15 @@ event.on('task:create:save', (msg, action) => {
 event.on('account:list', (msg, action, next) => {
     Account.list(msg.from.id)
 
-        // Аккаунтов нет, предлогаем добавить
-        .catch(err => event.emit('account:empty', msg))
-
         .then(accounts => {
+            console.log(accounts)
             let elements = accounts.map((item) => item.login);
             send.keyboard(msg.from.id, 'Выберите аккаунт', [...elements, 'Добавить', 'Назад']);
             next ? next() : null
-        });
+        })
+
+        // Аккаунтов нет, предлогаем добавить
+        .catch(err => event.emit('account:empty', msg));
 });
 
 // Нет добавленных аккаунтов

@@ -41,7 +41,7 @@ exports.add = (user, login, password) => {
 
 // Проверка существование аккаунта
 exports.contains = (user, login) => {
-    return Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
         Model.Account.find({
             user: user,
             login: login
