@@ -9,7 +9,11 @@ exports.list = () => {
     return new Promise((resolve, reject) => {
         Model.Source.find({}, (err, result) => {
             if (!err){
-                result.length ? resolve(result) : reject(err)
+                if (result.length){
+                    resolve(result)
+                } else {
+                    reject(err)
+                }
             } else {
                 reject(err)
             }
@@ -25,16 +29,26 @@ exports.create = data => {
             source: data.source,
             count: data.source.length
         });
-        Source.save((err) => resolve(Source));
+        Source.save((err) => {
+            if (!err){
+                resolve(Source)
+            } else {
+                reject(err)
+            }
+        });
     });
 };
 
 // Проверить существование источника
 exports.contains = name => {
     return new Promise((resolve, reject) => {
-        Model.Source.find({name: name}, (err, source) => {
+        Model.Source.find({name: name}, (err, result) => {
             if (!err){
-                source.length ? resolve(source) : reject(err)
+                if (result.length){
+                    resolve(result)
+                } else {
+                    reject(err)
+                }
             } else {
                 reject(err)
             }
@@ -45,6 +59,12 @@ exports.contains = name => {
 // Удаление
 exports.remove = name => {
     return new Promise((resolve, reject) => {
-        Model.Source.remove({name: name}, (err, source) => resolve(source))
+        Model.Source.remove({name: name}, (err, source) => {
+            if (!err){
+                resolve(source)
+            } else {
+                reject(err)
+            }
+        })
     });
 };

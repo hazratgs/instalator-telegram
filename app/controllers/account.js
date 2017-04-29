@@ -7,9 +7,13 @@ const Model  = require('../models/account');
 // Список аккаунтов
 exports.list = (user) => {
     return new Promise((resolve, reject) => {
-        Model.Account.find({user: user}, (err, accounts) => {
+        Model.Account.find({user: user}, (err, result) => {
             if (!err){
-                accounts.length ? resolve(accounts) : reject(err)
+                if (result.length){
+                    resolve(result)
+                } else {
+                    reject(err)
+                }
             } else {
                 reject(err)
             }
@@ -25,7 +29,13 @@ exports.add = (user, login, password) => {
             login: login,
             password: password
         });
-        addAccount.save((err) => resolve(addAccount))
+        addAccount.save((err) => {
+            if (!err){
+                resolve(addAccount)
+            } else {
+                reject(err)
+            }
+        })
     });
 };
 
@@ -35,9 +45,13 @@ exports.contains = (user, login) => {
         Model.Account.find({
             user: user,
             login: login
-        }, (err, account) => {
+        }, (err, result) => {
             if (!err){
-                account.length ? resolve(account) : reject(err)
+                if (result.length){
+                    resolve(result)
+                } else {
+                    reject(err)
+                }
             } else {
                 reject(err)
             }
@@ -52,7 +66,11 @@ exports.containsAllUsers = (login) => {
             login: login
         }, (err, result) => {
             if (!err){
-                result.length ? resolve(result) : reject(err)
+                if (result.length){
+                    resolve(result)
+                } else {
+                    reject(err)
+                }
             } else {
                 reject(err)
             }
@@ -111,7 +129,17 @@ exports.followList = (user, login) => {
         Model.AccountFollow.findOne({
             user: user,
             login: login
-        }, (err, result) => resolve(result));
+        }, (err, result) => {
+            if (!err){
+                if (result.length){
+                    resolve(result)
+                } else {
+                    reject(err)
+                }
+            } else {
+                reject(err)
+            }
+        });
     });
 };
 
@@ -122,7 +150,17 @@ exports.followCheck = (user, login, follow) => {
             user: user,
             login: login,
             data: {$in: [follow]}
-        }, (err, result) => result.length ? resolve() : reject());
+        }, (err, result) => {
+            if (!err){
+                if (result.length){
+                    resolve(result)
+                } else {
+                    reject(err)
+                }
+            } else {
+                reject(err)
+            }
+        });
     });
 };
 
@@ -136,7 +174,13 @@ exports.followClear = (user, login, callback) => {
             $set: {
                 data: []
             }
-        }, (err) => resolve())
+        }, (err) => {
+            if (!err){
+                resolve()
+            } else {
+                reject()
+            }
+        })
     });
 };
 
@@ -154,7 +198,13 @@ exports.like = (user, login, like) => {
                         $push: {
                             data: like
                         }
-                    }, (err) => resolve())
+                    }, (err) => {
+                        if (!err){
+                            resolve()
+                        } else {
+                            reject()
+                        }
+                    })
                 } else {
 
                     // База не найдена, добавляем базу
@@ -162,7 +212,13 @@ exports.like = (user, login, like) => {
                         user: user,
                         login: login,
                         data: [like]
-                    }).save((err) => resolve())
+                    }).save((err) => {
+                        if (!err){
+                            resolve()
+                        } else {
+                            reject()
+                        }
+                    })
                 }
             })
     });
@@ -174,7 +230,18 @@ exports.likeList = (user, login) => {
         Model.AccountLike.findOne({
             user: user,
             login: login
-        }, (err, result) => result ? resolve(result) : reject(err));
+        }, (err, result) => {
+            if (!err){
+                if (result.length){
+                    resolve(result)
+                    result ? resolve(result) : reject(err)
+                } else {
+                    reject(err)
+                }
+            } else {
+                reject(err)
+            }
+        });
     });
 };
 
@@ -185,7 +252,17 @@ exports.likeCheck = (user, login, like) => {
             user: user,
             login: login,
             data: {$in: [like]}
-        }, (err, result) => result !== null ? resolve(true) : resolve(false));
+        }, (err, result) => {
+            if (!err){
+                if (result.length){
+                    resolve(true)
+                } else {
+                    resolve(false)
+                }
+            } else {
+                resolve(false)
+            }
+        });
     });
 };
 

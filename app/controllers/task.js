@@ -46,7 +46,11 @@ exports.current = (user, login) => {
             status: 'active'
         }, (err, tasks) => {
             if (!err){
-                tasks.length ? resolve(tasks) : reject(err)
+                if (tasks.length){
+                    resolve(tasks)
+                } else {
+                    reject(err)
+                }
             } else {
                 reject(err)
             }
@@ -59,7 +63,13 @@ exports.currentList = () => {
     return new Promise((resolve, reject) => {
         Model.Task.find({
             status: 'active'
-        }, (err, tasks) => resolve(tasks))
+        }, (err, tasks) => {
+            if (!err){
+                resolve(tasks)
+            } else {
+                reject(err)
+            }
+        })
     });
 };
 
@@ -73,7 +83,13 @@ exports.finish = (user, login) => {
             $set: {
                 status: 'success'
             }
-        }, (err) => resolve())
+        }, (err) => {
+            if (!err){
+                resolve()
+            } else {
+                reject()
+            }
+        })
     });
 };
 
@@ -87,7 +103,13 @@ exports.currentIncrement = (user, login) => {
             $inc: {
                 current: 1
             }
-        }, (err) => resolve(err))
+        }, (err) => {
+            if (!err){
+                resolve()
+            } else {
+                reject(err)
+            }
+        })
     });
 };
 
@@ -101,7 +123,13 @@ exports.likeIncrement = (user, login) => {
             $inc: {
                 likeCurrent: 1
             }
-        }, (err) => resolve(err))
+        }, (err) => {
+            if (!err){
+                resolve()
+            } else {
+                reject(err)
+            }
+        })
     });
 };
 

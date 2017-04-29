@@ -7,7 +7,17 @@ const Model  = require('../models/user');
 /* Проверка существования пользователя */
 exports.contains = id => {
     return new Promise((resolve, reject) => {
-        Model.User.find({id: id}, (err, user) => resolve(user))
+        Model.User.find({id: id}, (err, user) => {
+            if (!err){
+                if (user.length){
+                    resolve(user)
+                } else {
+                    reject(err)
+                }
+            } else {
+                reject(err)
+            }
+        })
     })
 };
 
@@ -18,7 +28,13 @@ exports.create = data => {
             id: data.id,
             name: data.name
         });
-        CreateUser.save((err) => resolve(true))
+        CreateUser.save((err) => {
+            if (!err){
+                resolve(true)
+            } else {
+                reject(err)
+            }
+        })
     });
 };
 
@@ -26,8 +42,12 @@ exports.create = data => {
 exports.cleaner = () => {
     return new Promise((resolve, reject) => {
         Model.User.remove({}, (err) => {
-            console.log('Очистка: выполнено');
-            resolve();
+            if (!err){
+                console.log('Очистка: выполнено');
+                resolve();
+            } else {
+                reject(err)
+            }
         });
     });
 };
