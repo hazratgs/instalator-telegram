@@ -42,16 +42,12 @@ exports.add = (user, login, password) => {
 // Проверка существование аккаунта
 exports.contains = (user, login) => {
     return new Promise((resolve, reject) => {
-        Model.Account.find({
+        Model.Account.findOne({
             user: user,
             login: login
         }, (err, result) => {
             if (!err){
-                if (result.length){
-                    resolve(result)
-                } else {
-                    reject(err)
-                }
+                resolve(result)
             } else {
                 reject(err)
             }
@@ -165,7 +161,7 @@ exports.followCheck = (user, login, follow) => {
 };
 
 // Очистить список подписчиков
-exports.followClear = (user, login, callback) => {
+exports.followClear = (user, login) => {
     return new Promise((resolve, reject) => {
         Model.AccountFollow.update({
             user: user,

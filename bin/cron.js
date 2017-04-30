@@ -2,34 +2,49 @@ const log = require('../libs/log')(module);
 const cron = require('node-cron');
 
 const Task = require('../app/controllers/task');
-const Account = require('../app/controllers/account');
-const Source = require('../app/controllers/source');
-const Instanode = require('../bin/instanode');
+const Instanode = require('./instanode');
+const Client = require('instagram-private-api').V1;
 
-const instanode = require('./instanode');
+// Активные задания
+let activeTask = [];
 
 // Запускаем активные задания
-cron.schedule('*/5 * * * * *', () => {
+cron.schedule('*/5' +
+    ' * * * * *', () => {
+    Task.currentList()
+        .then(tasks => {
+            for (let item of tasks){
+                let id = item._id.toString();
 
-    // Получаем все активные задания
-    Task.currentList((err, tasks) => {
-        if (!tasks.length) return null;
+                // Пропускаем выполняющиеся задания
+                if (activeTask.includes(id)) continue;
 
-        tasks.forEach((item) => {
+                switch (item.type){
+                    case 'Лайк + Подписка':
+                        activeTask.push(id);
+                        break;
 
-            switch (item.type){
-                case 'Лайк + Подписка':
+                    case 'Отписка':
+                        activeTask.push(id);
+                        Instanode.unFollow(item)
+                            .then(res => {
 
-                    break;
+                                // Удаляем из списка выполняемых
+                                let keyActiveTask = activeTask.indexOf(id);
+                                delete activeTask[keyActiveTask];
+                            })
+                            .catch(err => {
+                               // Возникла ошибка, задание не выполнено
+                                console.log(err);
+                            });
+                        break;
 
-                case 'Отписка':
-                    break;
-
-                default:
-                    break;
+                    default:
+                        break;
+                }
             }
+        })
+        .catch(err => {
+            // Нет активных заданий
         });
-    });
 });
-
-

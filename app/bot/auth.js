@@ -7,12 +7,12 @@ module.exports = (data) => {
         User.contains(data.id)
             .then(user => {
                 if (user.length){
-                    resolve(true)
+                    resolve()
                 } else {
 
                     // Новый пользователь
                     User.create({id: data.id, name: data.name})
-                        .then(() => resolve(false));
+                        .then(() => reject());
                 }
             })
     })

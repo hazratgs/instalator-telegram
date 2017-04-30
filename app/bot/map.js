@@ -17,16 +17,16 @@ module.exports = {
                             event: 'task:select:type',
                             children: {
                                 '*': {
-                                    event: 'task:select:source',
+                                    event: 'task:select:follow+like:source',
                                     children: {
                                         '*': {
-                                            event: 'task:select:action',
+                                            event: 'task:select:follow+like:action',
                                             children: {
                                                 '*': {
-                                                    event: 'task:select:actionPerDay',
+                                                    event: 'task:select:follow+like:actionPerDay',
                                                     children: {
                                                         '*': {
-                                                            event: 'task:select:like'
+                                                            event: 'task:select:follow+like:like'
                                                         },
                                                         'Назад': {
                                                             event: 'location:back'
@@ -53,7 +53,7 @@ module.exports = {
                             children: {
                                 '*': {
                                     event: 'task:select:type:unfollow',
-                                    await: true
+                                    // await: true
                                 },
                                 'Назад': {
                                     event: 'location:back'
