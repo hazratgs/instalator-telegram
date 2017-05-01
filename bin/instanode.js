@@ -33,7 +33,7 @@ exports.followLike = async (task) => {
 
 exports.unFollow = async (task) => {
     return new Promise (async (resolve, reject) => {
-        let account, session, followers, unFollowing, id;
+        let account, session, following, unFollowing, id;
 
         id = task._id.toString();
 
@@ -43,7 +43,6 @@ exports.unFollow = async (task) => {
                 account = result
             });
 
-        
         // Авторизация
         await this.auth(account.login, account.password)
             .then(result => {
@@ -51,49 +50,57 @@ exports.unFollow = async (task) => {
             });
 
         // Список пользователей, от которых надо отписаться
-        followers = task.params.following;
+        following = task.params.following;
 
         // Список от которых уже отписались
         unFollowing = task.params.unFollowing;
 
-        if (!followers.length){
+        if (!following.length){
 
             // Загружаем список подписок
             await this.followLoad(session, account.login, account.password)
-                .then(result => followers = result);
+                .then(result => following = result);
 
             // попробывать реализовать повторный запрос подписок,
             // чтобы получить наибоелее полный список подписок
 
             // Сохраняем для переиспользования
-            Task.followingUpdate(id, followers)
+            Task.followingUpdate(id, following)
                 .then(() => {
 
                 })
                 .catch(err => {
-
                     // Возникла ошибка при сохранении
                     console.log(err)
                 })
         }
 
         // Кол. отписок в час
-        let action = task.actionFollowingDay / 24; // 20
+        let action = task.params.actionFollowingDay / 24; // 20
 
         // Время на выполнения задания
-        let time = 3000 / action;
+        let time = (3000 / action) * 10;
 
         // Поиск уникальных пользователей, для отписки
         let users = [];
-        for (let user of followers){
-            if (users.length >= action) break;
+        for (let user of following){
             if (unFollowing.includes(user)) continue;
+            if (users.length >= action) break;
 
             users.push(user);
         }
 
-        // Задание завершено
-        if (users.length){
+        if (!users.length){
+
+            // Задача завершена
+            Task.finish(id)
+                .then(() => {
+                    resolve(true);
+                })
+
+        } else {
+
+            // асинхронный итератор "якобии"
             let func = async (user) => {
                 return new Promise((_resolve, _reject) => {
                     setTimeout(() => {
@@ -105,6 +112,9 @@ exports.unFollow = async (task) => {
                                     Task.unFollowAddUser(id, user)
                                         .then(() => {
                                             _resolve()
+                                        })
+                                        .catch(err => {
+                                            console.log(err)
                                         })
                                 } else {
                                     // Не отписались
@@ -122,21 +132,8 @@ exports.unFollow = async (task) => {
             // Обход пользователй и отписка
             for (let user of users){
                 await func(user)
-                    .then(() => {
-
-                    })
-                    .catch(err => {
-                        console.log(err);
-                    })
             }
-            resolve();
-        } else {
-
-            // Задача завершена
-            Task.finish(id)
-                .then(() => {
-                    resolve();
-                })
+            resolve(false);
         }
     });
 };
@@ -166,29 +163,10 @@ exports.followLoad = async (session, login) => {
             .then((result) => {
                 let following = [];
                 for (let item of result){
-                    following.push(item.id)
+                    following.push(item.id.toString())
                 }
                 resolve(following)
             })
             .catch(err => reject(err));
     });
-
-    // return this.auth(login, password)
-    //     .then(async (session) => {
-    //
-    //         let followers = [];
-    //
-    //         // Получаем данные пользователя
-    //         let account = await Client.Account.searchForUser(session, login);
-    //
-    //         // Запрашиваем подписчиков
-    //         let feed = await new Client.Feed.AccountFollowing(session, account._params.id, 7500);
-    //
-    //         // Сохраняем подписчиков
-    //         await feed.all().then((result) => {
-    //             followers = result;
-    //         });
-    //
-    //         return followers;
-    //     });
 };

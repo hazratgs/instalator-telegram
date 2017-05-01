@@ -97,7 +97,7 @@ exports.currentList = () => {
 };
 
 // Завершение задания
-exports.finish = (id) => {
+exports.finish = id => {
     return new Promise((resolve, reject) => {
         Model.Task.update({
             _id: id
@@ -141,7 +141,7 @@ exports.unFollowAddUser = (id, user) => {
             _id: id
         }, {
             $push: {
-                'params.following': user
+                'params.unFollowing': user
             }
         }, (err) => {
             if (!err){
