@@ -6,7 +6,6 @@ let TaskSchema = new db.mongoose.Schema({
     login: {type: String, required: [true, 'loginRequired']},
     type: {type: String, required: [true, 'typeRequired']},
     params: {type: Object, required: [true, 'paramsRequired']}, // Массив для хранения специфичные для типа данных
-    state: {type: Number, default: 0}, // состояние
     status: {type: String, default: 'active'}, // Статус задания (active, cancel, success)
     date: {type: Date, default: Date.now}
 });

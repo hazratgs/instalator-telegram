@@ -13,24 +13,21 @@ exports.auth = (login, password) => {
 };
 
 // Задание подписаться + лайк
-exports.followLike = async (task) => {
-    let account, session, source;
+exports.followLike = (task) => {
+    return new Promise(async (resolve, reject) => {
+        let account, session, source;
 
-    // Поиск данных аккаунта
-    await Account.contains(task.user, task.login)
-        .then(res => account = res);
+        // Поиск данных аккаунта
+        await Account.contains(task.user, task.login)
+            .then(res => account = res);
 
-    // Поиск источника
-    await Source.contains(task.source)
-        .then(res => source = res);
-
-    // Авторизовываемся в системе и получаем сессию
-    // await this.auth(account.login, account.password)
-    //     .then((res) => {
-    //         session = res
-    //     });
+        // Поиск источника
+        await Source.contains(task.source)
+            .then(res => source = res);
+    });
 };
 
+// Задание отписаться
 exports.unFollow = async (task) => {
     return new Promise (async (resolve, reject) => {
         let account, session, following, unFollowing, id;
@@ -156,7 +153,7 @@ exports.followLoad = async (session, login) => {
         let account = await Client.Account.searchForUser(session, login);
 
         // Запрашиваем подписчиков
-        let feed = await new Client.Feed.AccountFollowing(session, account._params.id, 7500);
+        let feed = await new Client.Feed.AccountFollowing(session, account._params.id);
 
         // Сохраняем подписчиков
         feed.all()
@@ -170,3 +167,23 @@ exports.followLoad = async (session, login) => {
             .catch(err => reject(err));
     });
 };
+
+this.auth('halicha.ru', '475787093w')
+    .then(async session => {
+
+        // Получаем данные пользователя
+        let account = await Client.Account.searchForUser(session, 'myderbent_plus');
+
+        // Запрашиваем подписчиков
+        let feeds = await new Client.Feed.AccountFollowers(session, account._params.id, 400);
+
+        feeds.get()
+            .then(res => {
+                let followers = [];
+                for (let item of res){
+                    followers.push(item._params.id.toString());
+                }
+                console.log(followers.length)
+            })
+
+    });
