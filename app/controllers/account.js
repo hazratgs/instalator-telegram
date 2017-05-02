@@ -112,7 +112,7 @@ exports.checkFollowing = (user, login, follow) => {
             user: user,
             login: login,
             data: {
-                '$in': [follow]
+                '$in': [follow] // []
             }
         }, (err, result) => {
             if (!err){

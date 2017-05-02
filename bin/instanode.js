@@ -15,15 +15,126 @@ exports.auth = (login, password) => {
 // Задание подписаться + лайк
 exports.followLike = (task) => {
     return new Promise(async (resolve, reject) => {
-        let account, session, source;
+        let account, session;
 
         // Поиск данных аккаунта
         await Account.contains(task.user, task.login)
-            .then(res => account = res);
+            .then(result => account = result);
+
+        // Авторизация
+        await this.auth(account.login, account.password)
+            .then(result => {
+                session = result
+            });
+
+        switch (task.params.sourceType){
+            case 'Источники':
+                this.followLikeSource(task, session, account);
+                break;
+
+            default:
+                reject();
+                break;
+        }
+    });
+};
+
+//
+exports.followLikeSource = (task, session, account) => {
+    return new Promise(async (resolve, reject) => {
+        let source, action, time, id;
+
+        id = task._id.toString();
 
         // Поиск источника
-        await Source.contains(task.source)
-            .then(res => source = res);
+        await Source.contains(task.params.source)
+            .then(res => source = res.source);
+
+        // база подписок
+        // await Account.followList(account.user, account.login)
+        //     .then(res => following = res.data);
+
+        // Кол. подписок в час
+        action = task.params.actionFollowDay / 24;
+
+        // Время на выполнения задания
+        time = (3000 / action) * 1000;
+
+        // Поиск уникальных пользователей, для подписки
+        let users = [];
+        for (let user of source){
+            let following;
+            await Account.checkFollowing(account.user, account.login, user)
+                .then(() => following = true)
+                .catch(() => following = false);
+
+            if (following) continue;
+            if (users.length >= action) break;
+
+            users.push(user);
+        }
+
+        if (!users.length){
+
+            // Задача завершена
+            Task.finish(id)
+                .then(() => {
+                    resolve(true);
+                })
+        } else {
+
+            // асинхронный итератор "якобии"
+            let func = async (user) => {
+                return new Promise((_resolve, _reject) => {
+                    setTimeout(() => {
+                        this.getFollow(session, user)
+                            .then((relationship) => {
+
+                                // фиксируем пользователя
+                                if (relationship._params.following){
+
+                                    // добавить в task.params свойства для хранения выполненых подписок в задании
+                                    Task.unFollowAddUser(id, user)
+                                        .then(() => {
+
+                                            // Добавляем в базу подписок пользователей из отписок
+                                            // чтобы в будущем повторно на них не подписаться
+                                            Account.following(task.user, task.login, user);
+
+                                            _resolve()
+                                        })
+                                        .catch(err => {
+                                            console.log(err)
+                                        })
+                                } else {
+                                    // Не отписались
+                                    _reject();
+                                }
+                            })
+                            .catch(err => {
+                                // обработка ошибок
+                                _reject(err)
+                            })
+                    }, time);
+                });
+            };
+
+            // Обход пользователй и подписка
+            for (let user of users){
+                await func(user)
+            }
+            resolve(false);
+        }
+
+    });
+};
+
+exports.getFollow = (session, account) => {
+    return new Promise((resolve, reject) => {
+        Client.Relationship.create(session, account)
+            .then(relationship => {
+                resolve(relationship)
+            })
     });
 };
 

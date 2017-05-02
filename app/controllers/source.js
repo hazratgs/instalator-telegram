@@ -42,9 +42,9 @@ exports.create = data => {
 // Проверить существование источника
 exports.contains = name => {
     return new Promise((resolve, reject) => {
-        Model.Source.find({name: name}, (err, result) => {
+        Model.Source.findOne({name: name}, (err, result) => {
             if (!err){
-                if (result.length){
+                if (result !== null){
                     resolve(result)
                 } else {
                     reject(err)
