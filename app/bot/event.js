@@ -100,20 +100,7 @@ event.on('task:select', (msg, action, next) => {
 event.on('task:select:type', (msg, action, next) => {
     switch (msg.text){
         case 'Лайк + Подписка':
-            Source.list()
-                .then(result => {
-                    let source = result.map((item) => {
-                        return item.name
-                    });
-
-                    // Выбранное действие
-                    send.keyboard(msg.from.id, `Выберите источник`, [...source, 'Назад']);
-                    next ? next() : null;
-                })
-                .catch(err => {
-                    send.message(msg.from.id, 'К сожалению нет источников');
-                    event.emit('location:back', msg);
-                });
+            event.emit('task:select:follow+like', msg, action);
             break;
 
         case 'Отписка':
@@ -128,8 +115,55 @@ event.on('task:select:type', (msg, action, next) => {
     }
 });
 
+// Выбор типа источника
+event.on('task:select:follow+like', (msg, action, next) => {
+    send.keyboard(msg.from.id, `Выберите тип источника`, action);
+    next ? next() : null
+});
+
+// Пользователь
+event.on('task:select:follow+like:user', (msg, action, next) => {
+    send.keyboard(msg.from.id, `В разработке, выберите другой тип источника`, action);
+    next ? next() : null;
+    event.emit('location:back', msg);
+});
+
+// Локация
+event.on('task:select:follow+like:geo', (msg, action, next) => {
+    send.keyboard(msg.from.id, `В разработке, выберите другой тип источника`, action);
+    next ? next() : null;
+    event.emit('location:back', msg);
+});
+
+// Хештег
+event.on('task:select:follow+like:hashtag', (msg, action, next) => {
+    send.keyboard(msg.from.id, `В разработке, выберите другой тип источника`, action);
+    next ? next() : null;
+    event.emit('location:back', msg);
+});
+
 // Список источников
 event.on('task:select:follow+like:source', (msg, action, next) => {
+    Source.list()
+        .then(result => {
+            let source = result.map((item) => {
+                return item.name
+            });
+
+            // Выбранное действие
+            send.keyboard(msg.from.id, `Выберите источник`, [...source, 'Назад']);
+            next ? next() : null;
+        })
+        .catch(err => {
+            next ? next() : null;
+
+            send.message(msg.from.id, 'К сожалению нет источников');
+            event.emit('location:back', msg);
+        });
+});
+
+// Выбор источника
+event.on('task:select:follow+like:source:select', (msg, action, next) => {
     Source.contains(msg.text)
         .then(source => {
             // Кол. действия
@@ -142,7 +176,7 @@ event.on('task:select:follow+like:source', (msg, action, next) => {
 });
 
 // Количество действий
-event.on('task:select:follow+like:action', (msg, action, next) => {
+event.on('task:select:follow+like:source:action', (msg, action, next) => {
     let length = parseInt(msg.text);
     if (isNaN(length) || length > 7500){
         send.message(msg.from.id, 'Не более 7500 подписчиков в одном задании');
@@ -155,7 +189,7 @@ event.on('task:select:follow+like:action', (msg, action, next) => {
 });
 
 // Количество действий в день
-event.on('task:select:follow+like:actionPerDay', (msg, action, next) => {
+event.on('task:select:follow+like:source:actionPerDay', (msg, action, next) => {
     let length = parseInt(msg.text);
     if (isNaN(length) || length > 1200){
         send.message(msg.from.id, 'Слишком много, могут заблокировать. Попробуй еще раз...');
@@ -168,7 +202,7 @@ event.on('task:select:follow+like:actionPerDay', (msg, action, next) => {
 });
 
 // Количество лайков к фотографии
-event.on('task:select:follow+like:like', (msg, action, next) => {
+event.on('task:select:follow+like:source:like', (msg, action, next) => {
     let length = parseInt(msg.text);
     if (isNaN(length) || length > 5){
         send.message(msg.from.id, 'Думаю это слишко много...');
@@ -198,10 +232,11 @@ event.on('task:create:follow+like:save', (msg, action) => {
                 user: msg.from.id,
                 login: data[0],
                 type: data[1],
-                source: data[2],
-                action: data[3],
-                actionDay: data[4],
-                like: data[5],
+                sourceType: data[2],
+                source: data[3],
+                action: data[4],
+                actionDay: data[5],
+                like: data[6],
             })
                 .then(() => {
                     send.message(msg.from.id, 'Задание успешно добавлено, подробнее можете посмотреть в активности');
@@ -270,7 +305,7 @@ event.on('account:list', (msg, action, next) => {
     Account.list(msg.from.id)
         .then(accounts => {
             let elements = accounts.map((item) => item.login);
-            send.keyboard(msg.from.id, 'Выберите аккаунт', [...elements, 'Добавить', 'Назад']);
+            send.keyboard(msg.from.id, 'Выберите аккаунт', [...elements, 'Добавить аккаунт', 'Назад']);
             next ? next() : null
         })
 
@@ -378,7 +413,6 @@ event.on('account:delete', (msg) => {
             event.emit('location.back', msg);
         })
 });
-
 
 // Экспортируем объект события
 exports.event = event;

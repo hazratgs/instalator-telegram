@@ -25,6 +25,7 @@ exports.createFollowLike = data => {
         login: data.login,
         type: data.type,
         params: {
+            sourceType: data.sourceType, // тип источника
             source: data.source, // источник
             actionFollow: data.action, // кол. подписок необходимо выполнить
             actionFollowDay: data.actionDay, // кол. в день

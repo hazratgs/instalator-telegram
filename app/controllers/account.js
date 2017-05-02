@@ -92,42 +92,31 @@ exports.remove = (user, login) => {
 };
 
 // Записать информацию о подписке
-exports.follow = (user, login, follow) => {
-    let self = this;
-    return new Promise(async (resolve, reject) => {
-        await self.followList(user, login)
-            .then((result) => {
-                if (result){
-                    Model.AccountFollow.update({
-                        user: user,
-                        login: login
-                    }, {
-                        $push: {
-                            data: follow
-                        }
-                    }, (err) => resolve())
-                } else {
-
-                    // База не найдена, добавляем базу
-                    new Model.AccountFollow({
-                        user: user,
-                        login: login,
-                        data: [follow]
-                    }).save(() => resolve())
-                }
+exports.following = (user, login, follow) => {
+    return new Promise((resolve, reject) => {
+        this.checkFollowing(user, login, follow)
+            .then(() => reject())
+            .catch(() => {
+                this.addFollowing(user, login, follow)
+                    .then(() => {
+                        resolve()
+                    });
             });
     });
 };
 
-// Список подписок пользователя
-exports.followList = (user, login) => {
+// Проверить подписку
+exports.checkFollowing = (user, login, follow) => {
     return new Promise((resolve, reject) => {
         Model.AccountFollow.findOne({
             user: user,
-            login: login
+            login: login,
+            data: {
+                '$in': [follow]
+            }
         }, (err, result) => {
             if (!err){
-                if (result.length){
+                if (result !== null){
                     resolve(result)
                 } else {
                     reject(err)
@@ -139,16 +128,40 @@ exports.followList = (user, login) => {
     });
 };
 
-// Проверить, подписан ли
-exports.followCheck = (user, login, follow) => {
+// Добавить подписчика в историю
+exports.addFollowing = (user, login, follow) => {
+    return new Promise((resolve, reject) => {
+        this.followList(user, login)
+            .then(() => {
+                Model.AccountFollow.update({
+                    user: user,
+                    login: login
+                }, {
+                    $push: {
+                        data: follow
+                    }
+                }, (err) => resolve())
+            })
+            .catch(() => {
+                new Model.AccountFollow({ // Запись не найдена, добавляем
+                    user: user,
+                    login: login,
+                    data: follow
+                }).save((err) => resolve())
+            });
+
+    });
+};
+
+// Список подписок пользователя
+exports.followList = (user, login) => {
     return new Promise((resolve, reject) => {
         Model.AccountFollow.findOne({
             user: user,
-            login: login,
-            data: {$in: [follow]}
+            login: login
         }, (err, result) => {
             if (!err){
-                if (result.length){
+                if (result !== null){
                     resolve(result)
                 } else {
                     reject(err)

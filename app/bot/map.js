@@ -14,19 +14,36 @@ module.exports = {
                             event: 'task:select:type'
                         },
                         'Лайк + Подписка': {
-                            event: 'task:select:type',
+                            event: 'task:select:follow+like',
                             children: {
-                                '*': {
+                                'Пользователь': {
+                                    event: 'task:select:follow+like:user'
+                                },
+                                'Геолокация': {
+                                    event: 'task:select:follow+like:geo'
+                                },
+                                'Хештэг': {
+                                    event: 'task:select:follow+like:hashtag'
+                                },
+                                'Источники': {
                                     event: 'task:select:follow+like:source',
                                     children: {
                                         '*': {
-                                            event: 'task:select:follow+like:action',
+                                            event: 'task:select:follow+like:source:select',
                                             children: {
                                                 '*': {
-                                                    event: 'task:select:follow+like:actionPerDay',
+                                                    event: 'task:select:follow+like:source:action',
                                                     children: {
                                                         '*': {
-                                                            event: 'task:select:follow+like:like'
+                                                            event: 'task:select:follow+like:source:actionPerDay',
+                                                            children: {
+                                                                '*': {
+                                                                    event: 'task:select:follow+like:source:like'
+                                                                },
+                                                                'Назад': {
+                                                                    event: 'location:back'
+                                                                }
+                                                            }
                                                         },
                                                         'Назад': {
                                                             event: 'location:back'
@@ -43,6 +60,7 @@ module.exports = {
                                         }
                                     }
                                 },
+
                                 'Назад': {
                                     event: 'location:back'
                                 }
@@ -65,7 +83,7 @@ module.exports = {
                         }
                     }
                 },
-                'Добавить': {
+                'Добавить аккаунт': {
                     event: 'account:add',
                     children: {
                         '*': {
@@ -101,7 +119,7 @@ module.exports = {
                         }
                     }
                 },
-                'Добавить': {
+                'Добавить аккаунт': {
                     event: 'account:add',
                     children: {
                         '*': {

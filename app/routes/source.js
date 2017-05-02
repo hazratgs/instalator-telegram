@@ -21,54 +21,51 @@ module.exports = (app) => {
         }
 
         // Проверяем существование источника
-        source.contains(req.body.name, (result) => {
-            if (result.length){
+        source.contains(req.body.name)
+            .then(result => {
                 res.status(500).json({
                     'ok': false,
                     'error_code': 500,
                     'description': `База ${req.body.name} уже существует`
                 });
-                return null;
-            }
-
-            // Сохраняем данные
-            source.create({
-                name: req.body.name,
-                source: data
-            }, (err) => {
-                if (!err){
-                    res.json({
-                        'ok': true,
-                        'result': `Источник добавлен`
-                    });
-                } else {
-                    res.status(500).json({
-                        'ok': false,
-                        'error_code': 500,
-                        'description': `Не удалось сохранить базу ${req.body.name}`
-                    });
-                }
             })
-        });
+            .catch(err => {
+
+                // Сохраняем данные
+                source.create({name: req.body.name, source: data})
+                    .then(result => {
+                        res.json({
+                            'ok': true,
+                            'result': `Источник добавлен`
+                        });
+                    })
+                    .catch(err => {
+                        res.status(500).json({
+                            'ok': false,
+                            'error_code': 500,
+                            'description': `Не удалось сохранить базу ${req.body.name}`
+                        });
+                    })
+            })
     });
 
     // Удаление источника
     app.delete('/source/remove', (req, res) => {
-        source.contains(req.body.name, (result) => {
-            if (result.length){
+        source.contains(req.body.name)
+            .then(result => {
                 source.remove(req.body.name, () => {
                     res.json({
                         'ok': true,
                         'result': `Источник удален`
                     });
                 });
-            } else {
+            })
+            .catch(err => {
                 res.status(500).json({
                     'ok': false,
                     'error_code': 500,
                     'description': `Источник ${req.body.name} не существует`
                 });
-            }
-        })
+            })
     });
 };

@@ -21,18 +21,18 @@ cron.schedule('* * */1 * * *', () => {
                 switch (item.type){
                     case 'Лайк + Подписка':
                         activeTask.push(id);
-                        Instanode.followLike(item)
-                            .then(finish => {
-
-                                // Удаляем из списка выполняемых
-                                let keyActiveTask = activeTask.indexOf(id);
-                                delete activeTask[keyActiveTask];
-
-                                // оповещаем пользователя о завершении задания
-                                if (finish){
-                                    send.message(item.user, `Задание ${item.type} завершено для аккаунта ${item.login}`);
-                                }
-                            });
+                        // Instanode.followLike(item)
+                        //     .then(finish => {
+                        //
+                        //         // Удаляем из списка выполняемых
+                        //         let keyActiveTask = activeTask.indexOf(id);
+                        //         delete activeTask[keyActiveTask];
+                        //
+                        //         // оповещаем пользователя о завершении задания
+                        //         if (finish){
+                        //             send.message(item.user, `Задание ${item.type} завершено для аккаунта ${item.login}`);
+                        //         }
+                        //     });
                         break;
 
                     case 'Отписка':

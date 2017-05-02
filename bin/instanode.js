@@ -76,7 +76,7 @@ exports.unFollow = async (task) => {
         let action = task.params.actionFollowingDay / 24; // 20
 
         // Время на выполнения задания
-        let time = (3000 / action) * 10;
+        let time = (3000 / action) * 1000;
 
         // Поиск уникальных пользователей, для отписки
         let users = [];
@@ -94,7 +94,6 @@ exports.unFollow = async (task) => {
                 .then(() => {
                     resolve(true);
                 })
-
         } else {
 
             // асинхронный итератор "якобии"
@@ -108,6 +107,11 @@ exports.unFollow = async (task) => {
                                 if (!relationship._params.following){
                                     Task.unFollowAddUser(id, user)
                                         .then(() => {
+
+                                            // Добавляем в базу подписок пользователей из отписок
+                                            // чтобы в будущем повторно на них не подписаться
+                                            Account.following(task.user, task.login, user);
+
                                             _resolve()
                                         })
                                         .catch(err => {
@@ -168,22 +172,22 @@ exports.followLoad = async (session, login) => {
     });
 };
 
-this.auth('halicha.ru', '475787093w')
-    .then(async session => {
-
-        // Получаем данные пользователя
-        let account = await Client.Account.searchForUser(session, 'myderbent_plus');
-
-        // Запрашиваем подписчиков
-        let feeds = await new Client.Feed.AccountFollowers(session, account._params.id, 400);
-
-        feeds.get()
-            .then(res => {
-                let followers = [];
-                for (let item of res){
-                    followers.push(item._params.id.toString());
-                }
-                console.log(followers.length)
-            })
-
-    });
+// this.auth('halicha.ru', '475787093w')
+//     .then(async session => {
+//
+//         // Получаем данные пользователя
+//         let account = await Client.Account.searchForUser(session, 'myderbent_plus');
+//
+//         // Запрашиваем подписчиков
+//         let feeds = await new Client.Feed.AccountFollowers(session, account._params.id, 400);
+//
+//         feeds.get()
+//             .then(res => {
+//                 let followers = [];
+//                 for (let item of res){
+//                     followers.push(item._params.id.toString());
+//                 }
+//                 console.log(followers.length)
+//             })
+//
+//     });
