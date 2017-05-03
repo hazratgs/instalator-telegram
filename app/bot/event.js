@@ -318,7 +318,7 @@ event.on('account:list', (msg, action, next) => {
 
 // Нет добавленных аккаунтов
 event.on('account:empty', (msg, action, next) => {
-    send.keyboard(msg.from.id, 'У вас нет ни одного аккаунта', ['Добавить', 'Назад'])
+    send.keyboard(msg.from.id, 'У вас нет ни одного аккаунта', ['Добавить аккаунт', 'Назад'])
 
 });
 

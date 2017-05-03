@@ -19,7 +19,7 @@ bot.on('message', msg => {
         })
 
         // Новый пользователь
-        .catch(() => {
+        .catch((err) => {
             handle.command(msg)
         })
 });

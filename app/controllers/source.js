@@ -56,6 +56,25 @@ exports.contains = name => {
     });
 };
 
+// Удалить элемент из источника
+exports.removeUserSource = (source, user) => {
+    return new Promise((resolve, reject) => {
+        Model.Source.update({
+            name: source
+        }, {
+            $pull: {
+                'source': user
+            }
+        }, (err) => {
+            if (!err){
+                resolve()
+            } else {
+                reject(err)
+            }
+        })
+    });
+};
+
 // Удаление
 exports.remove = name => {
     return new Promise((resolve, reject) => {

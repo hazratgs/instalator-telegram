@@ -7,9 +7,9 @@ const Model  = require('../models/user');
 /* Проверка существования пользователя */
 exports.contains = id => {
     return new Promise((resolve, reject) => {
-        Model.User.find({id: id}, (err, user) => {
+        Model.User.findOne({id: id}, (err, user) => {
             if (!err){
-                if (user.length){
+                if (user !== null){
                     resolve(user)
                 } else {
                     reject(err)
