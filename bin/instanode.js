@@ -30,7 +30,7 @@ exports.followLike = (task) => {
         switch (task.params.sourceType){
             case 'Источники':
                 this.followLikeSource(task, session, account)
-                    .then(() => resolve())
+                    .then(() => resolve());
                 break;
 
             default:
