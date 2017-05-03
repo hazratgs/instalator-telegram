@@ -42,7 +42,7 @@ exports.followLike = (task) => {
 //
 exports.followLikeSource = (task, session, account) => {
     return new Promise(async (resolve, reject) => {
-        let source, action, time, id;
+        let source, action, time, id, following;
 
         id = task._id.toString();
 
@@ -54,6 +54,9 @@ exports.followLikeSource = (task, session, account) => {
         // await Account.followList(account.user, account.login)
         //     .then(res => following = res.data);
 
+        // Список подписок
+        following = task.params.following;
+
         // Кол. подписок в час
         action = task.params.actionFollowDay / 24;
 
@@ -63,12 +66,13 @@ exports.followLikeSource = (task, session, account) => {
         // Поиск уникальных пользователей, для подписки
         let users = [];
         for (let user of source){
-            let following;
+            let used;
             await Account.checkFollowing(account.user, account.login, user)
-                .then(() => following = true)
-                .catch(() => following = false);
+                .then(() => used = true)
+                .catch(() => used = false);
 
-            if (following) continue;
+            if (used) continue;
+            if (following.includes(user)) continue;
             if (users.length >= action) break;
 
             users.push(user);
@@ -94,6 +98,7 @@ exports.followLikeSource = (task, session, account) => {
                                 if (relationship._params.following){
 
                                     // добавить в task.params свойства для хранения выполненых подписок в задании
+                                    Account.che
                                     Task.unFollowAddUser(id, user)
                                         .then(() => {
 

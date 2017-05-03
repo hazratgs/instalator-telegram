@@ -29,7 +29,8 @@ exports.createFollowLike = data => {
             source: data.source, // источник
             actionFollow: data.action, // кол. подписок необходимо выполнить
             actionFollowDay: data.actionDay, // кол. в день
-            actionLikeDay: data.like // кол. лайков в день
+            actionLikeDay: data.like, // кол. лайков в день,
+            following: [] // на кого подписались
         }
     })
 };
@@ -143,6 +144,25 @@ exports.unFollowAddUser = (id, user) => {
         }, {
             $push: {
                 'params.unFollowing': user
+            }
+        }, (err) => {
+            if (!err){
+                resolve()
+            } else {
+                reject(err)
+            }
+        })
+    });
+};
+
+// Добавить пользователя в подписки
+exports.addUserFollow = (id, user) => {
+    return new Promise((resolve, reject) => {
+        Model.Task.update({
+            _id: id
+        }, {
+            $push: {
+                'params.following': user
             }
         }, (err) => {
             if (!err){
