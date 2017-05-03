@@ -195,41 +195,63 @@ exports.followClear = (user, login) => {
 
 // Записать информацию о лайке
 exports.like = (user, login, like) => {
-    let self = this;
     return new Promise((resolve, reject) => {
-        self.likeList(user, login)
-            .then(result => {
-                if (result){
-                    Model.AccountLike.update({
-                        user: user,
-                        login: login
-                    }, {
-                        $push: {
-                            data: like
-                        }
-                    }, (err) => {
-                        if (!err){
-                            resolve()
-                        } else {
-                            reject()
-                        }
-                    })
-                } else {
+        this.checkLike(user, login, like)
+            .then(() => reject())
+            .catch(() => {
+                this.addLike(user, login, like)
+                    .then(() => {
+                        resolve()
+                    });
+            });
+    });
+};
 
-                    // База не найдена, добавляем базу
-                    new Model.AccountLike({
-                        user: user,
-                        login: login,
-                        data: [like]
-                    }).save((err) => {
-                        if (!err){
-                            resolve()
-                        } else {
-                            reject()
-                        }
-                    })
+// Проверить, лайкнул ли
+exports.checkLike = (user, login, like) => {
+    return new Promise((resolve, reject) => {
+        Model.AccountLike.findOne({
+            user: user,
+            login: login,
+            data: {
+                '$in': [like]
+            }
+        }, (err, result) => {
+            if (!err){
+                if (result !== null){
+                    resolve(result)
+                } else {
+                    reject(err)
                 }
+            } else {
+                reject(err)
+            }
+        });
+    });
+};
+
+// Добавить подписчика лайк
+exports.addLike = (user, login, like) => {
+    return new Promise((resolve, reject) => {
+        this.likeList(user, login)
+            .then(() => {
+                Model.AccountLike.update({
+                    user: user,
+                    login: login
+                }, {
+                    $push: {
+                        data: like
+                    }
+                }, (err) => resolve())
             })
+            .catch(() => {
+                new Model.AccountLike({ // Запись не найдена, добавляем
+                    user: user,
+                    login: login,
+                    data: like
+                }).save((err) => resolve())
+            });
+
     });
 };
 
@@ -241,35 +263,13 @@ exports.likeList = (user, login) => {
             login: login
         }, (err, result) => {
             if (!err){
-                if (result.length){
+                if (result !== null){
                     resolve(result)
-                    result ? resolve(result) : reject(err)
                 } else {
                     reject(err)
                 }
             } else {
                 reject(err)
-            }
-        });
-    });
-};
-
-// Проверить, лайкнул ли
-exports.likeCheck = (user, login, like) => {
-    return new Promise((resolve, reject) => {
-        Model.AccountLike.findOne({
-            user: user,
-            login: login,
-            data: {$in: [like]}
-        }, (err, result) => {
-            if (!err){
-                if (result.length){
-                    resolve(true)
-                } else {
-                    resolve(false)
-                }
-            } else {
-                resolve(false)
             }
         });
     });

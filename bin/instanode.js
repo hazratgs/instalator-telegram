@@ -29,7 +29,8 @@ exports.followLike = (task) => {
 
         switch (task.params.sourceType){
             case 'Источники':
-                this.followLikeSource(task, session, account);
+                this.followLikeSource(task, session, account)
+                    .then(() => resolve())
                 break;
 
             default:
@@ -57,7 +58,7 @@ exports.followLikeSource = (task, session, account) => {
         action = Math.round(task.params.actionFollowDay / 24);
 
         // Время на выполнения задания
-        time = (3000 / action) * 25; // 1000
+        time = (3000 / action) * 1000; // 1000
 
         let users = [];
 
@@ -114,7 +115,7 @@ exports.followLikeSource = (task, session, account) => {
                                                 .catch(() => {});
 
                                             // Получаем данные для лайка
-                                            this.getLike(session, user, task.params.actionLikeDay)
+                                            this.getLike(session, task.user, task.login, user, task.params.actionLikeDay)
                                                 .then(res => {
                                                     _resolve(); // поставили лайки
                                                 })
@@ -178,9 +179,9 @@ exports.getFollow = (session, user) => {
 };
 
 // Достаем контент для лайка
-exports.getLike = (session, user, limit = 1) => {
+exports.getLike = (session, user, login, like, limit = 1) => {
     return new Promise(async (resolve, reject) => {
-        let account = await Client.Account.searchForUser(session, user);
+        let account = await Client.Account.searchForUser(session, like);
         let feed = await new Client.Feed.UserMedia(session, account._params.id, limit);
 
         feed.get()
@@ -190,9 +191,20 @@ exports.getLike = (session, user, limit = 1) => {
                     for (let item of result){
                         if (limit == i) break;
 
+                        let used;
+                        await Account.checkLike(user, login, item._params.id)
+                            .then(() => used = true)
+                            .catch(() => used = false);
+
+                        // Пропускаем ранее лайкнутые
+                        if (used) continue;
+
                         // Установка лайка
                         await new Client.Like.create(session, item._params.id)
                             .then((res) => {
+
+                                // Записываем информацию о лайке
+                                Account.like(user, login, item._params.id);
 
                             })
                             .catch((err) => {
