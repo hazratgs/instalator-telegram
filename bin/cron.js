@@ -12,7 +12,11 @@ let activeTask = [];
 cron.schedule('* * */1 * * *', () => {
     Task.currentList()
         .then(tasks => {
+            console.log('-----------')
+            console.log('Запуск задачи в ' + new Date());
+            console.log('-----------')
             for (let item of tasks){
+                console.log('Задача запущена для ' + item.login + ' в ' + new Date());
                 let id = item._id.toString();
 
                 // Пропускаем выполняющиеся задания
@@ -27,6 +31,8 @@ cron.schedule('* * */1 * * *', () => {
                                 // Удаляем из списка выполняемых
                                 let keyActiveTask = activeTask.indexOf(id);
                                 delete activeTask[keyActiveTask];
+
+                                console.log('ЗАВЕРШЕНО для ' + item.login + ' в ' + new Date());
 
                                 // оповещаем пользователя о завершении задания
                                 if (finish){
@@ -43,7 +49,9 @@ cron.schedule('* * */1 * * *', () => {
                                 // Удаляем из списка выполняемых
                                 let keyActiveTask = activeTask.indexOf(id);
                                 delete activeTask[keyActiveTask];
-                                
+
+                                console.log('ЗАВЕРШЕНО для ' + item.login + ' в ' + new Date());
+
                                 // оповещаем пользователя о завершении задания
                                 if (finish){
                                     send.message(item.user, `Задание ${item.type} завершено для аккаунта ${item.login}`);
