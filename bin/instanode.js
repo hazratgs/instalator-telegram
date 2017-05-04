@@ -4,6 +4,12 @@ const Account = require('../app/controllers/account');
 const Source = require('../app/controllers/source');
 const Task = require('../app/controllers/task');
 
+function random(min, max) {
+    let rand = min - 0.5 + Math.random() * (max - min + 1);
+    rand = Math.round(rand);
+    return rand;
+}
+
 // Авторизация
 exports.auth = (login, password) => {
     const device = new Client.Device(login);
@@ -58,7 +64,7 @@ exports.followLikeSource = (task, session, account) => {
         action = Math.round(task.params.actionFollowDay / 24);
 
         // Время на выполнения задания
-        time = (3000 / action) * 1000; // 1000
+        time = (3000 / action) * random(100, 1000); // 1000
 
         let users = [];
 
@@ -272,7 +278,7 @@ exports.unFollow = async (task) => {
         let action = task.params.actionFollowingDay / 24; // 20
 
         // Время на выполнения задания
-        let time = (3000 / action) * 1000;
+        let time = (3000 / action) * random(100, 1000);
 
         // Поиск уникальных пользователей, для отписки
         let users = [];

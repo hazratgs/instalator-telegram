@@ -83,6 +83,9 @@ exports.remove = (user, login) => {
         }, (err) => {
             if (!err){
                 resolve()
+
+                // При удалении также необходимо удалить задачу
+
             } else {
                 reject(err)
             }

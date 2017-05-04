@@ -1,2 +1,0 @@
-[General]
-cookies="@Variant(\0\0\0\x7f\0\0\0\x16QList<QNetworkCookie>\0\0\0\0\x1\0\0\0\x2\0\0\0imid=WPZoSQAEAAGQiPVKkQnpvcnziXD4; expires=Mon, 13-Apr-2037 19:26:01 GMT; domain=www.instagram.com; path=/\0\0\0{csrftoken=qqL5klrMuGfgxssG0dpd3mSaWBoGMS4o; secure; expires=Tue, 17-Apr-2018 19:26:14 GMT; domain=www.instagram.com; path=/)"
