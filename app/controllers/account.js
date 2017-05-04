@@ -26,7 +26,7 @@ exports.add = (user, login, password) => {
     return new Promise((resolve, reject) => {
         let addAccount = new Model.Account({
             user: user,
-            login: login,
+            login: login.toLowerCase(),
             password: password
         });
         addAccount.save((err) => {
