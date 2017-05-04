@@ -367,7 +367,7 @@ event.on('account:add:save', (msg, login, password) => {
                     Account.add(msg.from.id, login, password)
                         .then(() => {
                             send.message(msg.from.id, `Аккаунт ${login} успешно добавлен, войдите в Instagram и подтвердите, что это были вы`);
-                            event.emit('location:back', msg);
+                            event.emit('location:home', msg);
                         })
                         .catch(err => {
                             send.message(msg.from.id, 'Возникла ошибка при авторизации, проверьте правильность логина/пароля');

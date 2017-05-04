@@ -28,8 +28,6 @@ cron.schedule('* * */1 * * *', () => {
                                 let keyActiveTask = activeTask.indexOf(id);
                                 delete activeTask[keyActiveTask];
 
-                                console.log('Тик задания ' + item.type + ' для ' + item.login + ' завершен');
-
                                 // оповещаем пользователя о завершении задания
                                 if (finish){
                                     send.message(item.user, `Задание ${item.type} завершено для аккаунта ${item.login}`);
@@ -45,8 +43,6 @@ cron.schedule('* * */1 * * *', () => {
                                 // Удаляем из списка выполняемых
                                 let keyActiveTask = activeTask.indexOf(id);
                                 delete activeTask[keyActiveTask];
-
-                                console.log('Тик задания ' + item.type + ' для ' + item.login + ' завершен');
                                 
                                 // оповещаем пользователя о завершении задания
                                 if (finish){
