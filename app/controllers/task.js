@@ -61,16 +61,16 @@ exports.list = user => {
 // Текущее задание аккаунта
 exports.current = (user, login) => {
     return new Promise((resolve, reject) => {
-        Model.Task.find({
+        Model.Task.findOne({
             user: user,
             login: login,
             status: 'active'
         }, (err, tasks) => {
             if (!err){
-                if (tasks.length){
+                if (tasks !== null){
                     resolve(tasks)
                 } else {
-                    reject(err)
+                    reject('Нет активной задачи')
                 }
             } else {
                 reject(err)
@@ -106,6 +106,25 @@ exports.finish = id => {
         }, {
             $set: {
                 status: 'success'
+            }
+        }, (err) => {
+            if (!err){
+                resolve()
+            } else {
+                reject()
+            }
+        })
+    });
+};
+
+// Отмена задания
+exports.cancel = id => {
+    return new Promise((resolve, reject) => {
+        Model.Task.update({
+            _id: id
+        }, {
+            $set: {
+                status: 'cancel'
             }
         }, (err) => {
             if (!err){

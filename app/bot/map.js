@@ -100,10 +100,25 @@ module.exports = {
                 }
             }
         },
-        // 'Активность': {
-        //     event: '',
-        //     children: {}
-        // },
+        'Активность': {
+            event: 'actions',
+            children: {
+                '*': {
+                    event: 'actions:account',
+                    children: {
+                        'Отменить': {
+                            event: 'actions:account:cancel'
+                        },
+                        'Назад': {
+                            event: 'location:back'
+                        }
+                    }
+                },
+                'Назад': {
+                    event: 'location:back'
+                }
+            }
+        },
         'Аккаунты': {
             event: 'account:list',
             children: {

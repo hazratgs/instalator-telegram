@@ -9,18 +9,19 @@ const Instanode = require('./instanode');
 let activeTask = [];
 
 // Запускаем активные задания
-cron.schedule('10 */1 * * *', () => {
+cron.schedule('0 */1 * * *', () => {
     Task.currentList()
         .then(tasks => {
             log.debug('Start cron %s', new Date());
 
             for (let item of tasks){
-                log.debug('Start %s %s', item.login, new Date());
 
                 let id = item._id.toString();
 
                 // Пропускаем выполняющиеся задания
                 if (activeTask.includes(id)) continue;
+
+                log.debug('Start %s %s', item.login, new Date());
 
                 switch (item.type){
                     case 'Лайк + Подписка':

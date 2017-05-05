@@ -47,7 +47,11 @@ exports.contains = (user, login) => {
             login: login
         }, (err, result) => {
             if (!err){
-                resolve(result)
+                if (result !== null){
+                    resolve(result)
+                } else {
+                    reject('Аккаунт не существует')
+                }
             } else {
                 reject(err)
             }
@@ -122,7 +126,7 @@ exports.checkFollowing = (user, login, follow) => {
                 if (result !== null){
                     resolve(result)
                 } else {
-                    reject(err)
+                    reject()
                 }
             } else {
                 reject(err)
