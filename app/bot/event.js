@@ -434,7 +434,11 @@ event.on('actions', (msg, action, next) => {
 event.on('actions:account', async (msg, action, next) => {
     try {
         let account = await Account.contains(msg.from.id, msg.text);
+        log.error(account)
+
         let task = await Task.current(msg.from.id, msg.text);
+        log.error(task)
+
         let text = '';
         let daily = '';
 
@@ -456,6 +460,8 @@ event.on('actions:account', async (msg, action, next) => {
         send.keyboard(msg.from.id, text, ['Отменить', 'Назад']);
         next ? next() : null
     } catch (err){
+        log.error('err');
+        log.error(err);
         send.message(msg.from.id, 'Нет активного задания');
         next ? next() : null;
 
