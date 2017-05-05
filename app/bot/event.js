@@ -2,6 +2,8 @@ const events = require('events');
 const event = new events.EventEmitter();
 const send = require('./method');
 const map = require('./map');
+const log = require('../../libs/log')(module);
+
 const instanode = require('../../bin/instanode');
 
 // Фиксирование расположение пользователя
