@@ -448,7 +448,7 @@ event.on('actions:account', async (msg, action, next) => {
                 break;
 
             case 'Отписка':
-                daily = Math.round((task.params.following - task.params.unFollowing) / task.params.actionFollowingDay);
+                daily = Math.round((task.params.following.length - task.params.unFollowing.length) / task.params.actionFollowingDay);
                 text = `Активность ${task.login}\nТип задачи: ${task.type}\nСостояние: ${task.params.following.length}/${task.params.unFollowing.length}\nОтписок в день: ${task.params.actionFollowingDay}\nДата завершения: ${daily} дней`;
                 break;
 
