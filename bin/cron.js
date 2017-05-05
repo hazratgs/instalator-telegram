@@ -12,11 +12,11 @@ let activeTask = [];
 cron.schedule('10 */1 * * *', () => {
     Task.currentList()
         .then(tasks => {
-            console.log('-----------')
-            console.log('Запуск задачи в ' + new Date());
-            console.log('-----------')
+            log.debug('Start cron %s', new Date());
+
             for (let item of tasks){
-                console.log('Задача запущена для ' + item.login + ' в ' + new Date());
+                log.debug('Start %s %s', item.login, new Date());
+
                 let id = item._id.toString();
 
                 // Пропускаем выполняющиеся задания
@@ -32,13 +32,14 @@ cron.schedule('10 */1 * * *', () => {
                                 let keyActiveTask = activeTask.indexOf(id);
                                 delete activeTask[keyActiveTask];
 
-                                console.log('ЗАВЕРШЕНО для ' + item.login + ' в ' + new Date());
+                                log.debug('Stop %s, time %s', item.login, new Date());
 
                                 // оповещаем пользователя о завершении задания
                                 if (finish){
                                     send.message(item.user, `Задание ${item.type} завершено для аккаунта ${item.login}`);
                                 }
-                            });
+                            })
+                            .catch(err => log.error(err));
                         break;
 
                     case 'Отписка':
@@ -50,17 +51,14 @@ cron.schedule('10 */1 * * *', () => {
                                 let keyActiveTask = activeTask.indexOf(id);
                                 delete activeTask[keyActiveTask];
 
-                                console.log('ЗАВЕРШЕНО для ' + item.login + ' в ' + new Date());
+                                log.debug('Stop %s, time %s', item.login, new Date());
 
                                 // оповещаем пользователя о завершении задания
                                 if (finish){
                                     send.message(item.user, `Задание ${item.type} завершено для аккаунта ${item.login}`);
                                 }
                             })
-                            .catch(err => {
-                               // Возникла ошибка, задание не выполнено
-                                console.log(err);
-                            });
+                            .catch(err => log.error(err));
                         break;
 
                     default:

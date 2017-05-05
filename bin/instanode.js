@@ -1,3 +1,4 @@
+const log = require('../libs/log')(module);
 const Client = require('instagram-private-api').V1;
 
 const Account = require('../app/controllers/account');
@@ -25,18 +26,21 @@ exports.followLike = (task) => {
 
         // Поиск данных аккаунта
         await Account.contains(task.user, task.login)
-            .then(result => account = result);
+            .then(result => account = result)
+            .catch(err => log.error(err));
 
         // Авторизация
         await this.auth(account.login, account.password)
             .then(result => {
                 session = result
-            });
+            })
+            .catch(err => log.error(err));
 
         switch (task.params.sourceType){
             case 'Источники':
                 this.followLikeSource(task, session, account)
-                    .then(() => resolve());
+                    .then(() => resolve())
+                    .catch((err) => reject());
                 break;
 
             default:
@@ -49,28 +53,30 @@ exports.followLike = (task) => {
 // подписка+лайк из источника
 exports.followLikeSource = (task, session, account) => {
     return new Promise(async (resolve, reject) => {
-        let source, action, time, id, following;
-
-        id = task._id.toString();
+        let id = task._id.toString();
 
         // Поиск источника
-        await Source.contains(task.params.source)
-            .then(res => source = res);
+        let source = await Source.contains(task.params.source)
+            .catch(err => {
+                log.error(err);
+                reject(err);
+            });
 
         // Список подписок
-        following = task.params.following;
+        let following = task.params.following;
 
         // Кол. подписок в час
-        action = Math.round(task.params.actionFollowDay / 24);
+        let action = Math.round(task.params.actionFollowDay / 24);
 
         // Время на выполнения задания
-        time = (3000 / action) * random(100, 1000); // 1000
+        let time = (3000 / action) * random(100, 1000);
 
+        // Массив пользователей для обхода
         let users = [];
 
         // Поиск уникальных пользователей, для подписки
         let findUsers = async (limit = false) => {
-            for (let user of source.source.reverse()){
+            for (let user of source.source){
                 if (following.includes(user)) continue;
 
                 let used;
@@ -81,17 +87,30 @@ exports.followLikeSource = (task, session, account) => {
                 if (used) continue;
                 if (limit && users.length === limit) break;
 
+                // Добавляем в массив пользователей
                 users.push(user);
 
                 // Добавляем пользователя в временную базу подписок
                 following.push(user);
 
+                // Если нет лимита, то выборка 1 пользователя
                 if (!limit) break;
             }
         };
 
+        // Проверям, на выполнение задачи
+        if (following >= task.params.actionFollow){
+
+            // Задача завершена
+            Task.finish(id)
+                .then(() => {
+                    resolve(true);
+                })
+        }
+
         await findUsers(action);
 
+        // Если больше пользователей нет из задачи, то завершаем задание
         if (!users.length){
 
             // Задача завершена
@@ -126,6 +145,7 @@ exports.followLikeSource = (task, session, account) => {
                                                     _resolve(); // поставили лайки
                                                 })
                                                 .catch(err => {
+                                                    log.error(err);
                                                     _resolve(); // нет контента, ошибка
                                                 });
                                         })
@@ -138,6 +158,7 @@ exports.followLikeSource = (task, session, account) => {
                                 }
                             })
                             .catch(err => {
+                                log.error(err);
                                 _reject(err)
                             })
                     }, time);
@@ -150,7 +171,7 @@ exports.followLikeSource = (task, session, account) => {
                     .then(() => {
                         // Успещно подписались
                     })
-                    .catch(async () => {
+                    .catch(async (err) => {
 
                         // Удаляем пользователя из базы
                         Source.removeUserSource(source.name, user);
@@ -175,10 +196,12 @@ exports.getFollow = (session, user) => {
                         resolve(relationship)
                     })
                     .catch(err => {
+                        log.error(err);
                         reject(err)
                     })
             })
             .catch(err => {
+                log.error(err);
                 reject(err); // Не найден пользователь
             });
     });
@@ -187,8 +210,15 @@ exports.getFollow = (session, user) => {
 // Достаем контент для лайка
 exports.getLike = (session, user, login, like, limit = 1) => {
     return new Promise(async (resolve, reject) => {
-        let account = await Client.Account.searchForUser(session, like);
-        let feed = await new Client.Feed.UserMedia(session, account._params.id, limit);
+        let account = await Client.Account.searchForUser(session, like)
+            .catch(err => {
+                reject(err);
+            });
+
+        let feed = await new Client.Feed.UserMedia(session, account._params.id, limit)
+            .catch(err => {
+                reject(err);
+            });
 
         feed.get()
             .then(async (result) => {
@@ -211,10 +241,9 @@ exports.getLike = (session, user, login, like, limit = 1) => {
 
                                 // Записываем информацию о лайке
                                 Account.like(user, login, item._params.id);
-
                             })
                             .catch((err) => {
-                                // лайк не установлен
+                                log.error(err);
                             });
                         i++;
                     }
@@ -232,50 +261,46 @@ exports.getLike = (session, user, login, like, limit = 1) => {
 // Задание отписаться
 exports.unFollow = async (task) => {
     return new Promise (async (resolve, reject) => {
-        let account, session, following, unFollowing, id;
-
-        id = task._id.toString();
+        let id = task._id.toString();
 
         // Поиск данных аккаунта
-        await Account.contains(task.user, task.login)
-            .then(result => {
-                account = result
+        let account = await Account.contains(task.user, task.login)
+            .catch(err => {
+                log.error(err);
+                reject(err);
             });
 
         // Авторизация
-        await this.auth(account.login, account.password)
-            .then(result => {
-                session = result
+        let session = await this.auth(account.login, account.password)
+            .catch(err => {
+                log.error(err);
+                reject(err)
             });
 
         // Список пользователей, от которых надо отписаться
-        following = task.params.following;
+        let following = task.params.following;
 
         // Список от которых уже отписались
-        unFollowing = task.params.unFollowing;
+        let unFollowing = task.params.unFollowing;
 
         if (!following.length){
 
             // Загружаем список подписок
-            await this.followLoad(session, account.login, account.password)
-                .then(result => following = result);
+            following = await this.followLoad(session, account.login, account.password)
+                .catch(err => {
+                    log.error(err);
+                    reject(err);
+                });
 
             // попробывать реализовать повторный запрос подписок,
             // чтобы получить наибоелее полный список подписок
 
             // Сохраняем для переиспользования
-            Task.followingUpdate(id, following)
-                .then(() => {
-
-                })
-                .catch(err => {
-                    // Возникла ошибка при сохранении
-                    console.log(err)
-                })
+            Task.followingUpdate(id, following);
         }
 
         // Кол. отписок в час
-        let action = task.params.actionFollowingDay / 24; // 20
+        let action =  Math.round(task.params.actionFollowingDay / 24);
 
         // Время на выполнения задания
         let time = (3000 / action) * random(100, 1000);
@@ -320,12 +345,11 @@ exports.unFollow = async (task) => {
                                             console.log(err)
                                         })
                                 } else {
-                                    // Не отписались
                                     _reject();
                                 }
                             })
                             .catch(err => {
-                                // обработка ошибок
+                                log.error(err);
                                 _reject(err)
                             })
                     }, time);
@@ -346,18 +370,19 @@ exports.getUnFollow = (session, user) => {
     return new Promise(async (resolve, reject) => {
 
         // Получаем данные пользователя
-        let id;
-        await Client.Account.searchForUser(session, user)
-            .then(res => {
-                id = res._params.id.toString();
-            })
+        let account = await Client.Account.searchForUser(session, user)
             .catch(err => {
-                reject(); // Не найден пользователь
+                log.error(err);
+                reject();
             });
 
-        Client.Relationship.destroy(session, id)
+        Client.Relationship.destroy(session, account._params.id.toString())
             .then(relationship => {
                 resolve(relationship)
+            })
+            .catch(err => {
+                log.error(err);
+                reject();
             })
     });
 };
