@@ -456,12 +456,9 @@ event.on('actions:account', async (msg, action, next) => {
                 break
         }
 
-        log.debug(text);
-
         send.keyboard(msg.from.id, text, ['Отменить', 'Назад']);
         next ? next() : null
     } catch (err){
-        log.error(err);
         send.message(msg.from.id, 'Нет активного задания');
         next ? next() : null;
 
