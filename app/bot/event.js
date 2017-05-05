@@ -456,7 +456,9 @@ event.on('actions:account', async (msg, action, next) => {
                 break
         }
 
-        send.keyboard(msg.from.id, `hello`, ['Отменить', 'Назад']);
+        log.debug(text);
+
+        send.keyboard(msg.from.id, text, ['Отменить', 'Назад']);
         next ? next() : null
     } catch (err){
         log.error(err);
