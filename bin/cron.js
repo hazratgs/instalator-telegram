@@ -32,7 +32,6 @@ cron.schedule('00 */1 * * *', () => {
                                 delete activeTask[keyActiveTask];
 
                                 log.debug('Stop %s, time %s', item.login, new Date());
-                                console.log(finish)
 
                                 // оповещаем пользователя о завершении задания
                                 if (finish){
@@ -51,7 +50,6 @@ cron.schedule('00 */1 * * *', () => {
                                 let keyActiveTask = activeTask.indexOf(id);
                                 delete activeTask[keyActiveTask];
 
-                                console.log(finish)
                                 log.debug('Stop %s, time %s', item.login, new Date());
 
                                 // оповещаем пользователя о завершении задания

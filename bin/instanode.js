@@ -100,6 +100,7 @@ exports.followLikeSource = async (task, session, account) => {
 
         // Обход пользователй и подписка
         for (let user of users){
+            log.info('Обходим ' + user)
             try {
 
                 // Поиск пользователя
@@ -110,7 +111,7 @@ exports.followLikeSource = async (task, session, account) => {
 
                 let relationship = await this.getFollow(session, searchUser);
                 if (relationship._params.following || relationship._params.outgoingRequest){
-
+                    log.info('Отписались от ' + user)
                     // Фиксирум подписку
                     Task.addUserFollow(id, user);
                     Account.following(task.user, task.login, user);
@@ -160,6 +161,7 @@ exports.getLike = async (session, user, login, account, limit = 1) => {
             // Установка лайка
             await new Client.Like.create(session, item._params.id);
 
+            log.info('Установили лайк ' + item._params.webLink)
             // Записываем информацию о лайке
             Account.like(user, login, item._params.id);
 
@@ -231,17 +233,15 @@ exports.unFollow = async (task) => {
 
         // Обход пользователй и отписка
         for (let user of users){
-            log.info(user)
             try {
                 // Поиск пользователя
                 let searchUser = await Client.Account.searchForUser(session, user);
 
-                let time = Math.round((3000 / action) * random(1, 10));
+                let time = Math.round((3000 / action) * random(50, 800));
                 await sleep(time);
 
                 let relationship = await this.getUnFollow(session, searchUser);
                 if (!relationship._params.following){
-                    log.info('Отписались от ' + user)
 
                     // Фиксируем пользователя
                     Task.unFollowAddUser(id, user);
@@ -253,12 +253,10 @@ exports.unFollow = async (task) => {
             } catch (err) {
 
                 // Удаляем не существующий аккаунт из списка отписок
-                log.debug(err.name)
                 if (err.name === 'IGAccountNotFoundError'){
                     Task.removeUnFollowUser(id, user);
                 }
 
-                log.error(err);
                 // Ищем замену
                 findUsers();
             }
