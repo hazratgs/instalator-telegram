@@ -9,7 +9,7 @@ const Instanode = require('./instanode');
 let activeTask = [];
 
 // Запускаем активные задания
-cron.schedule('7 20 * * *', () => {
+cron.schedule('15 */1 * * *', () => {
     Task.currentList()
         .then(tasks => {
             for (let item of tasks){
