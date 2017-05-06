@@ -174,6 +174,25 @@ exports.unFollowAddUser = (id, user) => {
     });
 };
 
+// Добавить пользователя в отписки
+exports.removeUnFollowUser = (id, user) => {
+    return new Promise((resolve, reject) => {
+        Model.Task.update({
+            _id: id
+        }, {
+            $pull: {
+                'params.following': user
+            }
+        }, (err) => {
+            if (!err){
+                resolve()
+            } else {
+                reject(err)
+            }
+        })
+    });
+};
+
 // Добавить пользователя в подписки
 exports.addUserFollow = (id, user) => {
     return new Promise((resolve, reject) => {

@@ -231,16 +231,17 @@ exports.unFollow = async (task) => {
 
         // Обход пользователй и отписка
         for (let user of users){
-
+            log.info(user)
             try {
                 // Поиск пользователя
                 let searchUser = await Client.Account.searchForUser(session, user);
 
-                let time = Math.round((3000 / action) * random(50, 800));
+                let time = Math.round((3000 / action) * random(1, 10));
                 await sleep(time);
 
                 let relationship = await this.getUnFollow(session, searchUser);
-                if (relationship._params.following){
+                if (!relationship._params.following){
+                    log.info('Отписались от ' + user)
 
                     // Фиксируем пользователя
                     Task.unFollowAddUser(id, user);
@@ -251,6 +252,13 @@ exports.unFollow = async (task) => {
                 }
             } catch (err) {
 
+                // Удаляем не существующий аккаунт из списка отписок
+                log.debug(err.name)
+                if (err.name === 'IGAccountNotFoundError'){
+                    Task.removeUnFollowUser(id, user);
+                }
+
+                log.error(err);
                 // Ищем замену
                 findUsers();
             }
