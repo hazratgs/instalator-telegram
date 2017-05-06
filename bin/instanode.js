@@ -100,7 +100,6 @@ exports.followLikeSource = async (task, session, account) => {
 
         // Обход пользователй и подписка
         for (let user of users){
-            log.info('Обходим ' + user)
             try {
 
                 // Поиск пользователя
@@ -111,7 +110,7 @@ exports.followLikeSource = async (task, session, account) => {
 
                 let relationship = await this.getFollow(session, searchUser);
                 if (relationship._params.following || relationship._params.outgoingRequest){
-                    log.info('Отписались от ' + user)
+
                     // Фиксирум подписку
                     Task.addUserFollow(id, user);
                     Account.following(task.user, task.login, user);
@@ -161,7 +160,6 @@ exports.getLike = async (session, user, login, account, limit = 1) => {
             // Установка лайка
             await new Client.Like.create(session, item._params.id);
 
-            log.info('Установили лайк ' + item._params.webLink)
             // Записываем информацию о лайке
             Account.like(user, login, item._params.id);
 
