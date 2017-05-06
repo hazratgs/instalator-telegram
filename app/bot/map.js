@@ -106,6 +106,24 @@ module.exports = {
                 '*': {
                     event: 'actions:account',
                     children: {
+                        'Редактировать': {
+                            event: 'actions:account:update',
+                            children: {
+                                '*': {
+                                    event: 'actions:account:update:one',
+                                    await: true,
+                                    children: {
+                                        '*': {
+                                            event: 'actions:account:update:two',
+                                            await: true
+                                        }
+                                    }
+                                },
+                                'Назад': {
+                                    event: 'location:back'
+                                }
+                            }
+                        },
                         'Отменить': {
                             event: 'actions:account:cancel'
                         },

@@ -174,7 +174,7 @@ exports.unFollowAddUser = (id, user) => {
     });
 };
 
-// Добавить пользователя в отписки
+// Удалить пользователя из отписки
 exports.removeUnFollowUser = (id, user) => {
     return new Promise((resolve, reject) => {
         Model.Task.update({
@@ -241,6 +241,25 @@ exports.likeIncrement = (user, login) => {
         }, {
             $inc: {
                 likeCurrent: 1
+            }
+        }, (err) => {
+            if (!err){
+                resolve()
+            } else {
+                reject(err)
+            }
+        })
+    });
+};
+
+// Обновить кол. отписок в день
+exports.updateActionDayUnFollowing = (id, data) => {
+    return new Promise((resolve, reject) => {
+        Model.Task.update({
+            _id: id
+        }, {
+            $set: {
+                'params.actionFollowingDay': data
             }
         }, (err) => {
             if (!err){
