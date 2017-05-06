@@ -45,7 +45,7 @@ exports.keyboard = (user, message, data, inline = 2) => {
         reply_markup: {
             keyboard: opt,
             resize_keyboard: true,
-            one_time_keyboard: true
+            // one_time_keyboard: true
         }
     });
 };

@@ -105,7 +105,7 @@ exports.followLikeSource = async (task, session, account) => {
                 // Поиск пользователя
                 let searchUser = await Client.Account.searchForUser(session, user);
 
-                let time = Math.round((3000 / action) * random(50, 800));
+                let time = Math.round((3000 / action) * random(50, 1000));
                 await sleep(time);
 
                 let relationship = await this.getFollow(session, searchUser);
@@ -235,7 +235,7 @@ exports.unFollow = async (task) => {
                 // Поиск пользователя
                 let searchUser = await Client.Account.searchForUser(session, user);
 
-                let time = Math.round((3000 / action) * random(50, 800));
+                let time = Math.round((3000 / action) * random(50, 1000));
                 await sleep(time);
 
                 let relationship = await this.getUnFollow(session, searchUser);
