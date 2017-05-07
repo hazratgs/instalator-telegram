@@ -443,7 +443,7 @@ event.on('actions:account', async (msg, action, next) => {
 
         switch (task.type){
             case 'Лайк + Подписка':
-                daily = Math.round(task.params.actionFollow / task.params.actionFollowDay);
+                daily = Math.round((task.params.actionFollow - task.params.following.length) / task.params.actionFollowDay);
                 text = `Активность ${task.login}\nТип задачи: ${task.type}\nСостояние: ${task.params.actionFollow}/${task.params.following.length}\nПодписок в день: ${task.params.actionFollowDay}\nЛайков в день: ${task.params.actionLikeDay}\nИсточник: ${task.params.source}\nДата завершения: ${daily} дней`;
                 break;
 
