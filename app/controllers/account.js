@@ -1,286 +1,147 @@
 const conf = require('../../conf');
 const log = require('../../libs/log')(module);
-const db  = require('../../libs/db');
 
-const Model  = require('../models/account');
+const Model = require('../models/account');
 
 // Список аккаунтов
-exports.list = (user) => {
-    return new Promise((resolve, reject) => {
-        Model.Account.find({user: user}, (err, result) => {
-            if (!err){
-                if (result.length){
-                    resolve(result)
-                } else {
-                    reject(err)
-                }
-            } else {
-                reject(err)
-            }
-        })
-    });
-};
+exports.list = user => Model.Account.find({user: user});
 
 // Добавление аккаунта
-exports.add = (user, login, password) => {
-    return new Promise((resolve, reject) => {
-        let addAccount = new Model.Account({
-            user: user,
-            login: login.toLowerCase(),
-            password: password
-        });
-        addAccount.save((err) => {
-            if (!err){
-                resolve(addAccount)
-            } else {
-                reject(err)
-            }
-        })
-    });
-};
+exports.add = (user, login, password) =>
+    new Model.Account({
+        user: user,
+        login: login.toLowerCase(),
+        password: password
+    }).save();
 
 // Проверка существование аккаунта
-exports.contains = (user, login) => {
-    return new Promise((resolve, reject) => {
-        Model.Account.findOne({
-            user: user,
-            login: login
-        }, (err, result) => {
-            if (!err){
-                if (result !== null){
-                    resolve(result)
-                } else {
-                    reject('Аккаунт не существует')
-                }
-            } else {
-                reject(err)
-            }
-        })
-    });
-};
+exports.contains = (user, login) =>
+    Model.Account.findOne({user: user, login: login});
 
 // Проверка существование аккаунта у всех пользователей
-exports.containsAllUsers = (login) => {
-    return new Promise((resolve, reject) => {
-        Model.Account.find({
-            login: login
-        }, (err, result) => {
-            if (!err){
-                if (result.length){
-                    resolve(result)
-                } else {
-                    reject(err)
-                }
-            } else {
-                reject(err)
-            }
-        })
-    });
-};
+exports.containsAllUsers = (login) =>
+    Model.Account.find({login: login});
 
 // Удаление аккаунта
-exports.remove = (user, login) => {
-    return new Promise((resolve, reject) => {
-        Model.Account.remove({
-            user: user,
-            login: login
-        }, (err) => {
-            if (!err){
-                resolve()
-
-                // При удалении также необходимо удалить задачу
-
-            } else {
-                reject(err)
-            }
-        })
-    });
-
-};
+exports.remove = (user, login) =>
+    Model.Account.remove({user: user, login: login});
 
 // Записать информацию о подписке
-exports.following = (user, login, follow) => {
-    return new Promise((resolve, reject) => {
-        this.checkFollowing(user, login, follow)
-            .then(() => reject())
-            .catch(() => {
-                this.addFollowing(user, login, follow)
-                    .then(() => {
-                        resolve()
-                    });
-            });
-    });
+exports.following = async (user, login, follow) => {
+    try {
+        let check = await this.checkFollowing(user, login, follow);
+        if (check === null) throw new Error(`Пользователь ${login} не подписан к ${follow}`);
+        return check;
+    } catch (e){
+        return this.addFollowing(user, login, follow)
+    }
 };
 
 // Проверить подписку
-exports.checkFollowing = (user, login, follow) => {
-    return new Promise((resolve, reject) => {
-        Model.AccountFollow.findOne({
-            user: user,
-            login: login,
-            data: {
-                '$in': [follow] // []
-            }
-        }, (err, result) => {
-            if (!err){
-                if (result !== null){
-                    resolve(result)
-                } else {
-                    reject()
-                }
-            } else {
-                reject(err)
-            }
-        });
-    });
-};
+exports.checkFollowing = (user, login, follow) =>
+    Model.AccountFollow.findOne({
+        user: user,
+        login: login,
+        data: {
+            '$in': [follow]
+        }
+});
 
 // Добавить подписчика в историю
-exports.addFollowing = (user, login, follow) => {
-    return new Promise((resolve, reject) => {
-        this.followList(user, login)
-            .then(() => {
-                Model.AccountFollow.update({
-                    user: user,
-                    login: login
-                }, {
-                    $push: {
-                        data: follow
-                    }
-                }, (err) => resolve())
-            })
-            .catch(() => {
-                new Model.AccountFollow({ // Запись не найдена, добавляем
-                    user: user,
-                    login: login,
-                    data: follow
-                }).save((err) => resolve())
-            });
-
-    });
-};
-
-// Список подписок пользователя
-exports.followList = (user, login) => {
-    return new Promise((resolve, reject) => {
-        Model.AccountFollow.findOne({
-            user: user,
-            login: login
-        }, (err, result) => {
-            if (!err){
-                if (result !== null){
-                    resolve(result)
-                } else {
-                    reject(err)
-                }
-            } else {
-                reject(err)
-            }
-        });
-    });
-};
-
-// Очистить список подписчиков
-exports.followClear = (user, login) => {
-    return new Promise((resolve, reject) => {
-        Model.AccountFollow.update({
+exports.addFollowing = async (user, login, follow) => {
+    try {
+        let list = await this.followList(user, login);
+        if (list === null) throw new Error(`AccountFollow отсутствует для ${login}`);
+        return Model.AccountFollow.update({
             user: user,
             login: login
         }, {
-            $set: {
-                data: []
-            }
-        }, (err) => {
-            if (!err){
-                resolve()
-            } else {
-                reject()
-            }
-        })
-    });
+            $push: {data: follow}
+        });
+    } catch (e){
+
+        // Создаем базу для хранения подписок
+        return new Model.AccountFollow({
+            user: user,
+            login: login,
+            data: follow
+        }).save();
+    }
 };
+
+// Список подписок пользователя
+exports.followList = (user, login) =>
+    Model.AccountFollow.findOne({
+        user: user,
+        login: login
+    });
+
+// Очистить список подписчиков
+exports.followClear = (user, login) =>
+    Model.AccountFollow.update({
+        user: user,
+        login: login
+    }, {
+        $set: {
+            data: []
+        }
+    });
 
 // Записать информацию о лайке
 exports.like = (user, login, like) => {
-    return new Promise((resolve, reject) => {
-        this.checkLike(user, login, like)
-            .then(() => reject())
-            .catch(() => {
-                this.addLike(user, login, like)
-                    .then(() => {
-                        resolve()
-                    });
-            });
-    });
+    try {
+        let check = this.checkLike(user, login, like);
+        if (check === null) throw new Error(`${login} не лайкал ранее ${like}`)
+        return check;
+    } catch (e){
+
+        // Ставим лайк
+        return this.addLike(user, login, like)
+    }
 };
 
 // Проверить, лайкнул ли
-exports.checkLike = (user, login, like) => {
-    return new Promise((resolve, reject) => {
-        Model.AccountLike.findOne({
-            user: user,
-            login: login,
-            data: {
-                '$in': [like]
-            }
-        }, (err, result) => {
-            if (!err){
-                if (result !== null){
-                    resolve(result)
-                } else {
-                    reject(err)
-                }
-            } else {
-                reject(err)
-            }
-        });
+exports.checkLike = (user, login, like) =>
+    Model.AccountLike.findOne({
+        user: user,
+        login: login,
+        data: {
+            '$in': [like]
+        }
     });
-};
 
 // Добавить подписчика лайк
-exports.addLike = (user, login, like) => {
-    return new Promise((resolve, reject) => {
-        this.likeList(user, login)
-            .then(() => {
-                Model.AccountLike.update({
-                    user: user,
-                    login: login
-                }, {
-                    $push: {
-                        data: like
-                    }
-                }, (err) => resolve())
-            })
-            .catch(() => {
-                new Model.AccountLike({ // Запись не найдена, добавляем
-                    user: user,
-                    login: login,
-                    data: like
-                }).save((err) => resolve())
-            });
+exports.addLike = async (user, login, like) => {
+    try {
+        let list = await this.likeList(user, login);
+        if (list === null) throw new Error(`База данных AccountLike отсутствует для пользователя ${login}`)
 
-    });
+        // Записываем информацию о лайке
+        return Model.AccountLike.update({
+            user: user,
+            login: login
+        }, {
+            $push: {
+                data: like
+            }
+        });
+    } catch (e){
+
+        // Запись не найдена, создаем документ
+        return new Model.AccountLike({
+            user: user,
+            login: login,
+            data: like
+        }).save()
+    }
 };
 
 // Список лайков пользователя
-exports.likeList = (user, login) => {
-    return new Promise((resolve, reject) => {
-        Model.AccountLike.findOne({
-            user: user,
-            login: login
-        }, (err, result) => {
-            if (!err){
-                if (result !== null){
-                    resolve(result)
-                } else {
-                    reject(err)
-                }
-            } else {
-                reject(err)
-            }
-        });
+exports.likeList = (user, login) =>
+    Model.AccountLike.findOne({
+        user: user,
+        login: login
     });
-};
 
 
 
