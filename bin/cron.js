@@ -9,63 +9,67 @@ const Instanode = require('./instanode');
 let activeTask = [];
 
 // Запускаем активные задания
-cron.schedule('15 */1 * * *', () => {
-    Task.currentList()
-        .then(tasks => {
-            for (let item of tasks){
+cron.schedule('15 */1 * * *', async () => {
+    try {
+        let list = await Task.currentList();
+        if (list === null) throw new Error('Нет активных заданий');
 
-                let id = item._id.toString();
+        for (let item of list){
+            let id = item._id.toString();
 
-                // Пропускаем выполняющиеся задания
-                if (activeTask.includes(id)) continue;
+            // Пропускаем выполняющиеся задания
+            if (activeTask.includes(id)) continue;
 
-                log.debug('Start %s %s', item.login, new Date());
+            log.debug('Start %s %s', item.login, new Date());
 
-                switch (item.type){
-                    case 'Лайк + Подписка':
-                        activeTask.push(id);
-                        Instanode.followLike(item)
-                            .then(finish => {
+            switch (item.type){
+                case 'Лайк + Подписка':
+                    activeTask.push(id);
+                    Instanode.followLike(item)
+                        .then(finish => {
 
-                                // Удаляем из списка выполняемых
-                                let keyActiveTask = activeTask.indexOf(id);
-                                delete activeTask[keyActiveTask];
+                            // Удаляем из списка выполняемых
+                            let keyActiveTask = activeTask.indexOf(id);
+                            delete activeTask[keyActiveTask];
 
-                                log.debug('Stop %s, time %s', item.login, new Date());
+                            log.debug('Stop %s, time %s', item.login, new Date());
 
-                                // оповещаем пользователя о завершении задания
-                                if (finish){
-                                    send.message(item.user, `Задание ${item.type} завершено для аккаунта ${item.login}`);
-                                }
-                            })
-                            .catch(err => log.error(err));
-                        break;
+                            // оповещаем пользователя о завершении задания
+                            if (finish){
+                                send.message(item.user, `Задание ${item.type} завершено для аккаунта ${item.login}`);
+                            }
+                        })
+                        .catch(e => log.error(e));
+                    break;
 
-                    case 'Отписка':
-                        activeTask.push(id);
-                        Instanode.unFollow(item)
-                            .then(finish => {
+                case 'Отписка':
+                    activeTask.push(id);
+                    Instanode.unFollow(item)
+                        .then(finish => {
 
-                                // Удаляем из списка выполняемых
-                                let keyActiveTask = activeTask.indexOf(id);
-                                delete activeTask[keyActiveTask];
+                            // Удаляем из списка выполняемых
+                            let keyActiveTask = activeTask.indexOf(id);
+                            delete activeTask[keyActiveTask];
 
-                                log.debug('Stop %s, time %s', item.login, new Date());
+                            log.debug('Stop %s, time %s', item.login, new Date());
 
-                                // оповещаем пользователя о завершении задания
-                                if (finish){
-                                    send.message(item.user, `Задание ${item.type} завершено для аккаунта ${item.login}`);
-                                }
-                            })
-                            .catch(err => log.error(err));
-                        break;
+                            // оповещаем пользователя о завершении задания
+                            if (finish){
+                                send.message(item.user, `Задание ${item.type} завершено для аккаунта ${item.login}`);
+                            }
+                        })
+                        .catch(e => log.error(e));
+                    break;
 
-                    default:
-                        break;
-                }
+                default:
+                    // Тип задания не определен
+                    break;
             }
-        })
-        .catch(err => {
-            // Нет активных заданий
-        });
+        }
+
+    } catch (e){
+
+        // Нет активных заданий
+        log.info(e);
+    }
 });
