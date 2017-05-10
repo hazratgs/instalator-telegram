@@ -22,10 +22,10 @@ module.exports = (app) => {
         res.send({"ok": false, "error_code": 404, "description": "Not found"});
     });
 
-    /* Возникла ошибка */
+    // Возникла ошибка
     app.use((err, req, res, next) => {
         res.status(err.status || 500);
-        log.error('Internal error(%d): %s',res.statusCode,err.message);
+        log.error('Internal error(%d): %s', res.statusCode, err.message);
         res.send({"ok": false, "error_code": 500, "description": err.message});
 
         // Оповещаем разработчика об ошибке
