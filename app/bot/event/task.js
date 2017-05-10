@@ -86,7 +86,7 @@ module.exports = (event, state, log, map, send) => {
     event.on('task:select:follow+like:source', async (msg, action, next) => {
         try {
             let list = await Source.list();
-            if (list === null) throw new Error('К сожалению нет источников');
+            if (!list.length) throw new Error('К сожалению нет источников');
 
             let source = list.map((item) => item.name);
 
@@ -95,7 +95,7 @@ module.exports = (event, state, log, map, send) => {
             next ? next() : null;
 
         } catch (e){
-            send.message(msg.from.id, e);
+            send.message(msg.from.id, e.message);
             next ? next() : null;
 
             event.emit('location:back', msg);
