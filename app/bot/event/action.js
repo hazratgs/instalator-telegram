@@ -6,19 +6,20 @@ const instanode = require('../../../bin/instanode');
 module.exports = (event, state, log, map, send) => {
 
     // Активность пользователя
-    event.on('actions', (msg, action, next) => {
-        Account.list(msg.from.id)
-            .then(accounts => {
-                let elements = accounts.map((item) => item.login);
-                send.keyboard(msg.from.id, 'Выберите аккаунт', [...elements, 'Назад']);
-                next ? next() : null
-            })
+    event.on('actions', async (msg, action, next) => {
+        try {
+            let list = await Account.list(msg.from.id);
+            if (list === null) throw new Error('Нет ни одного аккаунта');
 
-            // Аккаунтов нет, предлогаем добавить
-            .catch(err => {
-                send.keyboard(msg.from.id, 'У вас нет ни одного аккаунта', ['Назад'])
-                next ? next() : null
-            })
+            // Отправляем список аккаунтов
+            let elements = list.map((item) => item.login);
+            send.keyboard(msg.from.id, 'Выберите аккаунт', [...elements, 'Назад']);
+            next ? next() : null
+
+        } catch (e){
+            send.keyboard(msg.from.id, 'У вас нет ни одного аккаунта', ['Назад']);
+            next ? next() : null
+        }
     });
 
     // Вывод информации об активности Аккаунта
@@ -47,6 +48,7 @@ module.exports = (event, state, log, map, send) => {
 
             send.keyboard(msg.from.id, text, ['Редактировать', 'Отменить', 'Назад']);
             next ? next() : null
+
         } catch (err){
             send.message(msg.from.id, 'Нет активного задания');
             next ? next() : null;
@@ -66,6 +68,7 @@ module.exports = (event, state, log, map, send) => {
             send.message(msg.from.id, `🔴 Задание ${task.type} отменена`);
 
             event.emit('location:back', msg);
+
         } catch (err){
             send.message(msg.from.id, 'Возникла ошибка, повторите');
             next ? next() : null;

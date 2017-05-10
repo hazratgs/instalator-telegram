@@ -12,26 +12,28 @@ module.exports = (event, state, log, map, send) => {
     });
 
     // Выбор аккаунта для задания
-    event.on('task:select', (msg, action, next) => {
-        Account.contains(msg.from.id, msg.text)
-            .then(account => {
+    event.on('task:select', async (msg, action, next) => {
+        try {
+            let check = Account.contains(msg.from.id, msg.text);
+            if (check === null) throw new Error(`Аккаунт ${msg.text} не существует, выберите другой`);
+
+            try {
 
                 // Проверяем, есть ли активные задания у аккаунта
-                Task.current(msg.from.id, msg.text)
+                let task = await Task.current(msg.from.id, msg.text);
+                if (task === null) throw new Error();
 
                 // Активное задание есть
-                    .then(tasks => {
-                        send.message(msg.from.id, `Есть активное задание у ${msg.text}, попробуйте позже.`);
-                        event.emit('account:list', msg);
-                    })
-                    .catch(err => {
-                        send.keyboard(msg.from.id, `Выберите действие`, action);
-                        next ? next() : null
-                    })
-            })
-            .catch(err => {
-                send.message(msg.from.id, `Аккаунт ${msg.text} не существует, выберите другой`);
-            });
+                send.message(msg.from.id, `Есть активное задание у ${msg.text}, попробуйте позже.`);
+                event.emit('account:list', msg);
+
+            } catch (e){
+                send.keyboard(msg.from.id, `Выберите действие`, action);
+                next ? next() : null
+            }
+        } catch (e){
+            send.message(msg.from.id, `Аккаунт ${msg.text} не существует, выберите другой`);
+        }
     });
 
     // Выбор типа задания
@@ -81,36 +83,38 @@ module.exports = (event, state, log, map, send) => {
     });
 
     // Список источников
-    event.on('task:select:follow+like:source', (msg, action, next) => {
-        Source.list()
-            .then(result => {
-                let source = result.map((item) => {
-                    return item.name
-                });
+    event.on('task:select:follow+like:source', async (msg, action, next) => {
+        try {
+            let list = await Source.list();
+            if (list === null) throw new Error('К сожалению нет источников');
 
-                // Выбранное действие
-                send.keyboard(msg.from.id, `Выберите источник`, [...source, 'Назад']);
-                next ? next() : null;
-            })
-            .catch(err => {
-                next ? next() : null;
+            let source = list.map((item) => item.name);
 
-                send.message(msg.from.id, 'К сожалению нет источников');
-                event.emit('location:back', msg);
-            });
+            // Выбранное действие
+            send.keyboard(msg.from.id, `Выберите источник`, [...source, 'Назад']);
+            next ? next() : null;
+
+        } catch (e){
+            send.message(msg.from.id, e);
+            next ? next() : null;
+
+            event.emit('location:back', msg);
+        }
     });
 
     // Выбор источника
-    event.on('task:select:follow+like:source:select', (msg, action, next) => {
-        Source.contains(msg.text)
-            .then(source => {
-                // Кол. действия
-                send.keyboard(msg.from.id, 'Введите количество Подписок', ['2500', '5000', '7500', 'Назад']);
-                next ? next() : null
-            })
-            .catch(err => {
-                send.message(msg.from.id, 'Ошибка, нет такого источника');
-            })
+    event.on('task:select:follow+like:source:select', async (msg, action, next) => {
+        try {
+            let check = await Source.contains(msg.text);
+            if (check === null) throw new Error('Ошибка, нет такого источника');
+
+            // Кол. действия
+            send.keyboard(msg.from.id, 'Введите количество Подписок', ['2500', '5000', '7500', 'Назад']);
+            next ? next() : null
+
+        } catch (e){
+            send.message(msg.from.id, e);
+        }
     });
 
     // Количество действий
@@ -153,42 +157,40 @@ module.exports = (event, state, log, map, send) => {
     });
 
     // Создаем задание
-    event.on('task:create:follow+like:save', (msg, action) => {
+    event.on('task:create:follow+like:save', async (msg, action) => {
         let data = state[msg.from.id];
         data.splice(0, 1);
 
-        // Проверка существования задачи
-        Task.current(msg.from.id, data[0])
-            .then(task => {
-                send.message(msg.from.id, 'У этого аккаунта есть активное задание, дождитесь завершения.');
+        try {
 
-                // Переходим на главную
-                event.emit('location:home', msg);
-            })
-            .catch(err => {
-                Task.createFollowLike({
-                    user: msg.from.id,
-                    login: data[0],
-                    type: data[1],
-                    sourceType: data[2],
-                    source: data[3],
-                    action: data[4],
-                    actionDay: data[5],
-                    like: data[6],
-                })
-                    .then(() => {
-                        send.message(msg.from.id, 'Задание успешно добавлено, подробнее можете посмотреть в активности');
+            // Проверка существования задачи
+            let task = await Task.current(msg.from.id, data[0]);
+            if (task === null) throw new Error('Есть активное задание');
 
-                        // Переходим на главную
-                        event.emit('location:home', msg);
-                    })
-                    .catch((err) => {
-                        send.message(msg.from.id, 'Возникла ошибка, пожалуйста повторите еще раз!');
+            send.message(msg.from.id, 'У этого аккаунта есть активное задание, дождитесь завершения.');
 
-                        // Переходим на главную
-                        event.emit('location:home', msg);
-                    })
-            })
+            // Переходим на главную
+            event.emit('location:home', msg);
+
+        } catch (e){
+
+            // Создание задания
+            await Task.createFollowLike({
+                user: msg.from.id,
+                login: data[0],
+                type: data[1],
+                sourceType: data[2],
+                source: data[3],
+                action: data[4],
+                actionDay: data[5],
+                like: data[6],
+            });
+
+            send.message(msg.from.id, 'Задание успешно добавлено, подробнее можете посмотреть в активности');
+
+            // Переходим на главную
+            event.emit('location:home', msg);
+        }
     });
 
     // Отписка
@@ -204,38 +206,34 @@ module.exports = (event, state, log, map, send) => {
     });
 
     // Создание задание отписка
-    event.on('task:select:type:unfollow:save', (msg, action) => {
+    event.on('task:select:type:unfollow:save', async (msg, action) => {
         let data = state[msg.from.id];
         data.splice(0, 1);
 
-        // Проверка существования задачи
-        Task.current(msg.from.id, data[0])
-            .then(task => {
-                send.message(msg.from.id, 'У этого аккаунта есть активное задание, дождитесь завершения.');
+        try {
 
-                // Переходим на главную
-                event.emit('location:home', msg);
-            })
-            .catch(err => {
-                Task.createUnFollow({
-                    user: msg.from.id,
-                    login: data[0],
-                    type: data[1],
-                    actionFollowingDay: data[2]
-                })
-                    .then(() => {
-                        send.message(msg.from.id, 'Задание успешно добавлено, подробнее можете посмотреть в активности');
+            // Проверка существования задачи
+            let task = await Task.current(msg.from.id, data[0]);
+            if (task === null) throw new Error('Нет активных заданий');
 
-                        // Переходим на главную
-                        event.emit('location:home', msg);
-                    })
-                    .catch((err) => {
-                        send.message(msg.from.id, 'Возникла ошибка, пожалуйста повторите еще раз!');
+            send.message(msg.from.id, 'У этого аккаунта есть активное задание, дождитесь завершения.');
 
-                        // Переходим на главную
-                        event.emit('location:home', msg);
-                    })
-            })
+            // Переходим на главную
+            event.emit('location:home', msg);
+
+        } catch (e){
+            await Task.createUnFollow({
+                user: msg.from.id,
+                login: data[0],
+                type: data[1],
+                actionFollowingDay: data[2]
+            });
+
+            send.message(msg.from.id, 'Задание успешно добавлено, подробнее можете посмотреть в активности');
+
+            // Переходим на главную
+            event.emit('location:home', msg);
+        }
     });
 };
 

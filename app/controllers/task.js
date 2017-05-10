@@ -1,26 +1,12 @@
-const conf = require('../../conf');
-const log = require('../../libs/log')(module);
-const db  = require('../../libs/db');
-
 const Model  = require('../models/task');
 
 // Добавить задание
-exports.create = data => {
-    return new Promise((resolve, reject) => {
-        let Task = new Model.Task(data);
-        Task.save((err) => {
-            if (!err){
-                resolve()
-            } else {
-                reject()
-            }
-        });
-    });
-};
+exports.create = data =>
+    new Model.Task(data).save();
 
 // задание Лайк+Подписка
-exports.createFollowLike = data => {
-    return this.create({
+exports.createFollowLike = data =>
+    this.create({
         user: data.user,
         login: data.login,
         type: data.type,
@@ -32,12 +18,11 @@ exports.createFollowLike = data => {
             actionLikeDay: data.like, // кол. лайков в день,
             following: [] // на кого подписались
         }
-    })
-};
+    });
 
 // задание Отписка
-exports.createUnFollow = data => {
-    return this.create({
+exports.createUnFollow = data =>
+    this.create({
         user: data.user,
         login: data.login,
         type: data.type,
@@ -46,228 +31,113 @@ exports.createUnFollow = data => {
             unFollowing: [], // список пользователей, от которых в этом задании отписались
             actionFollowingDay: data.actionFollowingDay, // кол. отписок в день
         }
-    })
-};
+    });
 
 // Список задач пользователя
-exports.list = user => {
-    return new Promise((resolve, reject) => {
-        Model.Task.find({
-            user: user
-        }, (err, tasks) => resolve(tasks))
-    });
-};
+exports.list = user => Model.Task.find({user: user});
 
 // Текущее задание аккаунта
-exports.current = (user, login) => {
-    return new Promise((resolve, reject) => {
-        Model.Task.findOne({
-            user: user,
-            login: login,
-            status: 'active'
-        }, (err, tasks) => {
-            if (!err){
-                if (tasks !== null){
-                    resolve(tasks)
-                } else {
-                    reject('Нет активной задачи')
-                }
-            } else {
-                reject(err)
-            }
-        })
+exports.current = (user, login) =>
+    Model.Task.findOne({
+        user: user,
+        login: login,
+        status: 'active'
     });
-};
 
 // Активные задания
-exports.currentList = () => {
-    return new Promise((resolve, reject) => {
-        Model.Task.find({
-            status: 'active'
-        }, (err, tasks) => {
-            if (!err){
-                if (tasks.length){
-                    resolve(tasks)
-                } else {
-                    reject(err)
-                }
-            } else {
-                reject(err)
-            }
-        })
+exports.currentList = () =>
+    Model.Task.find({
+        status: 'active'
     });
-};
 
 // Завершение задания
-exports.finish = id => {
-    return new Promise((resolve, reject) => {
-        Model.Task.update({
-            _id: id
-        }, {
-            $set: {
-                status: 'success'
-            }
-        }, (err) => {
-            if (!err){
-                resolve()
-            } else {
-                reject()
-            }
-        })
+exports.finish = id =>
+    Model.Task.update({
+        _id: id
+    }, {
+        $set: {
+            status: 'success'
+        }
     });
-};
 
 // Отмена задания
-exports.cancel = id => {
-    return new Promise((resolve, reject) => {
-        Model.Task.update({
-            _id: id
-        }, {
-            $set: {
-                status: 'cancel'
-            }
-        }, (err) => {
-            if (!err){
-                resolve()
-            } else {
-                reject()
-            }
-        })
+exports.cancel = id =>
+    Model.Task.update({
+        _id: id
+    }, {
+        $set: {
+            status: 'cancel'
+        }
     });
-};
 
 // Обновить список подписок
-exports.followingUpdate = (id, data) => {
-    return new Promise((resolve, reject) => {
-        Model.Task.update({
-            _id: id
-        }, {
-            $set: {
-                'params.following': data
-            }
-        }, (err) => {
-            if (!err){
-                resolve()
-            } else {
-                reject(err)
-            }
-        })
+exports.followingUpdate = (id, data) =>
+    Model.Task.update({
+        _id: id
+    }, {
+        $set: {
+            'params.following': data
+        }
     });
-};
 
 // Добавить пользователя в отписки
-exports.unFollowAddUser = (id, user) => {
-    return new Promise((resolve, reject) => {
-        Model.Task.update({
-            _id: id
-        }, {
-            $push: {
-                'params.unFollowing': user
-            }
-        }, (err) => {
-            if (!err){
-                resolve()
-            } else {
-                reject(err)
-            }
-        })
+exports.unFollowAddUser = (id, user) =>
+    Model.Task.update({
+        _id: id
+    }, {
+        $push: {
+            'params.unFollowing': user
+        }
     });
-};
 
 // Удалить пользователя из отписки
-exports.removeUnFollowUser = (id, user) => {
-    return new Promise((resolve, reject) => {
-        Model.Task.update({
-            _id: id
-        }, {
-            $pull: {
-                'params.following': user
-            }
-        }, (err) => {
-            if (!err){
-                resolve()
-            } else {
-                reject(err)
-            }
-        })
+exports.removeUnFollowUser = (id, user) =>
+    Model.Task.update({
+        _id: id
+    }, {
+        $pull: {
+            'params.following': user
+        }
     });
-};
 
 // Добавить пользователя в подписки
-exports.addUserFollow = (id, user) => {
-    return new Promise((resolve, reject) => {
-        Model.Task.update({
-            _id: id
-        }, {
-            $push: {
-                'params.following': user
-            }
-        }, (err) => {
-            if (!err){
-                resolve()
-            } else {
-                reject(err)
-            }
-        })
+exports.addUserFollow = (id, user) =>
+    Model.Task.update({
+        _id: id
+    }, {
+        $push: {
+            'params.following': user
+        }
     });
-};
 
 // Инкримент подписчиков
-exports.currentIncrement = (user, login) => {
-    return new Promise((resolve, reject) => {
-        Model.Task.update({
-            user: user,
-            login: login
-        }, {
-            $inc: {
-                current: 1
-            }
-        }, (err) => {
-            if (!err){
-                resolve()
-            } else {
-                reject(err)
-            }
-        })
+exports.currentIncrement = (user, login) =>
+    Model.Task.update({
+        user: user,
+        login: login
+    }, {
+        $inc: {
+            current: 1
+        }
     });
-};
 
 // Инкримент лайков
-exports.likeIncrement = (user, login) => {
-    return new Promise((resolve, reject) => {
-        Model.Task.update({
-            user: user,
-            login: login
-        }, {
-            $inc: {
-                likeCurrent: 1
-            }
-        }, (err) => {
-            if (!err){
-                resolve()
-            } else {
-                reject(err)
-            }
-        })
+exports.likeIncrement = (user, login) =>
+    Model.Task.update({
+        user: user,
+        login: login
+    }, {
+        $inc: {
+            likeCurrent: 1
+        }
     });
-};
 
 // Обновить кол. отписок в день
-exports.updateActionDayUnFollowing = (id, data) => {
-    return new Promise((resolve, reject) => {
-        Model.Task.update({
-            _id: id
-        }, {
-            $set: {
-                'params.actionFollowingDay': data
-            }
-        }, (err) => {
-            if (!err){
-                resolve()
-            } else {
-                reject(err)
-            }
-        })
+exports.updateActionDayUnFollowing = (id, data) =>
+    Model.Task.update({
+        _id: id
+    }, {
+        $set: {
+            'params.actionFollowingDay': data
+        }
     });
-};
-

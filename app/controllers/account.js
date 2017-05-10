@@ -1,6 +1,3 @@
-const conf = require('../../conf');
-const log = require('../../libs/log')(module);
-
 const Model = require('../models/account');
 
 // Список аккаунтов
@@ -92,6 +89,7 @@ exports.like = (user, login, like) => {
     try {
         let check = this.checkLike(user, login, like);
         if (check === null) throw new Error(`${login} не лайкал ранее ${like}`)
+
         return check;
     } catch (e){
 
@@ -142,12 +140,3 @@ exports.likeList = (user, login) =>
         user: user,
         login: login
     });
-
-
-
-
-
-
-
-
-
