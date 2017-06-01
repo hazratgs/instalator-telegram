@@ -1,6 +1,6 @@
 .idea/
 node_modules/
 npm-debug.log
-app/bot/index.js
+app/bot/map.js
 conf/conf.json
 *.txt
