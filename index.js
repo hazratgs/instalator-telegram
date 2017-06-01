@@ -1,5 +1,5 @@
 /*!
- * nodeapp
+ * instalator-telegram
  * Copyright(c) 2017 Hazrat Gadjikerimov
  * MIT Licensed
  */

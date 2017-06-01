@@ -4,7 +4,6 @@
     "uri": "mongodb://localhost/instalator5"
   },
   "telegram": {
-    "token": "389525311:AAF9sNgrhf3ZX3wPmgEg3Y4oGPpCUXdJRZ8",
-    "user": 253178128
+    "token": "389525311:AAF9sNgrhf3ZX3wPmgEg3Y4oGPpCUXdJRZ8"
   }
 }
