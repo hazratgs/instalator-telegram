@@ -11,6 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.17.1",
+    "download-file": "^0.1.5",
     "express": "^4.14.0",
     "instagram-private-api": "^0.5.16",
     "mongoose": "^4.7.6",

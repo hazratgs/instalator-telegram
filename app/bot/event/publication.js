@@ -1,3 +1,8 @@
+const Telegram = require('../../../libs/telegramBot');
+const conf = require('../../../conf')
+const https = require('https');
+const fs = require('fs');
+
 module.exports = (event, state, log, map, send) => {
 
   // Главное меню
@@ -13,14 +18,27 @@ module.exports = (event, state, log, map, send) => {
   });
 
   // Добавить отложенную публикацию
-  event.on('publication:create:upload', (msg, action, next) => {
-    console.log(msg.photo)
+  event.on('publication:create:upload', async (msg, action, next) => {
     if (!msg.hasOwnProperty('photo')){
       send.message(msg.from.id, 'Ошибка, я жду фотографию');
       return null
     }
 
-    send.message(msg.from.id, 'Ok');
+    // ID файла
+    let id = msg.photo[msg.photo.length - 1].file_id;
+
+    // Получаем путь к файлу
+    let file = await Telegram.getFile(id)
+    let url = `https://api.telegram.org/file/bot${conf.get('telegram:token')}/${file.file_path}`;
+
+    // Формирование нового имени для файла
+    let name = '';
+
+    let fileStream = fs.createWriteStream(`/public/img/publication/`);
+    https.get(url, response => {
+        response.pipe(fileStream);
+        send.message(msg.from.id, 'Успешно загружено');
+    })
   });
 
 
