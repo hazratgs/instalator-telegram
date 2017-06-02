@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "forever start index.js -l log.txt"
+    "start": "node index.js",
+    "deamon": "forever start index.js -l log.txt"
   },
   "author": "hazratgs",
   "license": "ISC",

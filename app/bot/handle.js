@@ -6,6 +6,11 @@ const emoji = require('./emoji');
 // Редьюсер текстовых команд
 exports.router = (msg) => {
 
+    // Если прислали фото, подставляем msg.txt что бы роутинг продолжал работать
+    if (msg.hasOwnProperty('photo')){
+        msg.text = 'Фотография';
+    }
+
     // Декодируем эмодзи
     msg.text = emoji.decode(msg.text);
 

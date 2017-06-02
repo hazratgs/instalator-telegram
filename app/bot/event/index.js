@@ -11,6 +11,7 @@ const state = {};
 const account = require('./account')(event, state, log, map, send);
 const action = require('./action')(event, state, log, map, send);
 const task = require('./task')(event, state, log, map, send);
+const publication = require('./publication')(event, state, log, map, send);
 
 // Изменение расположения пользователя
 event.on('location:next', (msg, action) => {
