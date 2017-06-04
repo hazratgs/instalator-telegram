@@ -178,7 +178,7 @@ module.exports = {
               event: 'publication:create:upload',
               children: {
                 '*': {
-
+                  event: 'publication:create:title'
                 }
               }
             },

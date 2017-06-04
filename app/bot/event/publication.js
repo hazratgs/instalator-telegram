@@ -29,11 +29,17 @@ module.exports = (event, state, log, map, send) => {
       // Переходим к следующему шагу
       send.message(msg.from.id, 'Фотография успешно загружена');
       send.message(msg.from.id, 'Введите подпись');
-      next();
+      next(name);
 
     } catch (e){
       send.message(msg.from.id, 'Возникла ошибка, повторите еще раз');
     }
+  });
+
+  // Подпись для новой отложенной публикации
+  event.on('publication:create:title', async (msg, action, next) => {
+    send.message(msg.from.id, 'Укажите время публикации (мин час день месяц год), пример: 30 19 4 8 2017');
+    next();
   });
 
   // Список публикаций, ожидающих публикацию (тавтология)
