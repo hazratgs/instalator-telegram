@@ -14,9 +14,9 @@ const task = require('./task')(event, state, log, map, send);
 const publication = require('./publication')(event, state, log, map, send);
 
 // Изменение расположения пользователя
-event.on('location:next', (msg, action) => {
+event.on('location:next', (msg, action, value) => {
     if (action.event !== 'location:back' && !action.await){
-        state[msg.from.id].push(msg.text);
+        state[msg.from.id].push(value);
     }
 });
 

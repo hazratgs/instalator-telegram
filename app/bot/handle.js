@@ -48,8 +48,8 @@ exports.router = (msg) => {
             let action = reducer.children[msg.text];
 
             // Вызов действия
-            event.event.emit(action.event, msg, action, () => {
-                event.event.emit('location:next', msg, action)
+            event.event.emit(action.event, msg, action, (value = msg.text) => {
+                event.event.emit('location:next', msg, action, value)
             })
 
         } else {
@@ -59,8 +59,8 @@ exports.router = (msg) => {
                 let action = reducer.children['*'];
 
                 // Вызов действия
-                event.event.emit(action.event, msg, action, () => {
-                    event.event.emit('location:next', msg, action)
+                event.event.emit(action.event, msg, action, (value = msg.text) => {
+                    event.event.emit('location:next', msg, action, value)
                 })
             }
         }
