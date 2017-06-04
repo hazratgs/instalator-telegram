@@ -175,7 +175,12 @@ module.exports = {
           event: 'publication:create',
           children: {
             '*': {
-              event: 'publication:create:upload'
+              event: 'publication:create:upload',
+              children: {
+                '*': {
+
+                }
+              }
             },
             'Назад': {
               event: 'location:back'

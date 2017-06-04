@@ -1,7 +1,4 @@
-const Telegram = require('../../../libs/telegramBot');
-const conf = require('../../../conf')
-const https = require('https');
-const fs = require('fs');
+const Publication = require('../../controllers/publication');
 
 module.exports = (event, state, log, map, send) => {
 
@@ -21,26 +18,23 @@ module.exports = (event, state, log, map, send) => {
   event.on('publication:create:upload', async (msg, action, next) => {
     if (!msg.hasOwnProperty('photo')){
       send.message(msg.from.id, 'Ошибка, я жду фотографию');
-      return null
+      return null;
     }
 
-    // ID файла
-    let id = msg.photo[msg.photo.length - 1].file_id;
+    try {
 
-    // Получаем путь к файлу
-    let file = await Telegram.getFile(id)
-    let url = `https://api.telegram.org/file/bot${conf.get('telegram:token')}/${file.file_path}`;
+      // Загружаем фото
+      let name = await Publication.upload(msg);
 
-    // Формирование нового имени для файла
-    let name = '';
+      // Переходим к следующему шагу
+      send.message(msg.from.id, 'Фотография успешно загружена');
+      send.message(msg.from.id, 'Введите подпись');
+      next();
 
-    let fileStream = fs.createWriteStream(`/public/img/publication/`);
-    https.get(url, response => {
-        response.pipe(fileStream);
-        send.message(msg.from.id, 'Успешно загружено');
-    })
+    } catch (e){
+      send.message(msg.from.id, 'Возникла ошибка, повторите еще раз');
+    }
   });
-
 
   // Список публикаций, ожидающих публикацию (тавтология)
   event.on('publication:await', (msg, action, next) => {
