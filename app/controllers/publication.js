@@ -3,6 +3,7 @@ const conf = require('../../conf');
 const downloader = require('download-file-random');
 const Model = require('../models/publication');
 
+// Загрузка фотографии для отложенной публикации
 exports.upload = async (msg) => {
     let id = msg.photo[msg.photo.length - 1].file_id;
 
@@ -11,5 +12,9 @@ exports.upload = async (msg) => {
     let url = `https://api.telegram.org/file/bot${conf.get('telegram:token')}/${file.file_path}`;
 
     // Загрузка файла
-    return downloader(url, { path: '/public/img/publication/' });
+    return downloader([url], { path: '/public/img/publication/' });
+};
+
+exports.save = () => {
+
 };

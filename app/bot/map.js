@@ -178,7 +178,15 @@ module.exports = {
               event: 'publication:create:upload',
               children: {
                 '*': {
-                  event: 'publication:create:title'
+                  event: 'publication:create:title',
+                  children: {
+                    '*': {
+                      event: 'publication:create:date'
+                    }
+                  }
+                },
+                'Назад': {
+                    event: 'location:back'
                 }
               }
             },
