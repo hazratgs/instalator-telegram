@@ -172,28 +172,48 @@ module.exports = {
       event: 'publication',
       children: {
         'Добавить': {
-          event: 'publication:create',
+          event: 'publication:account',
           children: {
             '*': {
-              event: 'publication:create:upload',
+              event: 'publication:create',
               children: {
                 '*': {
-                  event: 'publication:create:title',
+                  event: 'publication:create:upload',
                   children: {
                     '*': {
-                      event: 'publication:create:date'
+                      event: 'publication:create:title',
+                      children: {
+                        '*': {
+                          event: 'publication:create:date'
+                        }
+                      }
+                    },
+                    'Назад': {
+                        event: 'location:back'
                     }
                   }
                 },
                 'Назад': {
-                    event: 'location:back'
+                  event: 'location:back'
+                }
+              }
+            },
+            'Добавить аккаунт': {
+              event: 'account:add',
+              children: {
+                '*': {
+                  event: 'account:await',
+                  await: true
+                },
+                'Назад': {
+                  event: 'location:back'
                 }
               }
             },
             'Назад': {
-              event: 'location:back'
+                event: 'location:back'
             }
-          }
+          },
         },
         'Ожидают публикации': {
           event: 'publication:await'
