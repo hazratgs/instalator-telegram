@@ -15,6 +15,6 @@ exports.upload = async (msg) => {
     return downloader([url], { path: '/public/img/publication/' });
 };
 
-exports.save = () => {
-
-};
+// Создание отложенной записи
+exports.create = (data) =>
+    new Model.Publication(data).save();

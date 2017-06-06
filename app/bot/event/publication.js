@@ -1,4 +1,5 @@
 const Publication = require('../../controllers/publication');
+const Account = require('../../controllers/account');
 
 module.exports = (event, state, log, map, send) => {
 
@@ -8,10 +9,24 @@ module.exports = (event, state, log, map, send) => {
     next ? next() : null
   });
 
+  // Выбор аккаунта для новой публикации
+  event.on('publication:account', (msg, action, next) => {
+      event.emit('account:list', msg);
+      next ? next() : null
+  });
+
   // Добавить отложенную публикацию
-  event.on('publication:create', (msg, action, next) => {
-    send.keyboard(msg.from.id, 'Загрузите фотографию', ['Назад']);
-    next ? next() : null
+  event.on('publication:create', async (msg, action, next) => {
+    try {
+        let check = await Account.contains(msg.from.id, msg.text);
+        if (check === null) throw new Error(`Аккаунт ${msg.text} не существует, выберите другой`);
+
+        // Аккаунт существует, просим загрузить фото
+        send.keyboard(msg.from.id, 'Загрузите фотографию', ['Назад']);
+        next ? next() : null
+    } catch (e){
+        send.message(msg.from.id, `Аккаунт ${msg.text} не существует, выберите другой`);
+    }
   });
 
   // Добавить отложенную публикацию
@@ -64,7 +79,22 @@ module.exports = (event, state, log, map, send) => {
     msg.text.split(' ').map((item, index) => startDate[index] = item)
 
     // Cохранение отложенной публикации
-    // Publication.save(msg.from)
+    try {
+      Publication.create({
+          user: msg.from.id,
+          login: 'account',
+          title: state[msg.from.id][4],
+          date: new Date(...startDate.reverse()),
+          image: state[msg.from.id][3]
+      });
+
+      send.message(msg.from.id, 'Задание успешно добавлено!');
+      event.emit('location:home', msg);
+
+    } catch (e){
+      send.message(msg.from.id, 'Возникла ошибка при сохранении, повторите позже.');
+      event.emit('location:home', msg);
+    }
   });
 
   // Список публикаций, ожидающих публикацию (тавтология)
