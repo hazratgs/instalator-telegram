@@ -14,7 +14,7 @@ module.exports = (event, state, log, map, send) => {
     // Выбор аккаунта для задания
     event.on('task:select', async (msg, action, next) => {
         try {
-            let check = Account.contains(msg.from.id, msg.text);
+            let check = await Account.contains(msg.from.id, msg.text);
             if (check === null) throw new Error(`Аккаунт ${msg.text} не существует, выберите другой`);
 
             try {
