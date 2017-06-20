@@ -53,7 +53,8 @@ module.exports = (app) => {
     app.delete('/source/remove', (req, res) => {
         source.contains(req.body.name)
             .then(result => {
-                source.remove(req.body.name, () => {
+                source.remove(req.body.name)
+                  .then(() => {
                     res.json({
                         'ok': true,
                         'result': `Источник удален`
