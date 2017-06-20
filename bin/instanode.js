@@ -122,6 +122,7 @@ exports.followLikeSource = async (task, session, account) => {
 
                 // Удаляем пользователя из базы
                 Source.removeUserSource(source.name, user);
+                console.log(`Удалили пользователя ${user}`)
 
                 // Пользователь не найден, необходимо вместо него,
                 // подставить другого
