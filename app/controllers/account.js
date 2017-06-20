@@ -1,3 +1,5 @@
+const fs = require('fs');
+const path = require('path')
 const Model = require('../models/account');
 
 // Список аккаунтов
@@ -20,8 +22,19 @@ exports.containsAllUsers = (login) =>
     Model.Account.find({login: login});
 
 // Удаление аккаунта
-exports.remove = (user, login) =>
-    Model.Account.remove({user: user, login: login});
+exports.remove = async (user, login) => {
+  try {
+    // Очистка cookies аккаунта
+    fs.unlink(path.resolve('.', './bin/cookies') + `/${login}.txt`, (err) => {
+      if (err) {
+        throw new Error(err)
+      }
+    });
+    return Model.Account.remove({user: user, login: login});
+  } catch (e) {
+    return e
+  }
+}
 
 // Записать информацию о подписке
 exports.following = async (user, login, follow) => {
