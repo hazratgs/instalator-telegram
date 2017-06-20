@@ -8,7 +8,7 @@
     "deamon": "forever start index.js -l log.txt"
   },
   "author": "hazratgs",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "body-parser": "^1.17.1",
     "download-file": "^0.1.5",
