@@ -1,7 +1,5 @@
-const conf = require('../conf/index');
-const TelegramBot = require('node-telegram-bot-api');
+const TelegramBot = require('node-telegram-bot-api')
+const conf = require('../conf.json')
+const bot = new TelegramBot(conf.token, { polling: true })
 
-const token = conf.get('telegram:token');
-const bot = new TelegramBot(token, { polling: true });
-
-module.exports = bot;
+module.exports = bot

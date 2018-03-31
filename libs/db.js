@@ -1,24 +1,15 @@
-'use strict';
+const mongoose = require('mongoose')
+const conf = require('../conf')
 
-// Mongo DB
-const mongoose = require('mongoose'),
-  conf = require('../conf'),
-  log = require('./log')(module);
+mongoose.Promise = global.Promise
+mongoose.connect(conf.mongoose.uri)
 
-mongoose.Promise = global.Promise;
-mongoose.connect(conf.get('mongoose:uri'));
-const db = mongoose.connection;
+const db = mongoose.connection
 
-db.on('error', (err) => {
-  log.error('connection error:', err.message);
-});
-
-db.once('open', () => {
-  log.info("Connected to DB!");
-});
+db.on('error', err => console.log('connection error:', err.message))
 
 // MongoDB
-exports.mongoose = mongoose;
+exports.mongoose = mongoose
 
 // This DB
-exports.connect = db;
+exports.connect = db

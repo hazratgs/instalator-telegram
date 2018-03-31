@@ -1,9 +1,0 @@
-{
-  "port": 3033,
-  "mongoose": {
-    "uri": "mongodb://localhost/instalator5"
-  },
-  "telegram": {
-    "token": "389525311:AAF9sNgrhf3ZX3wPmgEg3Y4oGPpCUXdJRZ8"
-  }
-}

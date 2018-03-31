@@ -1,0 +1,7 @@
+{
+  "port": 3033,
+  "token": "593155352:AAFyB-VorWdUzOaUVlLOZAv23LtUrkhdN2A",
+  "mongoose": {
+    "uri": "mongodb://localhost/instalator"
+  }
+}

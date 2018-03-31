@@ -1,40 +1,32 @@
 /*!
  * instalator-telegram
- * Copyright(c) 2017 Hazrat Gadjikerimov
+ * Copyright(c) 2018 Hazrat Gadjikerimov
  * MIT Licensed
  */
 
-const express = require('express');
-const app = express();
-const bodyParser = require('body-parser');
+const express = require('express')
+const app = express()
+const bodyParser = require('body-parser')
+const conf = require('./conf.json')
+const cors = require('cors')
 
-// Winston Log
-const log = require('./libs/log')(module);
-
-// Поддержка JSON
-app.use(bodyParser.json({limit: '5mb'}));
-app.use(bodyParser.urlencoded({
+app.use(cors())
+app.use(bodyParser.json({ limit: '5mb' }))
+app.use(
+  bodyParser.urlencoded({
     extended: true,
     limit: '5mb'
-}));
-
-// HTTP Сервер
-const server = require('./bin/server');
-
-// Роуты приложения
-const routes = require('./app/routes');
+  })
+)
 
 // Telegram bot
-const bot = require('./app/bot');
+const bot = require('./app/bot')
 
-// Запланированные задачи
-const cron = require('./bin/cron');
+// Task manager
+const cron = require('./bin/cron')
 
-// Отдача статики
-app.use(express.static(process.cwd() + '/public'));
+const application = require('./app/routes')(app)
 
-// Основной роутер
-routes(app);
-
-// Запуск сервера
-server.create(app);
+// Start app
+app.listen(conf.port), () =>
+  console.info(`Express app run to port: ${conf.port}`)

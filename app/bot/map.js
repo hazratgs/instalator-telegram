@@ -7,25 +7,25 @@ module.exports = {
         '*': {
           event: 'task:select',
           children: {
-            'Лайк': {
+            Лайк: {
               event: 'task:select:type'
             },
-            'Подписка': {
+            Подписка: {
               event: 'task:select:type'
             },
             'Лайк + Подписка': {
               event: 'task:select:follow+like',
               children: {
-                'Пользователь': {
+                Пользователь: {
                   event: 'task:select:follow+like:user'
                 },
-                'Геолокация': {
+                Геолокация: {
                   event: 'task:select:follow+like:geo'
                 },
-                'Хештэг': {
+                Хештэг: {
                   event: 'task:select:follow+like:hashtag'
                 },
-                'Источники': {
+                Источники: {
                   event: 'task:select:follow+like:source',
                   children: {
                     '*': {
@@ -40,44 +40,44 @@ module.exports = {
                                 '*': {
                                   event: 'task:select:follow+like:source:like'
                                 },
-                                'Назад': {
+                                Назад: {
                                   event: 'location:back'
                                 }
                               }
                             },
-                            'Назад': {
+                            Назад: {
                               event: 'location:back'
                             }
                           }
                         },
-                        'Назад': {
+                        Назад: {
                           event: 'location:back'
                         }
                       }
                     },
-                    'Назад': {
+                    Назад: {
                       event: 'location:back'
                     }
                   }
                 },
-                'Назад': {
+                Назад: {
                   event: 'location:back'
                 }
               }
             },
-            'Отписка': {
+            Отписка: {
               event: 'task:select:type',
               children: {
                 '*': {
-                  event: 'task:select:type:unfollow',
+                  event: 'task:select:type:unfollow'
                   // await: true
                 },
-                'Назад': {
+                Назад: {
                   event: 'location:back'
                 }
               }
             },
-            'Назад': {
+            Назад: {
               event: 'location:back'
             }
           }
@@ -89,23 +89,23 @@ module.exports = {
               event: 'account:await',
               await: true
             },
-            'Назад': {
+            Назад: {
               event: 'location:back'
             }
           }
         },
-        'Назад': {
+        Назад: {
           event: 'location:back'
         }
       }
     },
-    'Активность': {
+    Активность: {
       event: 'actions',
       children: {
         '*': {
           event: 'actions:account',
           children: {
-            'Редактировать': {
+            Редактировать: {
               event: 'actions:account:update',
               children: {
                 '*': {
@@ -118,35 +118,35 @@ module.exports = {
                     }
                   }
                 },
-                'Назад': {
+                Назад: {
                   event: 'location:back'
                 }
               }
             },
-            'Отменить': {
+            Отменить: {
               event: 'actions:account:cancel'
             },
-            'Назад': {
+            Назад: {
               event: 'location:back'
             }
           }
         },
-        'Назад': {
+        Назад: {
           event: 'location:back'
         }
       }
     },
-    'Аккаунты': {
+    Аккаунты: {
       event: 'account:list',
       children: {
         '*': {
           event: 'account:select',
           children: {
-            'Удалить': {
+            Удалить: {
               event: 'account:delete',
               await: true
             },
-            'Назад': {
+            Назад: {
               event: 'location:back'
             }
           }
@@ -158,20 +158,20 @@ module.exports = {
               event: 'account:await',
               await: true
             },
-            'Назад': {
+            Назад: {
               event: 'location:back'
             }
           }
         },
-        'Назад': {
+        Назад: {
           event: 'location:back'
         }
       }
     },
-    'Публикации': {
+    Публикации: {
       event: 'publication',
       children: {
-        'Добавить': {
+        Добавить: {
           event: 'publication:account',
           children: {
             '*': {
@@ -188,12 +188,12 @@ module.exports = {
                         }
                       }
                     },
-                    'Назад': {
-                        event: 'location:back'
+                    Назад: {
+                      event: 'location:back'
                     }
                   }
                 },
-                'Назад': {
+                Назад: {
                   event: 'location:back'
                 }
               }
@@ -205,23 +205,23 @@ module.exports = {
                   event: 'account:await',
                   await: true
                 },
-                'Назад': {
+                Назад: {
                   event: 'location:back'
                 }
               }
             },
-            'Назад': {
-                event: 'location:back'
+            Назад: {
+              event: 'location:back'
             }
-          },
+          }
         },
         'Ожидают публикации': {
           event: 'publication:await'
         },
-        'Назад': {
+        Назад: {
           event: 'location:back'
         }
       }
     }
   }
-};
+}
