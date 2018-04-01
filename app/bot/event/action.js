@@ -67,7 +67,7 @@ module.exports = (event, state, map, send) => {
       let account = await Account.contains(msg.from.id, data[1])
       let task = await Task.current(msg.from.id, data[1])
 
-      Task.cancel(task._id)
+      await Task.cancel(task._id)
       send.message(msg.from.id, `🔴 Задание ${task.type} отменена`)
 
       event.emit('location:back', msg)
