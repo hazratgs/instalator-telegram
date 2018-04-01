@@ -56,6 +56,12 @@ exports.followLikeUser = async (task, session, account) => {
   try {
     const source = await Source.contains(task.params.source)
     if (!source) throw new Error('Источник не существует')
+
+    // По истечению срока сбрасываем кэш
+    if (+source.date + 10368000 < Date.now()) {
+      await Source.remove({ name: task.params.source })
+      throw new Error('Срок годности базы истек')
+    }
   } catch (e) {
     // Загружаем источник
     const source = await this.getAccountFollowers(session, task.params.source)
