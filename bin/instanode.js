@@ -27,24 +27,6 @@ exports.auth = (login, password) => {
   return Client.Session.create(device, storage, login, password)
 }
 
-// Загрузка списка подписчиков группы
-exports.getAccountFollowers = async user => {
-  try {
-    const session = await this.auth('Halicha.ru', 'Dagestan05')
-    const account = await Client.Account.searchForUser(session, 'febox.ru')
-    const feeds = await new Client.Feed.AccountFollowers(
-      session,
-      account._params.id
-    )
-    const data = await feeds.all()
-    const users = data.map(item => item._params.username)
-
-    return users
-  } catch (e) {
-    console.log(e)
-  }
-}
-
 // Задание подписаться + лайк
 exports.followLike = async task => {
   try {
@@ -54,7 +36,9 @@ exports.followLike = async task => {
     switch (task.params.sourceType) {
       case 'Источники':
         return await this.followLikeSource(task, session, account)
-        break
+
+      case 'Пользователь':
+        return await this.followLikeUser(task, session, account)
 
       default:
         throw new Error(
@@ -65,6 +49,21 @@ exports.followLike = async task => {
   } catch (err) {
     return err
   }
+}
+
+// подписка+лайк из источника пользователь
+exports.followLikeUser = async (task, session, account) => {
+  try {
+    const source = await Source.contains(task.params.source)
+    if (!source) throw new Error('Источник не существует')
+  } catch (e) {
+    // Загружаем источник
+    const source = await this.getAccountFollowers(session, task.params.source)
+    await Source.create({ name: task.params.source, source: source })
+  }
+
+  // Запускаем задачу
+  this.followLikeSource(task, session, account)
 }
 
 // подписка+лайк из источника
@@ -307,8 +306,8 @@ exports.getUnFollow = async (session, user) => {
 // Получить подписчиков аккаунта
 exports.followLoad = async (session, login) => {
   try {
-    let account = await Client.Account.searchForUser(session, login)
-    let feed = await new Client.Feed.AccountFollowing(
+    const account = await Client.Account.searchForUser(session, login)
+    const feed = await new Client.Feed.AccountFollowing(
       session,
       account._params.id
     )
@@ -325,3 +324,25 @@ exports.followLoad = async (session, login) => {
     return `Ошибка при загрузки подписчиков для пользователя ${login}: ${err}`
   }
 }
+
+// Загрузка списка подписчиков группы
+exports.getAccountFollowers = async (session, login) => {
+  try {
+    // const session = await this.auth('Halicha.ru', 'Dagestan05')
+    const account = await Client.Account.searchForUser(session, login)
+    const feeds = await new Client.Feed.AccountFollowers(
+      session,
+      account._params.id
+    )
+    const data = await feeds.all()
+    const users = data.map(item => item._params.username)
+
+    return users
+  } catch (e) {
+    console.log(e)
+  }
+}
+
+// Поиск пользователя
+exports.searchUser = async (session, user) =>
+  await Client.Account.searchForUser(session, user)
