@@ -96,9 +96,16 @@ exports.followLikeSource = async (task, session, account) => {
 
         // Ранее подписывались, если да, то пропускам
         let used = true
-        await Account.checkFollowing(account.user, account.login, user).catch(
-          err => (used = false)
-        )
+        try {
+          const status = await Account.checkFollowing(
+            account.user,
+            account.login,
+            user
+          )
+          if (!status) throw new Error('empty')
+        } catch (e) {
+          used = false
+        }
 
         if (used) continue
         if (limit && users.length === limit) break
