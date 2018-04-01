@@ -17,7 +17,36 @@ module.exports = {
               event: 'task:select:follow+like',
               children: {
                 Пользователь: {
-                  event: 'task:select:follow+like:user'
+                  event: 'task:select:follow+like:user',
+                  children: {
+                    '*': {
+                      event: 'task:select:follow+like:user:select',
+                      children: {
+                        '*': {
+                          event: 'task:select:follow+like:source:action',
+                          children: {
+                            '*': {
+                              event: 'task:select:follow+like:source:actionPerDay',
+                              children: {
+                                '*': {
+                                  event: 'task:select:follow+like:source:like'
+                                }
+                              }
+                            },
+                            Назад: {
+                              event: 'location:back'
+                            }
+                          }
+                        },
+                        Назад: {
+                          event: 'location:back'
+                        }
+                      }
+                    },
+                    Назад: {
+                      event: 'location:back'
+                    }
+                  }
                 },
                 Геолокация: {
                   event: 'task:select:follow+like:geo'

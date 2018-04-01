@@ -75,11 +75,43 @@ module.exports = (event, state, map, send) => {
   event.on('task:select:follow+like:user', (msg, action, next) => {
     send.keyboard(
       msg.from.id,
-      `В разработке, выберите другой тип источника`,
+      `Введите имя пользователя, подписчиков которого вам нужно получить`,
       action
     )
     next && next()
-    event.emit('location:back', msg)
+  })
+
+  // Пользователь
+  event.on('task:select:follow+like:user:select', async (msg, action, next) => {
+    try {
+      const { login, password } = await Account.contains(
+        msg.from.id,
+        state[msg.from.id][1]
+      )
+      const session = await instanode.auth(login, password)
+      const searchUser = await instanode.searchUser(session, msg.text)
+
+      send.message(
+        msg.from.id,
+        `Профиль ${msg.text} найден, количество подписчиков: ${searchUser._params.followerCount}`
+      )
+
+      // Кол. действия
+      send.keyboard(msg.from.id, 'Введите количество Подписок', [
+        '2500',
+        '5000',
+        '7500',
+        'Назад'
+      ])
+      next && next()
+    } catch (e) {
+      send.message(
+        msg.from.id,
+        `Пользователь ${msg.text} не найден, попробуйте еще раз`
+      )
+      next && next()
+      event.emit('location:back', msg)
+    }
   })
 
   // Локация
@@ -107,10 +139,10 @@ module.exports = (event, state, map, send) => {
   // Список источников
   event.on('task:select:follow+like:source', async (msg, action, next) => {
     try {
-      let list = await Source.list()
+      const list = await Source.list()
       if (!list.length) throw new Error('К сожалению нет источников')
 
-      let source = list.map(item => item.name)
+      const source = list.map(item => item.name)
 
       // Выбранное действие
       send.keyboard(msg.from.id, `Выберите источник`, [...source, 'Назад'])
@@ -211,7 +243,7 @@ module.exports = (event, state, map, send) => {
     try {
       // Проверка существования задачи
       let task = await Task.current(msg.from.id, data[0])
-      if (task === null) throw new Error('Есть активное задание')
+      if (task === null) throw new Error()
 
       send.message(
         msg.from.id,
