@@ -69,28 +69,28 @@ exports.followLikeUser = async (task, session, account) => {
   }
 
   // Запускаем задачу
-  this.followLikeSource(task, session, account)
+  await this.followLikeSource(task, session, account)
 }
 
 // подписка+лайк из источника
 exports.followLikeSource = async (task, session, account) => {
   try {
-    let id = task._id.toString()
+    const id = task._id.toString()
 
     // Поиск источника
-    let source = await Source.contains(task.params.source)
+    const source = await Source.contains(task.params.source)
 
     // Список подписок
-    let following = task.params.following
+    const following = task.params.following
 
     // Кол. подписок в час
-    let action = Math.round(task.params.actionFollowDay / 24)
+    const action = Math.round(task.params.actionFollowDay / 24)
 
     // Массив пользователей для обхода
-    let users = []
+    const users = []
 
     // Поиск уникальных пользователей, для подписки
-    let findUsers = async (limit = false) => {
+    const findUsers = async (limit = false) => {
       for (let user of source.source) {
         if (following.includes(user)) continue
 
