@@ -27,6 +27,24 @@ exports.auth = (login, password) => {
   return Client.Session.create(device, storage, login, password)
 }
 
+// Загрузка списка подписчиков группы
+exports.getAccountFollowers = async user => {
+  try {
+    const session = await this.auth('Halicha.ru', 'Dagestan05')
+    const account = await Client.Account.searchForUser(session, 'febox.ru')
+    const feeds = await new Client.Feed.AccountFollowers(
+      session,
+      account._params.id
+    )
+    const data = await feeds.all()
+    const users = data.map(item => item._params.username)
+
+    return users
+  } catch (e) {
+    console.log(e)
+  }
+}
+
 // Задание подписаться + лайк
 exports.followLike = async task => {
   try {

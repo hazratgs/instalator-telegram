@@ -5,16 +5,16 @@ const Task = require('../app/controllers/task')
 const Instanode = require('./instanode')
 
 // Активные задания
-let activeTask = []
+const activeTask = []
 
 // Запускаем активные задания
 cron.schedule('15 */1 * * *', async () => {
   try {
-    let list = await Task.currentList()
+    const list = await Task.currentList()
     if (list === null) throw new Error('Нет активных заданий')
 
     for (let item of list) {
-      let id = item._id.toString()
+      const id = item._id.toString()
 
       // Пропускаем выполняющиеся задания
       if (activeTask.includes(id)) continue
