@@ -1,12 +1,17 @@
 {
   "name": "instalator-telegram",
-  "version": "1.0.0",
-  "description": "",
+  "description": "Telegram bot to promote accounts in instagram",
+  "version": "2.0.0",
   "main": "index.js",
   "scripts": {
     "dev": "nodemon index.js",
     "start": "pm2 start index.js -e err.log"
   },
+  "keywords": [
+    "instagram bot",
+    "followers",
+    "telegram bot"
+  ],
   "author": "hazratgs",
   "license": "MIT",
   "dependencies": {
