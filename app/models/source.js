@@ -1,7 +1,7 @@
-let db = require('../../libs/db')
+const db = require('../../libs/db')
 
 // Схема источника
-let SourceSchema = new db.mongoose.Schema({
+const SourceSchema = new db.mongoose.Schema({
   name: { type: String, required: [true, 'nameRequired'] },
   source: { type: Array, required: [true, 'dataRequired'] },
   count: { type: Number },

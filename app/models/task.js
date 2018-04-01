@@ -1,7 +1,7 @@
-let db = require('../../libs/db')
+const db = require('../../libs/db')
 
 // Модель задания
-let TaskSchema = new db.mongoose.Schema({
+const TaskSchema = new db.mongoose.Schema({
   user: { type: Number, required: [true, 'userRequired'] },
   login: { type: String, required: [true, 'loginRequired'] },
   type: { type: String, required: [true, 'typeRequired'] },

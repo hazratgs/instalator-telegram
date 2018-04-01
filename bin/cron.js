@@ -27,7 +27,7 @@ cron.schedule('15 */1 * * *', async () => {
           Instanode.followLike(item)
             .then(finish => {
               // Удаляем из списка выполняемых
-              let keyActiveTask = activeTask.indexOf(id)
+              const keyActiveTask = activeTask.indexOf(id)
               delete activeTask[keyActiveTask]
 
               console.log(`Stop ${item.login} ${new Date()}`)
@@ -48,7 +48,7 @@ cron.schedule('15 */1 * * *', async () => {
           Instanode.unFollow(item)
             .then(finish => {
               // Удаляем из списка выполняемых
-              let keyActiveTask = activeTask.indexOf(id)
+              const keyActiveTask = activeTask.indexOf(id)
               delete activeTask[keyActiveTask]
 
               console.log(`Stop ${item.login} ${new Date()}`)
