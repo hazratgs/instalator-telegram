@@ -142,7 +142,13 @@ module.exports = (event, state, map, send) => {
       const list = await Source.list()
       if (!list.length) throw new Error('К сожалению нет источников')
 
-      const source = list.map(item => item.name)
+      const source = list
+        .sort((a, b) => (a.count > b.count ? -1 : 1))
+        .map(item => item.name)
+        .reduce((sum, item) => {
+          if (sum.length > 20) return sum
+          return [...sum, item]
+        }, [])
 
       // Выбранное действие
       send.keyboard(msg.from.id, `Выберите источник`, [...source, 'Назад'])
