@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon index.js",
-    "deamon": "forever start index.js -l log.txt"
+    "dev": "nodemon index.js",
+    "start": "pm2 start index.js -e err.log"
   },
   "author": "hazratgs",
   "license": "MIT",
