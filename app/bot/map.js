@@ -7,12 +7,6 @@ module.exports = {
         '*': {
           event: 'task:select',
           children: {
-            Лайк: {
-              event: 'task:select:type'
-            },
-            Подписка: {
-              event: 'task:select:type'
-            },
             'Лайк + Подписка': {
               event: 'task:select:follow+like',
               children: {
@@ -191,61 +185,6 @@ module.exports = {
               event: 'location:back'
             }
           }
-        },
-        Назад: {
-          event: 'location:back'
-        }
-      }
-    },
-    Публикации: {
-      event: 'publication',
-      children: {
-        Добавить: {
-          event: 'publication:account',
-          children: {
-            '*': {
-              event: 'publication:create',
-              children: {
-                '*': {
-                  event: 'publication:create:upload',
-                  children: {
-                    '*': {
-                      event: 'publication:create:title',
-                      children: {
-                        '*': {
-                          event: 'publication:create:date'
-                        }
-                      }
-                    },
-                    Назад: {
-                      event: 'location:back'
-                    }
-                  }
-                },
-                Назад: {
-                  event: 'location:back'
-                }
-              }
-            },
-            'Добавить аккаунт': {
-              event: 'account:add',
-              children: {
-                '*': {
-                  event: 'account:await',
-                  await: true
-                },
-                Назад: {
-                  event: 'location:back'
-                }
-              }
-            },
-            Назад: {
-              event: 'location:back'
-            }
-          }
-        },
-        'Ожидают публикации': {
-          event: 'publication:await'
         },
         Назад: {
           event: 'location:back'
