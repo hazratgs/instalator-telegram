@@ -1,6 +1,3 @@
 .idea/
 node_modules/
-npm-debug.log
-app/bot/map.js
-conf/conf.json
 *.txt
