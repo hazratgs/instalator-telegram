@@ -21,6 +21,7 @@ exports.keyboard = (user, message, data, inline = 2) => {
   }
 
   for (let key of arr) {
+    if (key === '*') continue
     // Если inline больше 1, то вставляем inline элеменов в одну строку
     if (i < inline && opt[opt.length - 1] !== undefined) {
       opt[opt.length - 1].push({
