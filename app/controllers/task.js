@@ -1,10 +1,10 @@
 const Model = require('../models/task')
 
 // Добавить задание
-exports.create = data => new Model.Task(data).save()
+exports.create = async data => new Model.Task(data).save()
 
 // задание Лайк+Подписка
-exports.createFollowLike = data =>
+exports.createFollowLike = async data =>
   this.create({
     user: data.user,
     login: data.login,
@@ -20,7 +20,7 @@ exports.createFollowLike = data =>
   })
 
 // задание Отписка
-exports.createUnFollow = data =>
+exports.createUnFollow = async data =>
   this.create({
     user: data.user,
     login: data.login,
@@ -33,10 +33,10 @@ exports.createUnFollow = data =>
   })
 
 // Список задач пользователя
-exports.list = user => Model.Task.find({ user: user })
+exports.list = async user => Model.Task.find({ user: user })
 
 // Текущее задание аккаунта
-exports.current = (user, login) =>
+exports.current = async (user, login) =>
   Model.Task.findOne({
     user: user,
     login: login,
@@ -44,13 +44,13 @@ exports.current = (user, login) =>
   })
 
 // Активные задания
-exports.currentList = () =>
+exports.currentList = async () =>
   Model.Task.find({
     status: 'active'
   })
 
 // Завершение задания
-exports.finish = id =>
+exports.finish = async id =>
   Model.Task.update(
     {
       _id: id
@@ -63,7 +63,7 @@ exports.finish = id =>
   )
 
 // Отмена задания
-exports.cancel = id =>
+exports.cancel = async id =>
   Model.Task.update(
     {
       _id: id
@@ -76,7 +76,7 @@ exports.cancel = id =>
   )
 
 // Обновить список подписок
-exports.followingUpdate = (id, data) =>
+exports.followingUpdate = async (id, data) =>
   Model.Task.update(
     {
       _id: id
@@ -89,7 +89,7 @@ exports.followingUpdate = (id, data) =>
   )
 
 // Добавить пользователя в отписки
-exports.unFollowAddUser = (id, user) =>
+exports.unFollowAddUser = async (id, user) =>
   Model.Task.update(
     {
       _id: id
@@ -102,7 +102,7 @@ exports.unFollowAddUser = (id, user) =>
   )
 
 // Удалить пользователя из отписки
-exports.removeUnFollowUser = (id, user) =>
+exports.removeUnFollowUser = async (id, user) =>
   Model.Task.update(
     {
       _id: id
@@ -128,7 +128,7 @@ exports.addUserFollow = async (id, user) =>
   )
 
 // Инкримент подписчиков
-exports.currentIncrement = (user, login) =>
+exports.currentIncrement = async (user, login) =>
   Model.Task.update(
     {
       user: user,
@@ -142,7 +142,7 @@ exports.currentIncrement = (user, login) =>
   )
 
 // Инкримент лайков
-exports.likeIncrement = (user, login) =>
+exports.likeIncrement = async (user, login) =>
   Model.Task.update(
     {
       user: user,
@@ -156,7 +156,7 @@ exports.likeIncrement = (user, login) =>
   )
 
 // Обновить кол. отписок в день
-exports.updateActionDayUnFollowing = (id, data) =>
+exports.updateActionDayUnFollowing = async (id, data) =>
   Model.Task.update(
     {
       _id: id
@@ -169,7 +169,7 @@ exports.updateActionDayUnFollowing = (id, data) =>
   )
 
 // Изменить количество подписок
-exports.changeCount = (id, count) =>
+exports.changeCount = async (id, count) =>
   Model.Task.findByIdAndUpdate(id, {
     $set: {
       'params.actionFollow': count
