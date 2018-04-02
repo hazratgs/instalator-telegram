@@ -1,10 +1,10 @@
 const Model = require('../models/source')
 
 // Источники
-exports.list = () => Model.Source.find({})
+exports.list = async () => Model.Source.find({})
 
 // Добавить новый источник
-exports.create = data =>
+exports.create = async data =>
   new Model.Source({
     name: data.name,
     source: data.source,
@@ -12,10 +12,10 @@ exports.create = data =>
   }).save()
 
 // Проверить существование источника
-exports.contains = name => Model.Source.findOne({ name: name })
+exports.contains = async name => Model.Source.findOne({ name: name })
 
 // Удалить элемент из источника
-exports.removeUserSource = (source, user) =>
+exports.removeUserSource = async (source, user) =>
   Model.Source.update(
     {
       name: source
@@ -28,4 +28,4 @@ exports.removeUserSource = (source, user) =>
   )
 
 // Удаление
-exports.remove = name => Model.Source.remove({ name: name })
+exports.remove = async name => Model.Source.remove({ name: name })

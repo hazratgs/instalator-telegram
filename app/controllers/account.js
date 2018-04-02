@@ -3,10 +3,10 @@ const path = require('path')
 const Model = require('../models/account')
 
 // Список аккаунтов
-exports.list = user => Model.Account.find({ user: user })
+exports.list = async user => Model.Account.find({ user: user })
 
 // Добавление аккаунта
-exports.add = (user, login, password) =>
+exports.add = async (user, login, password) =>
   new Model.Account({
     user: user,
     login: login.toLowerCase(),
@@ -14,11 +14,11 @@ exports.add = (user, login, password) =>
   }).save()
 
 // Проверка существование аккаунта
-exports.contains = (user, login) =>
+exports.contains = async (user, login) =>
   Model.Account.findOne({ user: user, login: login })
 
 // Проверка существование аккаунта у всех пользователей
-exports.containsAllUsers = login => Model.Account.find({ login: login })
+exports.containsAllUsers = async login => Model.Account.find({ login: login })
 
 // Удаление аккаунта
 exports.remove = async (user, login) => {
@@ -49,7 +49,7 @@ exports.following = async (user, login, follow) => {
 }
 
 // Проверить подписку
-exports.checkFollowing = (user, login, follow) =>
+exports.checkFollowing = async (user, login, follow) =>
   Model.AccountFollow.findOne({
     user: user,
     login: login,
@@ -83,14 +83,14 @@ exports.addFollowing = async (user, login, follow) => {
 }
 
 // Список подписок пользователя
-exports.followList = (user, login) =>
+exports.followList = async (user, login) =>
   Model.AccountFollow.findOne({
     user: user,
     login: login
   })
 
 // Очистить список подписчиков
-exports.followClear = (user, login) =>
+exports.followClear = async (user, login) =>
   Model.AccountFollow.update(
     {
       user: user,
@@ -104,7 +104,7 @@ exports.followClear = (user, login) =>
   )
 
 // Записать информацию о лайке
-exports.like = (user, login, like) => {
+exports.like = async (user, login, like) => {
   try {
     let check = this.checkLike(user, login, like)
     if (check === null) throw new Error(`${login} не лайкал ранее ${like}`)
@@ -117,7 +117,7 @@ exports.like = (user, login, like) => {
 }
 
 // Проверить, лайкнул ли
-exports.checkLike = (user, login, like) =>
+exports.checkLike = async (user, login, like) =>
   Model.AccountLike.findOne({
     user: user,
     login: login,
@@ -159,7 +159,7 @@ exports.addLike = async (user, login, like) => {
 }
 
 // Список лайков пользователя
-exports.likeList = (user, login) =>
+exports.likeList = async (user, login) =>
   Model.AccountLike.findOne({
     user: user,
     login: login
