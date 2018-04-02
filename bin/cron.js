@@ -8,7 +8,7 @@ const Instanode = require('./instanode')
 const activeTask = []
 
 // Запускаем активные задания
-cron.schedule('34 */1 * * *', async () => {
+cron.schedule('43 */1 * * *', async () => {
   try {
     const list = await Task.currentList()
     if (list === null) throw new Error('Нет активных заданий')
