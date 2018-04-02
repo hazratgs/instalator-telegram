@@ -115,8 +115,8 @@ exports.removeUnFollowUser = (id, user) =>
   )
 
 // Добавить пользователя в подписки
-exports.addUserFollow = (id, user) =>
-  Model.Task.update(
+exports.addUserFollow = async (id, user) =>
+  await Model.Task.update(
     {
       _id: id
     },
@@ -167,3 +167,11 @@ exports.updateActionDayUnFollowing = (id, data) =>
       }
     }
   )
+
+// Изменить количество подписок
+exports.changeCount = (id, count) =>
+  Model.Task.findByIdAndUpdate(id, {
+    $set: {
+      'params.actionFollow': count
+    }
+  })

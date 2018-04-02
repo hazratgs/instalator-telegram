@@ -66,6 +66,11 @@ exports.followLikeUser = async (task, session, account) => {
     // Загружаем источник
     const source = await this.getAccountFollowers(session, task.params.source)
     await Source.create({ name: task.params.source, source: source })
+
+    // Если количество подписчиков меньше указанного в задании, обновляем количество
+    if (source.length < task.params.actionFollow) {
+      await Task.changeCount(task._id, source.length)
+    }
   }
 
   // Запускаем задачу
