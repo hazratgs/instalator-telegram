@@ -142,7 +142,8 @@ exports.followLikeSource = async (task, session, account) => {
         let relationship = await this.getFollow(session, searchUser)
         if (
           relationship._params.following ||
-          relationship._params.outgoingRequest
+          relationship._params.outgoingRequest ||
+          searchUser.params.friendshipStatus.is_private
         ) {
           // Фиксирум подписку
           Task.addUserFollow(id, user)
@@ -194,9 +195,12 @@ exports.getLike = async (session, user, login, account, limit = 1) => {
       if (limit == i) break
 
       let used = true
-      await Account.checkLike(user, login, item._params.id).catch(
-        () => (used = false)
-      )
+      try {
+        const checkLink = await Account.checkLike(user, login, item._params.id)
+        if (!checkLink) throw new Error('База отсутствует')
+      } catch (e) {
+        used = false
+      }
 
       // Пропускаем ранее лайкнутые
       if (used) continue
