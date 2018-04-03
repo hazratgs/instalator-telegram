@@ -131,6 +131,7 @@ exports.followLikeSource = async (task, session, account) => {
     // Если больше пользователей нет из задачи, то завершаем задание
     // Или перевыполнили план
     if (!users.length || following.length >= task.params.actionFollow) {
+      console.log('Задача остановлена', users, following, task.params.actionFollow)
       Task.finish(id)
       return true
     }
@@ -350,7 +351,6 @@ exports.followLoad = async (session, login) => {
 // Загрузка списка подписчиков группы
 exports.getAccountFollowers = async (session, login) => {
   try {
-    // const session = await this.auth('Halicha.ru', 'Dagestan05')
     const account = await Client.Account.searchForUser(session, login)
     const feeds = await new Client.Feed.AccountFollowers(
       session,

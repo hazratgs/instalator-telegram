@@ -30,10 +30,11 @@ cron.schedule('43 */1 * * *', async () => {
               const keyActiveTask = activeTask.indexOf(id)
               delete activeTask[keyActiveTask]
 
-              console.log(`Stop ${item.login} ${new Date()}`)
+              console.log(`Stop ${item.login} ${new Date()}`, finish)
 
               // оповещаем пользователя о завершении задания
               if (finish) {
+                console.log('Задача остановлена', item, finish)
                 send.message(
                   item.user,
                   `Задание ${item.type} завершено для аккаунта ${item.login}`
