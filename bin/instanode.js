@@ -1,3 +1,4 @@
+const bot = require('../libs/telegramBot')
 const Client = require('instagram-private-api').V1
 
 const Account = require('../app/controllers/account')
@@ -140,9 +141,9 @@ exports.followLikeSource = async (task, session, account) => {
     for (let user of users) {
       try {
         // Поиск пользователя
-        let searchUser = await Client.Account.searchForUser(session, user)
+        const searchUser = await Client.Account.searchForUser(session, user)
 
-        let time = Math.round(3000 / action * random(50, 1000))
+        const time = Math.round(3000 / action * random(50, 1000))
         await sleep(time)
 
         let relationship = await this.getFollow(session, searchUser)
@@ -165,13 +166,21 @@ exports.followLikeSource = async (task, session, account) => {
           )
         }
       } catch (err) {
-        // Удаляем пользователя из базы
-        Source.removeUserSource(source.name, user)
-        console.log(`Удалили пользователя ${user}`)
+        // Сработал лимит, останавливаем задачу
+        if (err.name === 'RequestsLimitError') {
+          bot.sendMessage(task.user, '⛔️ Instagram предупредил о превышении лимита, пожалуйста уменьшите количество действий в день')
+          break
+        }
 
-        // Пользователь не найден, необходимо вместо него,
-        // подставить другого
-        await findUsers()
+        if (err.name === 'IGAccountNotFoundError') {
+          // Удаляем пользователя из базы
+          Source.removeUserSource(source.name, user)
+          console.log(`Удалили пользователя ${user}`)
+
+          // Пользователь не найден, необходимо вместо него,
+          // подставить другого
+          await findUsers()
+        }
       }
     }
 
@@ -362,6 +371,7 @@ exports.getAccountFollowers = async (session, login) => {
     return users
   } catch (e) {
     console.log(e)
+    return []
   }
 }
 
