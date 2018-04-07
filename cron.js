@@ -1,40 +1,35 @@
 const cron = require('node-cron')
-const send = require('../app/bot/method')
+const send = require('./app/bot/method')
+const task = require('../app/controllers/task')
+const actions = require('./app/actions')
 
-const Task = require('../app/controllers/task')
-const Instanode = require('./instanode')
-
-// Активные задания
+// Active quests
 const activeTask = []
 
-// Запускаем активные задания
+// Run active tasks
 cron.schedule('29 */1 * * *', async () => {
   try {
-    const list = await Task.currentList()
-    if (list === null) throw new Error('Нет активных заданий')
+    const list = await task.currentList()
+    if (list === null) throw new Error('No active assignments')
 
     for (let item of list) {
       const id = item._id.toString()
 
-      // Пропускаем выполняющиеся задания
+      // Missing running tasks
       if (activeTask.includes(id)) continue
-
-      console.log(`Start ${item.login} ${new Date()}`)
 
       switch (item.type) {
         case 'Лайк + Подписка':
           activeTask.push(id)
-          Instanode.followLike(item)
+          actions
+            .followLike(item)
             .then(finish => {
-              // Удаляем из списка выполняемых
+              // Remove from list
               const keyActiveTask = activeTask.indexOf(id)
               delete activeTask[keyActiveTask]
 
-              console.log(`Stop ${item.login} ${new Date()}`, finish)
-
-              // оповещаем пользователя о завершении задания
+              // notify the user when the task is completed
               if (finish) {
-                console.log('Задача остановлена', item, finish)
                 send.message(
                   item.user,
                   `Задание ${item.type} завершено для аккаунта ${item.login}`
@@ -46,15 +41,14 @@ cron.schedule('29 */1 * * *', async () => {
 
         case 'Отписка':
           activeTask.push(id)
-          Instanode.unFollow(item)
+          actions
+            .unFollow(item)
             .then(finish => {
-              // Удаляем из списка выполняемых
+              // Remove from list
               const keyActiveTask = activeTask.indexOf(id)
               delete activeTask[keyActiveTask]
 
-              console.log(`Stop ${item.login} ${new Date()}`)
-
-              // оповещаем пользователя о завершении задания
+              // notify the user when the task is completed
               if (finish) {
                 send.message(
                   item.user,
@@ -66,12 +60,12 @@ cron.schedule('29 */1 * * *', async () => {
           break
 
         default:
-          // Тип задания не определен
+          // Job type is not defined
           break
       }
     }
   } catch (e) {
-    // Нет активных заданий
-    console.log(e)
+    // No active assignments
+    return e
   }
 })

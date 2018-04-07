@@ -1,6 +1,6 @@
-const db = require('../../libs/db')
+const db = require('../../mongodb')
 
-// Схема источника
+// Source Scheme
 const SourceSchema = new db.mongoose.Schema({
   name: { type: String, required: [true, 'nameRequired'] },
   source: { type: Array, required: [true, 'dataRequired'] },

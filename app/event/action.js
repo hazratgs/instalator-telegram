@@ -1,17 +1,16 @@
-const Account = require('../../controllers/account')
-const Source = require('../../controllers/source')
-const Task = require('../../controllers/task')
-const instanode = require('../../../bin/instanode')
+const Account = require('../controllers/account')
+const Source = require('../controllers/source')
+const Task = require('../controllers/task')
 
 module.exports = (event, state, map, send) => {
-  // Активность пользователя
+  // User activity
   event.on('actions', async (msg, action, next) => {
     try {
-      let list = await Account.list(msg.from.id)
+      const list = await Account.list(msg.from.id)
       if (list === null) throw new Error('Нет ни одного аккаунта')
 
-      // Отправляем список аккаунтов
-      let elements = list.map(item => item.login)
+      // Sending the list of accounts
+      const elements = list.map(item => item.login)
       send.keyboard(msg.from.id, 'Выберите аккаунт', [...elements, 'Назад'])
       next && next()
     } catch (e) {
@@ -20,11 +19,11 @@ module.exports = (event, state, map, send) => {
     }
   })
 
-  // Вывод информации об активности Аккаунта
+  // Output of information about the activity of the Account
   event.on('actions:account', async (msg, action, next) => {
     try {
-      let account = await Account.contains(msg.from.id, msg.text)
-      let task = await Task.current(msg.from.id, msg.text)
+      const account = await Account.contains(msg.from.id, msg.text)
+      const task = await Task.current(msg.from.id, msg.text)
 
       let text = ''
       let daily = ''
@@ -55,17 +54,16 @@ module.exports = (event, state, map, send) => {
     } catch (err) {
       send.message(msg.from.id, 'Нет активного задания')
       next && next()
-
       event.emit('location:back', msg)
     }
   })
 
-  // Отмена задачи
+  // Cancel a task
   event.on('actions:account:cancel', async (msg, action, next) => {
     try {
-      let data = state[msg.from.id]
-      let account = await Account.contains(msg.from.id, data[1])
-      let task = await Task.current(msg.from.id, data[1])
+      const data = state[msg.from.id]
+      const account = await Account.contains(msg.from.id, data[1])
+      const task = await Task.current(msg.from.id, data[1])
 
       await Task.cancel(task._id)
       send.message(msg.from.id, `🔴 Задание ${task.type} отменена`)
@@ -74,16 +72,15 @@ module.exports = (event, state, map, send) => {
     } catch (err) {
       send.message(msg.from.id, 'Возникла ошибка, повторите')
       next && next()
-
       event.emit('location:back', msg)
     }
   })
 
-  // Редактирование задачи
+  // Editing a task
   event.on('actions:account:update', async (msg, action, next) => {
     try {
-      let account = await Account.contains(msg.from.id, state[msg.from.id][1])
-      let task = await Task.current(msg.from.id, account.login)
+      const account = await Account.contains(msg.from.id, state[msg.from.id][1])
+      const task = await Task.current(msg.from.id, account.login)
 
       switch (task.type) {
         case 'Отписка':
@@ -107,7 +104,7 @@ module.exports = (event, state, map, send) => {
     }
   })
 
-  // Обработка редактирования, первый шаг
+  // Editing processing, the first step
   event.on('actions:account:update:one', async (msg, action, next) => {
     try {
       let account = await Account.contains(msg.from.id, state[msg.from.id][1])
@@ -115,13 +112,13 @@ module.exports = (event, state, map, send) => {
 
       switch (task.type) {
         case 'Отписка':
-          let action = parseInt(msg.text)
+          const action = parseInt(msg.text)
           if (isNaN(action)) {
             send.message(msg.from.id, 'Введите число!')
             return false
           }
 
-          // Обновляем кол. подписок в день
+          // We update the count. subscriptions per day
           Task.updateActionDayUnFollowing(task._id, msg.text)
           send.message(msg.from.id, 'Изменения успешно сохранены')
 

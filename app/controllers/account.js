@@ -2,10 +2,10 @@ const fs = require('fs')
 const path = require('path')
 const Model = require('../models/account')
 
-// Список аккаунтов
+// List of accounts
 exports.list = async user => Model.Account.find({ user: user })
 
-// Добавление аккаунта
+// Adding an account
 exports.add = async (user, login, password) =>
   new Model.Account({
     user: user,
@@ -13,18 +13,18 @@ exports.add = async (user, login, password) =>
     password: password
   }).save()
 
-// Проверка существование аккаунта
+// Checking the existence of an account
 exports.contains = async (user, login) =>
   Model.Account.findOne({ user: user, login: login })
 
-// Проверка существование аккаунта у всех пользователей
+// Verify the existence of the account for all users
 exports.containsAllUsers = async login => Model.Account.find({ login: login })
 
-// Удаление аккаунта
+// Account deleting
 exports.remove = async (user, login) => {
   try {
-    // Очистка cookies аккаунта
-    fs.unlink(path.resolve('.', './bin/cookies') + `/${login}.txt`, err => {
+    // Clearing Account Cookies
+    fs.unlink(path.resolve('.', './cookies') + `/${login}.txt`, err => {
       if (err) {
         throw new Error(err)
       }
@@ -35,10 +35,10 @@ exports.remove = async (user, login) => {
   }
 }
 
-// Записать информацию о подписке
+// Record subscription information
 exports.following = async (user, login, follow) => {
   try {
-    let check = await this.checkFollowing(user, login, follow)
+    const check = await this.checkFollowing(user, login, follow)
     if (check === null) {
       throw new Error(`Пользователь ${login} не подписан к ${follow}`)
     }
@@ -48,7 +48,7 @@ exports.following = async (user, login, follow) => {
   }
 }
 
-// Проверить подписку
+// Check subscription
 exports.checkFollowing = async (user, login, follow) =>
   Model.AccountFollow.findOne({
     user: user,
@@ -58,10 +58,10 @@ exports.checkFollowing = async (user, login, follow) =>
     }
   })
 
-// Добавить подписчика в историю
+// Add a subscriber to the story
 exports.addFollowing = async (user, login, follow) => {
   try {
-    let list = await this.followList(user, login)
+    const list = await this.followList(user, login)
     if (list === null) throw new Error(`AccountFollow отсутствует для ${login}`)
     return Model.AccountFollow.update(
       {
@@ -73,7 +73,7 @@ exports.addFollowing = async (user, login, follow) => {
       }
     )
   } catch (e) {
-    // Создаем базу для хранения подписок
+    // Create a database for storing subscriptions
     return new Model.AccountFollow({
       user: user,
       login: login,
@@ -82,14 +82,14 @@ exports.addFollowing = async (user, login, follow) => {
   }
 }
 
-// Список подписок пользователя
+// List of user's subscriptions
 exports.followList = async (user, login) =>
   Model.AccountFollow.findOne({
     user: user,
     login: login
   })
 
-// Очистить список подписчиков
+// Clear subscriber list
 exports.followClear = async (user, login) =>
   Model.AccountFollow.update(
     {
@@ -103,10 +103,10 @@ exports.followClear = async (user, login) =>
     }
   )
 
-// Записать информацию о лайке
+// Record information about the dog
 exports.like = async (user, login, like) => {
   try {
-    let check = this.checkLike(user, login, like)
+    const check = this.checkLike(user, login, like)
     if (check === null) throw new Error(`${login} не лайкал ранее ${like}`)
 
     return check
@@ -116,7 +116,7 @@ exports.like = async (user, login, like) => {
   }
 }
 
-// Проверить, лайкнул ли
+// Check whether it licked
 exports.checkLike = async (user, login, like) =>
   Model.AccountLike.findOne({
     user: user,
@@ -126,7 +126,7 @@ exports.checkLike = async (user, login, like) =>
     }
   })
 
-// Добавить подписчика лайк
+// Add Subscriber like
 exports.addLike = async (user, login, like) => {
   try {
     let list = await this.likeList(user, login)
@@ -136,7 +136,7 @@ exports.addLike = async (user, login, like) => {
       )
     }
 
-    // Записываем информацию о лайке
+    // We record information about the husky
     return Model.AccountLike.update(
       {
         user: user,
@@ -149,7 +149,7 @@ exports.addLike = async (user, login, like) => {
       }
     )
   } catch (e) {
-    // Запись не найдена, создаем документ
+    // The record was not found, we are creating a document
     return new Model.AccountLike({
       user: user,
       login: login,
@@ -158,7 +158,7 @@ exports.addLike = async (user, login, like) => {
   }
 }
 
-// Список лайков пользователя
+// User List List
 exports.likeList = async (user, login) =>
   Model.AccountLike.findOne({
     user: user,

@@ -1,9 +1,9 @@
-const bot = require('../libs/telegramBot')
 const Client = require('instagram-private-api').V1
+const bot = require('../telegram')
 
-const Account = require('../app/controllers/account')
-const Source = require('../app/controllers/source')
-const Task = require('../app/controllers/task')
+const Account = require('./controllers/account')
+const Source = require('./controllers/source')
+const Task = require('./controllers/task')
 
 function random (min, max) {
   let rand = min - 0.5 + Math.random() * (max - min + 1)
@@ -11,7 +11,7 @@ function random (min, max) {
   return rand
 }
 
-// асинхронный итератор
+// Execution postponing
 function sleep (time) {
   return new Promise(resolve => {
     setTimeout(() => {
@@ -20,10 +20,10 @@ function sleep (time) {
   })
 }
 
-// Авторизация
+// Authorization
 exports.auth = (login, password) => {
   const device = new Client.Device(login)
-  const storage = new Client.CookieFileStorage(`./bin/cookies/${login}.txt`)
+  const storage = new Client.CookieFileStorage(`./cookies/${login}.txt`)
 
   return Client.Session.create(device, storage, login, password)
 }
@@ -132,7 +132,12 @@ exports.followLikeSource = async (task, session, account) => {
     // Если больше пользователей нет из задачи, то завершаем задание
     // Или перевыполнили план
     if (!users.length || following.length >= task.params.actionFollow) {
-      console.log('Задача остановлена', users, following, task.params.actionFollow)
+      console.log(
+        'Задача остановлена',
+        users,
+        following,
+        task.params.actionFollow
+      )
       Task.finish(id)
       return true
     }
@@ -168,7 +173,10 @@ exports.followLikeSource = async (task, session, account) => {
       } catch (err) {
         // Сработал лимит, останавливаем задачу
         if (err.name === 'RequestsLimitError') {
-          bot.sendMessage(task.user, '⛔️ Instagram предупредил о превышении лимита, пожалуйста уменьшите количество действий в день')
+          bot.sendMessage(
+            task.user,
+            '⛔️ Instagram предупредил о превышении лимита, пожалуйста уменьшите количество действий в день'
+          )
           break
         }
 

@@ -1,14 +1,14 @@
 const Model = require('../models/user')
 
-// Проверка существования пользователя
+// User Existence Check
 exports.contains = async id => Model.User.findOne({ id: id })
 
-// Добавление нового пользователя
+// Adding a new user
 exports.create = async data =>
   new Model.User({
     id: data.id,
     name: data.name
   }).save()
 
-// Очистка базы пользователей
+// Cleaning up the user database
 exports.cleaner = async () => Model.User.remove({})

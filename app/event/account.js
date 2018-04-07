@@ -1,19 +1,19 @@
-const Account = require('../../controllers/account')
-const Source = require('../../controllers/source')
-const Task = require('../../controllers/task')
-const instanode = require('../../../bin/instanode')
+const Account = require('../controllers/account')
+const Source = require('../controllers/source')
+const Task = require('../controllers/task')
+const actions = require('../actions')
 
 module.exports = (event, state, map, send) => {
-  // Список аккаунтов
+  // List of accounts
   event.on('account:list', async (msg, action, next) => {
     try {
-      let list = await Account.list(msg.from.id)
+      const list = await Account.list(msg.from.id)
       if (list === null) {
         throw new Error(`There are no accounts for ${msg.from.id}`)
       }
 
-      // Отправляем список аккаунтов
-      let elements = list.map(item => item.login)
+      // Sending the list of accounts
+      const elements = list.map(item => item.login)
       send.keyboard(msg.from.id, 'Выберите аккаунт', [
         ...elements,
         'Добавить аккаунт',
@@ -27,7 +27,7 @@ module.exports = (event, state, map, send) => {
     }
   })
 
-  // Нет добавленных аккаунтов
+  // No accounts added
   event.on('account:empty', (msg, action, next) =>
     send.keyboard(msg.from.id, 'У вас нет ни одного аккаунта', [
       'Добавить аккаунт',
@@ -35,48 +35,48 @@ module.exports = (event, state, map, send) => {
     ])
   )
 
-  // Добавить аккаунт
+  // Add account
   event.on('account:add', (msg, action, next) => {
     send.keyboard(msg.from.id, 'Введите логин и пароль через пробел', ['Назад'])
     next && next()
   })
 
-  // Ожидание ввода аккаунта
+  // Waiting for Account Login
   event.on('account:await', (msg, action, next) => {
     try {
-      let account = msg.text.split(' ')
-      let login = account[0]
-      let password = account[1]
+      const account = msg.text.split(' ')
+      const login = account[0]
+      const password = account[1]
 
-      // Обработка ошибки
+      // Error handling
       if (account.length !== 2) throw new Error('Не передан логин/пароль')
 
-      // Сохраняем данные
+      // Save the data
       event.emit('account:add:save', msg, login, password)
     } catch (e) {
-      // Не передан один из параметров
+      // One of the parameters is not passed
       event.emit('account:add:err', msg)
     }
   })
 
-  // Ошибка добавления аккаунта, не передан логин/пароль
+  // Error adding account, no username / password
   event.on('account:add:err', (msg, action, next) =>
     send.keyboard(msg.from.id, 'Не передан пароль', ['Назад'])
   )
 
-  // Сохранение аккаунта
+  // Save account
   event.on('account:add:save', async (msg, login, password) => {
     try {
-      let check = await Account.containsAllUsers(login)
+      const check = await Account.containsAllUsers(login)
       if (check === null) throw new Error(`${login} уже используется!`)
 
       send.message(msg.from.id, `Подождите немного, пытаюсь авторизоваться`)
 
       try {
-        // Проверка доступности
-        await instanode.auth(login, password)
+        // Availability check
+        await actions.auth(login, password)
 
-        // Добавление в базу
+        // Adding to the database
         await Account.add(msg.from.id, login, password)
 
         send.message(
@@ -91,15 +91,15 @@ module.exports = (event, state, map, send) => {
         )
       }
     } catch (e) {
-      // Аккаунт добавлен ранее
+      // Account added earlier
       send.message(msg.from.id, e)
     }
   })
 
-  // Выбор аккаунта
+  // Choose an account
   event.on('account:select', async (msg, action, next) => {
     try {
-      // Поиск аккаунта в базе
+      // Search for an account in the database
       await Account.contains(msg.from.id, msg.text)
 
       send.keyboard(msg.from.id, 'Выберите действия для ' + msg.text, action)
@@ -112,16 +112,16 @@ module.exports = (event, state, map, send) => {
     }
   })
 
-  // Удаление аккаунта
+  // Account deleting
   event.on('account:delete', async msg => {
-    let login = state[msg.from.id][state[msg.from.id].length - 1]
+    const login = state[msg.from.id][state[msg.from.id].length - 1]
 
     try {
-      // Проверяем существование аккаунта
+      // Check the existence of an account
       await Account.contains(msg.from.id, login)
 
       try {
-        // Удаление
+        // Delete
         await Account.remove(msg.from.id, login)
 
         send.message(msg.from.id, `Аккаунт ${login} удален`)

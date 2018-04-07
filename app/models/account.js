@@ -1,6 +1,6 @@
-const db = require('../../libs/db')
+const db = require('../../mongodb')
 
-// Модель аккаунта
+// Account model
 const AccountSchema = new db.mongoose.Schema({
   user: { type: Number, required: [true, 'userRequired'] },
   login: { type: String, required: [true, 'loginRequired'] },
@@ -9,14 +9,14 @@ const AccountSchema = new db.mongoose.Schema({
   date: { type: Date, default: Date.now }
 })
 
-// Модель подписок
+// Subscription model
 const AccountFollowSchema = new db.mongoose.Schema({
   user: { type: Number, required: [true, 'userRequired'] },
   login: { type: String, required: [true, 'loginRequired'] },
   data: { type: Array, default: [] }
 })
 
-// Модель лайков
+// Model likes
 const AccountLikeSchema = new db.mongoose.Schema({
   user: { type: Number, required: [true, 'userRequired'] },
   login: { type: String, required: [true, 'loginRequired'] },

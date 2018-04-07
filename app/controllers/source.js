@@ -1,9 +1,9 @@
 const Model = require('../models/source')
 
-// Источники
+// Sources of information
 exports.list = async () => Model.Source.find({})
 
-// Добавить новый источник
+// Add new source
 exports.create = async data =>
   new Model.Source({
     name: data.name,
@@ -11,10 +11,10 @@ exports.create = async data =>
     count: data.source.length
   }).save()
 
-// Проверить существование источника
+// Check the existence of the source
 exports.contains = async name => Model.Source.findOne({ name: name })
 
-// Удалить элемент из источника
+// Remove item from source
 exports.removeUserSource = async (source, user) =>
   Model.Source.update(
     {
@@ -27,5 +27,5 @@ exports.removeUserSource = async (source, user) =>
     }
   )
 
-// Удаление
+// Delete
 exports.remove = async name => Model.Source.remove({ name: name })

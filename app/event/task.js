@@ -1,29 +1,29 @@
-const Account = require('../../controllers/account')
-const Source = require('../../controllers/source')
-const Task = require('../../controllers/task')
-const instanode = require('../../../bin/instanode')
+const Account = require('../controllers/account')
+const Source = require('../controllers/source')
+const Task = require('../controllers/task')
+const actions = require('../actions')
 
 module.exports = (event, state, map, send) => {
-  // Создание задания
+  // Create an assignment
   event.on('task:create', (msg, action, next) => {
     event.emit('account:list', msg)
     next && next()
   })
 
-  // Выбор аккаунта для задания
+  // Select an account for the job
   event.on('task:select', async (msg, action, next) => {
     try {
-      let check = await Account.contains(msg.from.id, msg.text)
+      const check = await Account.contains(msg.from.id, msg.text)
       if (check === null) {
         throw new Error(`Аккаунт ${msg.text} не существует, выберите другой`)
       }
 
       try {
-        // Проверяем, есть ли активные задания у аккаунта
-        let task = await Task.current(msg.from.id, msg.text)
+        // Check if there are active jobs on the account
+        const task = await Task.current(msg.from.id, msg.text)
         if (task === null) throw new Error()
 
-        // Активное задание есть
+        // Active task is
         send.message(
           msg.from.id,
           `Есть активное задание у ${msg.text}, попробуйте позже.`
@@ -41,7 +41,7 @@ module.exports = (event, state, map, send) => {
     }
   })
 
-  // Выбор типа задания
+  // Selecting the type of task
   event.on('task:select:type', (msg, action, next) => {
     switch (msg.text) {
       case 'Лайк + Подписка':
@@ -60,18 +60,17 @@ module.exports = (event, state, map, send) => {
 
       default:
         send.message(msg.from.id, `Ошибка, выберите действие`)
-        return null
         break
     }
   })
 
-  // Выбор типа источника
+  // Select Source Type
   event.on('task:select:follow+like', (msg, action, next) => {
     send.keyboard(msg.from.id, `Выберите тип источника`, action)
     next && next()
   })
 
-  // Пользователь
+  // The name of the user whose subscribers you need to receive
   event.on('task:select:follow+like:user', (msg, action, next) => {
     send.keyboard(
       msg.from.id,
@@ -81,15 +80,15 @@ module.exports = (event, state, map, send) => {
     next && next()
   })
 
-  // Пользователь
+  // Number of Subscriptions
   event.on('task:select:follow+like:user:select', async (msg, action, next) => {
     try {
       const { login, password } = await Account.contains(
         msg.from.id,
         state[msg.from.id][1]
       )
-      const session = await instanode.auth(login, password)
-      const searchUser = await instanode.searchUser(session, msg.text)
+      const session = await actions.auth(login, password)
+      const searchUser = await actions.searchUser(session, msg.text)
 
       send.message(
         msg.from.id,
@@ -114,7 +113,7 @@ module.exports = (event, state, map, send) => {
     }
   })
 
-  // Локация
+  // Location
   event.on('task:select:follow+like:geo', (msg, action, next) => {
     send.keyboard(
       msg.from.id,
@@ -125,7 +124,7 @@ module.exports = (event, state, map, send) => {
     event.emit('location:back', msg)
   })
 
-  // Хештег
+  // Hashtag
   event.on('task:select:follow+like:hashtag', (msg, action, next) => {
     send.keyboard(
       msg.from.id,
@@ -136,7 +135,7 @@ module.exports = (event, state, map, send) => {
     event.emit('location:back', msg)
   })
 
-  // Список источников
+  // List of sources
   event.on('task:select:follow+like:source', async (msg, action, next) => {
     try {
       const list = await Source.list()
@@ -150,26 +149,25 @@ module.exports = (event, state, map, send) => {
           return [...sum, item]
         }, [])
 
-      // Выбранное действие
+      // Selected action
       send.keyboard(msg.from.id, `Выберите источник`, [...source, 'Назад'])
       next && next()
     } catch (e) {
       send.message(msg.from.id, e.message)
       next && next()
-
       event.emit('location:back', msg)
     }
   })
 
-  // Выбор источника
+  // Select Source
   event.on(
     'task:select:follow+like:source:select',
     async (msg, action, next) => {
       try {
-        let check = await Source.contains(msg.text)
+        const check = await Source.contains(msg.text)
         if (check === null) throw new Error('Ошибка, нет такого источника')
 
-        // Кол. действия
+        // Qty. actions
         send.keyboard(msg.from.id, 'Введите количество Подписок', [
           '2500',
           '5000',
@@ -183,7 +181,7 @@ module.exports = (event, state, map, send) => {
     }
   )
 
-  // Количество действий
+  // Number of actions
   event.on('task:select:follow+like:source:action', (msg, action, next) => {
     let length = parseInt(msg.text)
     if (isNaN(length) || length > 7500) {
@@ -191,7 +189,7 @@ module.exports = (event, state, map, send) => {
       return null
     }
 
-    // Просим ввести кол. лайков к профилю
+    // Please enter the number. likes to profile
     send.keyboard(msg.from.id, 'К скольким в день подписываться?', [
       '300',
       '500',
@@ -202,7 +200,7 @@ module.exports = (event, state, map, send) => {
     next && next()
   })
 
-  // Количество действий в день
+  // Number of actions per day
   event.on(
     'task:select:follow+like:source:actionPerDay',
     (msg, action, next) => {
@@ -215,7 +213,7 @@ module.exports = (event, state, map, send) => {
         return null
       }
 
-      // Просим ввести кол. лайков к профилю
+      // Please enter the number. likes to profile
       send.keyboard(msg.from.id, 'Сколько лайков ставить?', [
         '1',
         '2',
@@ -228,7 +226,7 @@ module.exports = (event, state, map, send) => {
     }
   )
 
-  // Количество лайков к фотографии
+  // Number of likes to photos
   event.on('task:select:follow+like:source:like', (msg, action, next) => {
     let length = parseInt(msg.text)
     if (isNaN(length) || length > 5) {
@@ -237,18 +235,18 @@ module.exports = (event, state, map, send) => {
     }
     next()
 
-    // Сохранение задания
+    // Save job
     event.emit('task:create:follow+like:save', msg, action)
   })
 
-  // Создаем задание
+  // Create an assignment
   event.on('task:create:follow+like:save', async (msg, action) => {
     let data = state[msg.from.id]
     data.splice(0, 1)
 
     try {
-      // Проверка существования задачи
-      let task = await Task.current(msg.from.id, data[0])
+      // Examination of existence
+      const task = await Task.current(msg.from.id, data[0])
       if (task === null) throw new Error()
 
       send.message(
@@ -256,10 +254,10 @@ module.exports = (event, state, map, send) => {
         'У этого аккаунта есть активное задание, дождитесь завершения.'
       )
 
-      // Переходим на главную
+      // We pass to the main
       event.emit('location:home', msg)
     } catch (e) {
-      // Создание задания
+      // Create an assignment
       await Task.createFollowLike({
         user: msg.from.id,
         login: data[0],
@@ -276,12 +274,12 @@ module.exports = (event, state, map, send) => {
         'Задание успешно добавлено, подробнее можете посмотреть в активности'
       )
 
-      // Переходим на главную
+      // We pass to the main
       event.emit('location:home', msg)
     }
   })
 
-  // Отписка
+  // Unsubscription
   event.on('task:select:type:unfollow', (msg, action, next) => {
     let length = parseInt(msg.text)
     if (isNaN(length) || length > 1200) {
@@ -293,14 +291,14 @@ module.exports = (event, state, map, send) => {
     event.emit('task:select:type:unfollow:save', msg, action)
   })
 
-  // Создание задание отписка
+  // Create an assignment
   event.on('task:select:type:unfollow:save', async (msg, action) => {
     let data = state[msg.from.id]
     data.splice(0, 1)
 
     try {
       // Проверка существования задачи
-      let task = await Task.current(msg.from.id, data[0])
+      const task = await Task.current(msg.from.id, data[0])
       if (task === null) throw new Error('Нет активных заданий')
 
       send.message(
@@ -308,7 +306,7 @@ module.exports = (event, state, map, send) => {
         'У этого аккаунта есть активное задание, дождитесь завершения.'
       )
 
-      // Переходим на главную
+      // We pass to the main
       event.emit('location:home', msg)
     } catch (e) {
       await Task.createUnFollow({
@@ -323,7 +321,7 @@ module.exports = (event, state, map, send) => {
         'Задание успешно добавлено, подробнее можете посмотреть в активности'
       )
 
-      // Переходим на главную
+      // We pass to the main
       event.emit('location:home', msg)
     }
   })

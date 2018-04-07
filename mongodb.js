@@ -1,5 +1,5 @@
 const mongoose = require('mongoose')
-const conf = require('../conf')
+const conf = require('./conf')
 
 mongoose.Promise = global.Promise
 mongoose.connect(conf.mongoose.uri)

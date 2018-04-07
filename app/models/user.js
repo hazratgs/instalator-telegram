@@ -1,6 +1,6 @@
-const db = require('../../libs/db')
+const db = require('../../mongodb')
 
-// Модель пользователя
+// User Model
 const UserSchema = new db.mongoose.Schema({
   id: { type: Number, required: [true, 'idRequired'] },
   name: { type: String, required: [true, 'nameRequired'] },

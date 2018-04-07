@@ -1,41 +1,41 @@
 const Model = require('../models/task')
 
-// Добавить задание
+// Add assignment
 exports.create = async data => new Model.Task(data).save()
 
-// задание Лайк+Подписка
+// assignment Laik + Subscription
 exports.createFollowLike = async data =>
   this.create({
     user: data.user,
     login: data.login,
     type: data.type,
     params: {
-      sourceType: data.sourceType, // тип источника
-      source: data.source, // источник
-      actionFollow: data.action, // кол. подписок необходимо выполнить
-      actionFollowDay: data.actionDay, // кол. в день
-      actionLikeDay: data.like, // кол. лайков в день,
-      following: [] // на кого подписались
+      sourceType: data.sourceType, // source type
+      source: data.source, // a source
+      actionFollow: data.action, // number of subscriptions
+      actionFollowDay: data.actionDay, // number of in a day
+      actionLikeDay: data.like, // number of likes in a day,
+      following: [] // who subscribed
     }
   })
 
-// задание Отписка
+// assignment
 exports.createUnFollow = async data =>
   this.create({
     user: data.user,
     login: data.login,
     type: data.type,
     params: {
-      following: [], // подписки, от которых надо отписаться
-      unFollowing: [], // список пользователей, от которых в этом задании отписались
-      actionFollowingDay: data.actionFollowingDay // кол. отписок в день
+      following: [], // subscription from which you must unsubscribe
+      unFollowing: [], // list of users who were unsubscribed from this task
+      actionFollowingDay: data.actionFollowingDay // number of notes per day
     }
   })
 
-// Список задач пользователя
+// User Task List
 exports.list = async user => Model.Task.find({ user: user })
 
-// Текущее задание аккаунта
+// Current account job
 exports.current = async (user, login) =>
   Model.Task.findOne({
     user: user,
@@ -43,13 +43,13 @@ exports.current = async (user, login) =>
     status: 'active'
   })
 
-// Активные задания
+// Active quests
 exports.currentList = async () =>
   Model.Task.find({
     status: 'active'
   })
 
-// Завершение задания
+// Completion of the assignment
 exports.finish = async id =>
   Model.Task.update(
     {
@@ -62,7 +62,7 @@ exports.finish = async id =>
     }
   )
 
-// Отмена задания
+// Cancel a job
 exports.cancel = async id =>
   Model.Task.update(
     {
@@ -75,7 +75,7 @@ exports.cancel = async id =>
     }
   )
 
-// Обновить список подписок
+// Update subscription list
 exports.followingUpdate = async (id, data) =>
   Model.Task.update(
     {
@@ -88,7 +88,7 @@ exports.followingUpdate = async (id, data) =>
     }
   )
 
-// Добавить пользователя в отписки
+// Add user to account
 exports.unFollowAddUser = async (id, user) =>
   Model.Task.update(
     {
@@ -101,7 +101,7 @@ exports.unFollowAddUser = async (id, user) =>
     }
   )
 
-// Удалить пользователя из отписки
+// Remove user from account
 exports.removeUnFollowUser = async (id, user) =>
   Model.Task.update(
     {
@@ -114,7 +114,7 @@ exports.removeUnFollowUser = async (id, user) =>
     }
   )
 
-// Добавить пользователя в подписки
+// Add a user to subscriptions
 exports.addUserFollow = async (id, user) =>
   await Model.Task.update(
     {
@@ -127,7 +127,7 @@ exports.addUserFollow = async (id, user) =>
     }
   )
 
-// Инкримент подписчиков
+// Subscriber increment
 exports.currentIncrement = async (user, login) =>
   Model.Task.update(
     {
@@ -141,7 +141,7 @@ exports.currentIncrement = async (user, login) =>
     }
   )
 
-// Инкримент лайков
+// Increment of likes
 exports.likeIncrement = async (user, login) =>
   Model.Task.update(
     {
@@ -155,7 +155,7 @@ exports.likeIncrement = async (user, login) =>
     }
   )
 
-// Обновить кол. отписок в день
+// Update count. notes per day
 exports.updateActionDayUnFollowing = async (id, data) =>
   Model.Task.update(
     {
@@ -168,7 +168,7 @@ exports.updateActionDayUnFollowing = async (id, data) =>
     }
   )
 
-// Изменить количество подписок
+// Change the number of subscriptions
 exports.changeCount = async (id, count) =>
   Model.Task.findByIdAndUpdate(id, {
     $set: {

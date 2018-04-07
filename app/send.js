@@ -1,35 +1,32 @@
-const bot = require('../../libs/telegramBot')
+const bot = require('../telegram')
 const emoji = require('./emoji')
 
-// Отправки сообщения
-exports.message = (user, message) => {
-  bot.sendMessage(user, message)
-}
+// Send message
+exports.message = (user, message) => bot.sendMessage(user, message)
 
-// Отправка Сообщения с клавиатурой
+// Sending Messages with the keyboard
 exports.keyboard = (user, message, data, inline = 2) => {
   let opt = [], arr = [], i = 0
 
-  // Если поступил объект map, берем данные из текущей ветки
+  // If the map object entered, we take the data from the current branch
   if (!Array.isArray(data)) {
     for (let item in data.children) {
       arr.push(item)
     }
   } else {
-    // Поступил обычный массив
+    // Received a normal array
     arr = data
   }
 
   for (let key of arr) {
     if (key === '*') continue
-    // Если inline больше 1, то вставляем inline элеменов в одну строку
+    // If the inline is greater than 1, then insert the inline elements in one line
     if (i < inline && opt[opt.length - 1] !== undefined) {
       opt[opt.length - 1].push({
         text: emoji.encode(key)
       })
     } else {
       if (i === inline) i = 0
-
       opt.push([
         {
           text: emoji.encode(key)
@@ -49,7 +46,7 @@ exports.keyboard = (user, message, data, inline = 2) => {
   })
 }
 
-// Отправить сообщение с скрытием клавиатуры
+// Send a message with the keyboard hiding
 exports.messageHiddenKeyboard = (user, message) => {
   bot.sendMessage(user, message, {
     reply_markup: {
@@ -57,6 +54,3 @@ exports.messageHiddenKeyboard = (user, message) => {
     }
   })
 }
-
-// Отправка изображений
-exports.image = () => {}
