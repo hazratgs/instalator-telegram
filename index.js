@@ -8,6 +8,9 @@ const bot = require('./telegram')
 const commandEvents = require('./app/commandEvents')
 const { event, state } = require('./app/event')
 const user = require('./app/controllers/user')
+const map = require('./app/map')
+const emoji = require('./app/emoji')
+const cron = require('./cron')
 
 // Processing of messages
 bot.on('message', async msg => {
@@ -27,6 +30,8 @@ bot.on('message', async msg => {
 
 // Telegram router
 const router = msg => {
+  // Декодируем эмодзи
+  msg.text = emoji.decode(msg.text)
   // No user status, we give the main menu
   if (!state[msg.from.id]) {
     commandEvents.emit('/home', msg)

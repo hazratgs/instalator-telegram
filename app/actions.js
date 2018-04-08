@@ -373,7 +373,12 @@ exports.getAccountFollowers = async (session, login) => {
       session,
       account._params.id
     )
-    const data = await feeds.all()
+    const data = await feeds.all({
+      delay: 5000,
+      every: 150,
+      pause: 670000,
+      maxErrors: 300
+    })
     const users = data.map(item => item._params.username)
 
     return users

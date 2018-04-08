@@ -1,13 +1,13 @@
 const cron = require('node-cron')
-const send = require('./app/bot/method')
-const task = require('../app/controllers/task')
+const send = require('./app/send')
+const task = require('./app/controllers/task')
 const actions = require('./app/actions')
 
 // Active quests
 const activeTask = []
 
 // Run active tasks
-cron.schedule('29 */1 * * *', async () => {
+cron.schedule('28 */1 * * *', async () => {
   try {
     const list = await task.currentList()
     if (list === null) throw new Error('No active assignments')
