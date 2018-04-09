@@ -133,11 +133,14 @@ module.exports = {
               children: {
                 '*': {
                   event: 'actions:account:update:one',
-                  await: true,
                   children: {
                     '*': {
                       event: 'actions:account:update:two',
-                      await: true
+                      children: {
+                        '*': {
+                          event: 'actions:account:update:three',
+                        }
+                      }
                     }
                   }
                 },

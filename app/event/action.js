@@ -91,8 +91,14 @@ module.exports = (event, state, map, send) => {
           break
 
         case 'Лайк + Подписка':
-          send.message(msg.from.id, 'В разработке')
-          throw new Error('Пока еще не реализовано')
+          send.keyboard(msg.from.id, 'Сколько подписок нужно выполнить?', [
+            '1000',
+            '3000',
+            '5000',
+            '7000',
+            'Назад'
+          ])
+          next()
           break
 
         default:
@@ -107,8 +113,8 @@ module.exports = (event, state, map, send) => {
   // Editing processing, the first step
   event.on('actions:account:update:one', async (msg, action, next) => {
     try {
-      let account = await Account.contains(msg.from.id, state[msg.from.id][1])
-      let task = await Task.current(msg.from.id, account.login)
+      const account = await Account.contains(msg.from.id, state[msg.from.id][1])
+      const task = await Task.current(msg.from.id, account.login)
 
       switch (task.type) {
         case 'Отписка':
@@ -125,11 +131,97 @@ module.exports = (event, state, map, send) => {
           event.emit('location:back', msg)
           break
 
+        case 'Лайк + Подписка':
+          const actionDay = parseInt(msg.text)
+          if (isNaN(actionDay)) {
+            send.message(msg.from.id, 'Введите число!')
+            return false
+          }
+
+          send.keyboard(msg.from.id, 'К скольким подписываться в сутки?', [
+            '500',
+            '750',
+            '1000',
+            '1200',
+            'Назад'
+          ])
+          next()
+          break
+
         default:
           throw new Error('Не верный тип задания!')
           break
       }
     } catch (err) {
+      event.emit('location:back', msg)
+    }
+  })
+
+  event.on('actions:account:update:two', async (msg, action, next) => {
+    try {
+      const account = await Account.contains(msg.from.id, state[msg.from.id][1])
+      const task = await Task.current(msg.from.id, account.login)
+
+      switch (task.type) {
+        case 'Лайк + Подписка':
+          const actionDay = parseInt(msg.text)
+          if (isNaN(actionDay)) {
+            send.message(msg.from.id, 'Введите число!')
+            return false
+          }
+
+          send.keyboard(msg.from.id, 'Сколько лайков ставить?', [
+            '1',
+            '2',
+            '3',
+            '5',
+            'Назад'
+          ])
+          next()
+          break
+
+        default:
+          throw new Error('Не верный тип задания!')
+          break
+      }
+
+    } catch (e) {
+      event.emit('location:back', msg)
+    }
+  })
+
+  event.on('actions:account:update:three', async (msg, action, next) => {
+    try {
+      const account = await Account.contains(msg.from.id, state[msg.from.id][1])
+      const task = await Task.current(msg.from.id, account.login)
+
+      switch (task.type) {
+        case 'Лайк + Подписка':
+          const actionLikeDay = parseInt(msg.text)
+          if (isNaN(actionLikeDay)) {
+            send.message(msg.from.id, 'Введите число!')
+            return false
+          }
+          // New data
+          const [,,, actionFollow, actionFollowDay] = state[msg.from.id]
+
+          // Update
+          await Task.updateActionsFollowing(task._id, {
+            actionFollow: actionFollow,
+            actionFollowDay: actionFollowDay,
+            actionLikeDay: actionLikeDay
+          })
+          send.message(msg.from.id, 'Изменения успешно сохранены')
+
+          event.emit('location:home', msg)
+          break
+
+        default:
+          throw new Error('Не верный тип задания!')
+          break
+      }
+
+    } catch (e) {
       event.emit('location:back', msg)
     }
   })

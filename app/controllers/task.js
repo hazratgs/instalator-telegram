@@ -168,6 +168,19 @@ exports.updateActionDayUnFollowing = async (id, data) =>
     }
   )
 
+exports.updateActionsFollowing = async (id, data) => 
+  Model.Task.update(
+    {
+      _id: id
+    },
+    {
+      $set: {
+        'params.actionFollow': data.actionFollow,
+        'params.actionFollowDay': data.actionFollowDay,
+        'params.actionLikeDay': data.actionLikeDay
+      }
+    }
+  )
 // Change the number of subscriptions
 exports.changeCount = async (id, count) =>
   Model.Task.findByIdAndUpdate(id, {
