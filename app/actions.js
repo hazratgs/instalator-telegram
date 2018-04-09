@@ -28,7 +28,7 @@ exports.auth = (login, password) => {
   return Client.Session.create(device, storage, login, password)
 }
 
-// Задание подписаться + лайк
+// Assign to subscribe + like
 exports.followLike = async task => {
   try {
     let account = await Account.contains(task.user, task.login)
@@ -52,55 +52,56 @@ exports.followLike = async task => {
   }
 }
 
-// подписка+лайк из источника пользователь
+// Subscription + like from the source user
 exports.followLikeUser = async (task, session, account) => {
   try {
     const source = await Source.contains(task.params.source)
     if (!source) throw new Error('Источник не существует')
 
-    // По истечению срока сбрасываем кэш
+    // At the end of the period, we reset the cache
     if (+source.date + 10368000 < Date.now()) {
       await Source.remove({ name: task.params.source })
       throw new Error('Срок годности базы истек')
     }
   } catch (e) {
-    // Загружаем источник
+    // Download source
     const source = await this.getAccountFollowers(session, task.params.source)
     await Source.create({ name: task.params.source, source: source })
 
-    // Если количество подписчиков меньше указанного в задании, обновляем количество
+    // If the number of subscribers is less than the number specified in the task, 
+    // we update the number of subscribers
     if (source.length < task.params.actionFollow) {
       await Task.changeCount(task._id, source.length)
     }
   }
 
-  // Запускаем задачу
+  // Run the task
   await this.followLikeSource(task, session, account)
 }
 
-// подписка+лайк из источника
+// subscription + like from the source
 exports.followLikeSource = async (task, session, account) => {
   try {
     const id = task._id.toString()
 
-    // Поиск источника
+    // Source search
     const source = await Source.contains(task.params.source)
 
-    // Список подписок
+    // List of Subscriptions
     const following = task.params.following
 
-    // Кол. подписок в час
+    // Qty. subscriptions per hour
     const action = Math.round(task.params.actionFollowDay / 24)
 
-    // Массив пользователей для обхода
+    // Array of users to bypass
     const users = []
 
-    // Поиск уникальных пользователей, для подписки
+    // Search for unique users, to subscribe
     const findUsers = async (limit = false) => {
       for (let user of source.source) {
         if (following.includes(user)) continue
 
-        // Ранее подписывались, если да, то пропускам
+        // Earlier signed, if so, passes
         let used = true
         try {
           const status = await Account.checkFollowing(
@@ -116,21 +117,21 @@ exports.followLikeSource = async (task, session, account) => {
         if (used) continue
         if (limit && users.length === limit) break
 
-        // Добавляем в массив пользователей
+        // Add to user array
         users.push(user)
 
-        // Добавляем пользователя в временную базу подписок
+        // Adding a user to the temporary subscription database
         following.push(user)
 
-        // Если нет лимита, то выборка 1 пользователя
+        // If there is no limit, then the sample of 1 user
         if (!limit) break
       }
     }
 
     await findUsers(action)
 
-    // Если больше пользователей нет из задачи, то завершаем задание
-    // Или перевыполнили план
+    // If more users are not present from the task, then complete the task
+    // Or overfulfilled the plan
     if (!users.length || following.length >= task.params.actionFollow) {
       console.log(
         'Задача остановлена',
@@ -142,10 +143,10 @@ exports.followLikeSource = async (task, session, account) => {
       return true
     }
 
-    // Обход пользователй и подписка
+    // User bypass and subscription
     for (let user of users) {
       try {
-        // Поиск пользователя
+        // User search
         const searchUser = await Client.Account.searchForUser(session, user)
 
         const time = Math.round(3000 / action * random(50, 1000))
@@ -157,11 +158,11 @@ exports.followLikeSource = async (task, session, account) => {
           relationship._params.outgoingRequest ||
           searchUser.params.friendshipStatus.is_private
         ) {
-          // Фиксирум подписку
+          // Fix subscription
           Task.addUserFollow(id, user)
           Account.following(task.user, task.login, user)
 
-          // Ставим лайк
+          // We put like
           await this.getLike(
             session,
             task.user,
@@ -171,7 +172,7 @@ exports.followLikeSource = async (task, session, account) => {
           )
         }
       } catch (err) {
-        // Сработал лимит, останавливаем задачу
+        // The limit has worked, we stop the task
         if (err.name === 'RequestsLimitError') {
           bot.sendMessage(
             task.user,
@@ -181,12 +182,12 @@ exports.followLikeSource = async (task, session, account) => {
         }
 
         if (err.name === 'IGAccountNotFoundError') {
-          // Удаляем пользователя из базы
+          // We delete the user from the database
           Source.removeUserSource(source.name, user)
           console.log(`Удалили пользователя ${user}`)
 
-          // Пользователь не найден, необходимо вместо него,
-          // подставить другого
+          // User is not found, you need to replace it,
+          // substitute another
           await findUsers()
         }
       }
@@ -198,12 +199,12 @@ exports.followLikeSource = async (task, session, account) => {
   }
 }
 
-// Подписка
+// Subscription
 exports.getFollow = async (session, account) => {
   return Client.Relationship.create(session, account._params.id.toString())
 }
 
-// Достаем контент для лайка
+// We get content for the husk
 exports.getLike = async (session, user, login, account, limit = 1) => {
   try {
     let feed = await new Client.Feed.UserMedia(
@@ -225,13 +226,13 @@ exports.getLike = async (session, user, login, account, limit = 1) => {
         used = false
       }
 
-      // Пропускаем ранее лайкнутые
+      // We skip the previously bumped
       if (used) continue
 
-      // Установка лайка
+      // Installation of husk
       await new Client.Like.create(session, item._params.id)
 
-      // Записываем информацию о лайке
+      // We record information about the husky
       Account.like(user, login, item._params.id)
 
       i++
@@ -241,54 +242,55 @@ exports.getLike = async (session, user, login, account, limit = 1) => {
   }
 }
 
-// Задание отписаться
+// Unsigned job
 exports.unFollow = async task => {
   try {
-    let id = task._id.toString()
+    const id = task._id.toString()
 
-    // Поиск данных аккаунта
-    let account = await Account.contains(task.user, task.login)
+    // Finding account information
+    const account = await Account.contains(task.user, task.login)
 
-    // Авторизация
-    let session = await this.auth(account.login, account.password)
+    // Authorization
+    const session = await this.auth(account.login, account.password)
 
-    // Список пользователей, от которых надо отписаться
+    // List of users to unsubscribe from
     let following = task.params.following
 
-    // Список от которых уже отписались
+    // List from which already unsubscribed
     let unFollowing = task.params.unFollowing
 
     if (!following.length) {
-      // Загружаем список подписок
+      // Download the list of subscriptions
       following = await this.followLoad(
         session,
         account.login,
         account.password
       )
 
-      // попробывать реализовать повторный запрос подписок,
-      // чтобы получить наибоелее полный список подписок
+      // try to implement a repeated request for subscriptions,
+      // to get the most complete list of subscriptions
 
-      // Сохраняем для переиспользования
+      // We save for re-use
       Task.followingUpdate(id, following)
     }
 
-    // Кол. отписок в час
+    // Qty. unsubscribe per hour
     let action = Math.round(task.params.actionFollowingDay / 24)
 
-    // Храним пользователей для отписки
+    // Keep users for unsubscribing
     let users = []
 
-    // Поиск уникальных пользователей, для отписки
+    // Search for unique users to unsubscribe
     let findUsers = (limit = false) => {
       for (let user of following) {
         if (unFollowing.includes(user)) continue
         if (limit && users.length === limit) break
 
-        // Добавляем в массив пользователей
+        // Add to user array
         users.push(user)
 
-        // Добавляем пользователя в временную базу отподписок, тем самым пропуская удаленные аккаунты
+        // We add the user to the temporary database from the subscriptions, 
+        // thus skipping the deleted accounts
         unFollowing.push(user)
 
         if (!limit) break
@@ -297,16 +299,16 @@ exports.unFollow = async task => {
 
     findUsers(action)
 
-    // Если больше нет подписчиков, завершаем задачу
+    // If there are no more subscribers, we finish the task
     if (!users.length) {
       await Task.finish(id)
       return true
     }
 
-    // Обход пользователй и отписка
+    // User bypass and unsubscription
     for (let user of users) {
       try {
-        // Поиск пользователя
+        // User search
         let searchUser = await Client.Account.searchForUser(session, user)
 
         let time = Math.round(3000 / action * random(50, 1000))
@@ -314,20 +316,20 @@ exports.unFollow = async task => {
 
         let relationship = await this.getUnFollow(session, searchUser)
         if (!relationship._params.following) {
-          // Фиксируем пользователя
+          // We fix the user
           Task.unFollowAddUser(id, user)
 
-          // Добавляем в базу подписок пользователей из отписок
-          // чтобы в будущем повторно на них не подписаться
+          // We add subscriptions of users from the subscriptions to the database
+          // so that in the future they do not have to subscribe again
           Account.following(task.user, task.login, user)
         }
       } catch (err) {
-        // Удаляем не существующий аккаунт из списка отписок
+        // Delete an existing account from the list of notifications
         if (err.name === 'IGAccountNotFoundError') {
           Task.removeUnFollowUser(id, user)
         }
 
-        // Ищем замену
+        // Looking for a replacement
         findUsers()
       }
     }
@@ -338,12 +340,12 @@ exports.unFollow = async task => {
   }
 }
 
-// Отписка
+// Unsubscription
 exports.getUnFollow = async (session, user) => {
   return Client.Relationship.destroy(session, user._params.id.toString())
 }
 
-// Получить подписчиков аккаунта
+// Get account subscribers
 exports.followLoad = async (session, login) => {
   try {
     const account = await Client.Account.searchForUser(session, login)
@@ -352,7 +354,7 @@ exports.followLoad = async (session, login) => {
       account._params.id
     )
 
-    // Сохраняем подписчиков
+    // Save subscribers
     let allFollowing = await feed.all()
 
     let following = []
@@ -365,7 +367,7 @@ exports.followLoad = async (session, login) => {
   }
 }
 
-// Загрузка списка подписчиков группы
+// Downloading the list of subscribers for the group
 exports.getAccountFollowers = async (session, login) => {
   try {
     const account = await Client.Account.searchForUser(session, login)
@@ -383,6 +385,6 @@ exports.getAccountFollowers = async (session, login) => {
   }
 }
 
-// Поиск пользователя
+// User search
 exports.searchUser = async (session, user) =>
   await Client.Account.searchForUser(session, user)
