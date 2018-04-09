@@ -59,8 +59,8 @@ exports.followLikeUser = async (task, session, account) => {
     if (!source) throw new Error('Источник не существует')
 
     // At the end of the period, we reset the cache
-    if (+source.date + 10368000 < Date.now()) {
-      await Source.remove({ name: task.params.source })
+    if ((+source.date + 7776000000) < Date.now()) {
+      await Source.remove(task.params.source)
       throw new Error('Срок годности базы истек')
     }
   } catch (e) {

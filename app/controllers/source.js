@@ -12,7 +12,7 @@ exports.create = async data =>
   }).save()
 
 // Check the existence of the source
-exports.contains = async name => Model.Source.findOne({ name: name })
+exports.contains = async name => await Model.Source.findOne({ name: name })
 
 // Remove item from source
 exports.removeUserSource = async (source, user) =>
@@ -28,4 +28,4 @@ exports.removeUserSource = async (source, user) =>
   )
 
 // Delete
-exports.remove = async name => Model.Source.remove({ name: name })
+exports.remove = async name => await Model.Source.findOne({ name: name }).remove()
