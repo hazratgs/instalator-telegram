@@ -165,6 +165,18 @@ module.exports = {
         '*': {
           event: 'account:select',
           children: {
+            Редактировать: {
+              event: 'account:edit',
+              children: {
+                '*': {
+                  event: 'account:edit:await',
+                  await: true
+                },
+                Назад: {
+                  event: 'location:back'
+                }
+              }
+            },
             Удалить: {
               event: 'account:delete',
               await: true

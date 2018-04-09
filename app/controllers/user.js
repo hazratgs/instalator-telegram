@@ -5,7 +5,7 @@ exports.contains = async id => Model.User.findOne({ id: id })
 
 // Adding a new user
 exports.create = async data =>
-  new Model.User({
+  await new Model.User({
     id: data.id,
     name: data.name
   }).save()

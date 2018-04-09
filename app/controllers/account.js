@@ -1,6 +1,7 @@
 const fs = require('fs')
 const path = require('path')
 const Model = require('../models/account')
+const Task = require('../models/task')
 
 // List of accounts
 exports.list = async user => Model.Account.find({ user: user })
@@ -18,7 +19,7 @@ exports.contains = async (user, login) =>
   Model.Account.findOne({ user: user, login: login })
 
 // Verify the existence of the account for all users
-exports.containsAllUsers = async login => Model.Account.find({ login: login })
+exports.containsAllUsers = async login => await Model.Account.find({ login: login })
 
 // Account deleting
 exports.remove = async (user, login) => {
@@ -118,7 +119,7 @@ exports.like = async (user, login, like) => {
 
 // Check whether it licked
 exports.checkLike = async (user, login, like) =>
-  Model.AccountLike.findOne({
+  await Model.AccountLike.findOne({
     user: user,
     login: login,
     data: {
@@ -137,7 +138,7 @@ exports.addLike = async (user, login, like) => {
     }
 
     // We record information about the husky
-    return Model.AccountLike.update(
+    return await Model.AccountLike.update(
       {
         user: user,
         login: login
@@ -164,3 +165,67 @@ exports.likeList = async (user, login) =>
     user: user,
     login: login
   })
+
+// Method for editing login / password
+exports.changeAccount = async (user, login, newLogin, newPassword) => {
+  await Model.Account.update(
+    {
+      user: user,
+      login: login
+    },
+    {
+      $set: {
+        login: newLogin,
+        password: newPassword
+      }
+    },
+    {
+      multi: true
+    }
+  )
+
+  await Model.AccountFollow.update(
+    {
+      user: user,
+      login: login
+    },
+    {
+      $set: {
+        login: newLogin
+      }
+    },
+    {
+      multi: true
+    }
+  )
+
+  await Model.AccountLike.update(
+    {
+      user: user,
+      login: login
+    },
+    {
+      $set: {
+        login: newLogin
+      }
+    },
+    {
+      multi: true
+    }
+  )
+
+  await Task.Task.update(
+    {
+      user: user,
+      login: login
+    },
+    {
+      $set: {
+        login: newLogin
+      }
+    },
+    {
+      multi: true
+    }
+  )
+}
