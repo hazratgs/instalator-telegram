@@ -16,7 +16,9 @@ const cron = require('./cron')
 bot.on('message', async msg => {
   try {
     // Find user
-    await user.contains(msg.from.id)
+    const findUser = await user.contains(msg.from.id)
+    if (!findUser) throw new Error('Not user')
+    
     // Send buttons & routee
     return msg.entities && msg.entities.type === 'bot_command'
       ? botCommands(msg)
