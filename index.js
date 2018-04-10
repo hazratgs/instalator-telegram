@@ -33,7 +33,7 @@ bot.on('message', async msg => {
 // Telegram router
 const router = msg => {
   // Декодируем эмодзи
-  msg.text = emoji.decode(msg.text)
+  if (msg.text) msg.text = emoji.decode(msg.text)
   // No user status, we give the main menu
   if (!state[msg.from.id]) {
     commandEvents.emit('/home', msg)
