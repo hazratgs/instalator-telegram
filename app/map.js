@@ -42,7 +42,7 @@ module.exports = {
                     }
                   }
                 },
-                Хештэг: {
+                Хештег: {
                   event: 'task:select:follow+like:hashtag',
                   children: {
                     '*': {

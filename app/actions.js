@@ -77,7 +77,7 @@ exports.sourceConstructor = async (
     // Download source
     const source = task.params.sourceType === 'Пользователь'
       ? await this.getAccountFollowers(session, task.params.source)
-      : task.params.sourceType === 'Хештэг'
+      : task.params.sourceType === 'Хештег'
           ? await this.getHashFollowers(session, task.params.source)
           : []
 
@@ -406,7 +406,6 @@ exports.searchUser = async (session, user) =>
 
 exports.getHashFollowers = async (session, tag) => {
   try {
-    console.log(tag.substr(1))
     const tags = await new Client.Feed.TaggedMedia(session, tag.substr(1))
     const data = await tags.all({ limit: 15000, maxErrors: 999999 })
 

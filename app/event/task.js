@@ -291,12 +291,12 @@ module.exports = (event, state, map, send) => {
         'У этого аккаунта есть активное задание, дождитесь завершения.'
       )
 
-      let source = data[3]
-      if (data[2] === 'Хештег') source = `#${source}`
-
       // We pass to the main
       event.emit('location:home', msg)
     } catch (e) {
+      let source = data[3]
+      if (data[2] === 'Хештег') source = `#${source}`
+      
       // Create an assignment
       await Task.createFollowLike({
         user: msg.from.id,
