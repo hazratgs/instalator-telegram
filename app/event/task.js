@@ -126,14 +126,51 @@ module.exports = (event, state, map, send) => {
 
   // Hashtag
   event.on('task:select:follow+like:hashtag', (msg, action, next) => {
-    send.keyboard(
-      msg.from.id,
-      `В разработке, выберите другой тип источника`,
-      action
-    )
-    next && next()
-    event.emit('location:back', msg)
+    try {
+      send.keyboard(msg.from.id, `По какому хэштегу искать?`, ['Назад'])
+      next && next()
+    } catch (e) {
+      next && next()
+      event.emit('location:back', msg)
+    }
   })
+
+  // Hashtag
+  event.on(
+    'task:select:follow+like:hashtag:find',
+    async (msg, action, next) => {
+      try {
+        send.message(msg.from.id, `Пожалуйста, подождите...`)
+
+        const { login, password } = await Account.contains(
+          msg.from.id,
+          state[msg.from.id][1]
+        )
+        const session = await actions.auth(login, password)
+        const info = await actions.infoHashtag(session, msg.text)
+
+        send.message(
+          msg.from.id,
+          `По хэштегу #${msg.text} найдено ${info.params.mediaCount} записи`
+        )
+
+        setTimeout(
+          () =>
+            send.keyboard(msg.from.id, 'Введите количество Подписок', [
+              info.params.mediaCount < 2500 ? info.params.mediaCount : '2500',
+              '5000',
+              '7500',
+              'Назад'
+            ]),
+          600
+        )
+        next && next()
+      } catch (e) {
+        next && next()
+        event.emit('location:back', msg)
+      }
+    }
+  )
 
   // List of sources
   event.on('task:select:follow+like:source', async (msg, action, next) => {
@@ -254,6 +291,9 @@ module.exports = (event, state, map, send) => {
         'У этого аккаунта есть активное задание, дождитесь завершения.'
       )
 
+      let source = data[3]
+      if (data[2] === 'Хештег') source = `#${source}`
+
       // We pass to the main
       event.emit('location:home', msg)
     } catch (e) {
@@ -263,7 +303,7 @@ module.exports = (event, state, map, send) => {
         login: data[0],
         type: data[1],
         sourceType: data[2],
-        source: data[3],
+        source: source,
         action: data[4],
         actionDay: data[5],
         like: data[6]

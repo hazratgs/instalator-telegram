@@ -39,7 +39,10 @@ exports.followLike = async task => {
         return await this.followLikeSource(task, session, account)
 
       case 'Пользователь':
-        return await this.followLikeUser(task, session, account)
+        return await this.sourceConstructor(task, session, account)
+
+      case 'Хештег':
+        return await this.sourceConstructor(task, session, account, 3600000)
 
       default:
         throw new Error(
@@ -53,22 +56,34 @@ exports.followLike = async task => {
 }
 
 // Subscription + like from the source user
-exports.followLikeUser = async (task, session, account) => {
+exports.sourceConstructor = async (
+  task,
+  session,
+  account,
+  time = 7776000000
+) => {
   try {
     const source = await Source.contains(task.params.source)
-    if (!source) throw new Error('Источник не существует')
+    if (!source || !source.source.length) {
+      throw new Error('Источник не существует')
+    }
 
     // At the end of the period, we reset the cache
-    if ((+source.date + 7776000000) < Date.now()) {
+    if (+source.date + time < Date.now()) {
       await Source.remove(task.params.source)
       throw new Error('Срок годности базы истек')
     }
   } catch (e) {
     // Download source
-    const source = await this.getAccountFollowers(session, task.params.source)
+    const source = task.params.sourceType === 'Пользователь'
+      ? await this.getAccountFollowers(session, task.params.source)
+      : task.params.sourceType === 'Хештэг'
+          ? await this.getHashFollowers(session, task.params.source)
+          : []
+
     await Source.create({ name: task.params.source, source: source })
 
-    // If the number of subscribers is less than the number specified in the task, 
+    // If the number of subscribers is less than the number specified in the task,
     // we update the number of subscribers
     if (source.length < task.params.actionFollow) {
       await Task.changeCount(task._id, source.length)
@@ -289,7 +304,7 @@ exports.unFollow = async task => {
         // Add to user array
         users.push(user)
 
-        // We add the user to the temporary database from the subscriptions, 
+        // We add the user to the temporary database from the subscriptions,
         // thus skipping the deleted accounts
         unFollowing.push(user)
 
@@ -388,3 +403,21 @@ exports.getAccountFollowers = async (session, login) => {
 // User search
 exports.searchUser = async (session, user) =>
   await Client.Account.searchForUser(session, user)
+
+exports.getHashFollowers = async (session, tag) => {
+  try {
+    console.log(tag.substr(1))
+    const tags = await new Client.Feed.TaggedMedia(session, tag.substr(1))
+    const data = await tags.all({ limit: 15000, maxErrors: 999999 })
+
+    const users = data.map(item => item.params.account.username)
+    const uniqUsers = [...new Set(users)]
+
+    return uniqUsers
+  } catch (e) {
+    return []
+  }
+}
+
+exports.infoHashtag = async (session, tag) =>
+  await new Client.Hashtag.info(session, tag)
