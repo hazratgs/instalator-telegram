@@ -32,8 +32,9 @@ bot.on('message', async msg => {
 
 // Telegram router
 const router = msg => {
-  // Декодируем эмодзи
-  msg.text = emoji.decode(msg.text)
+  // Decode emojju
+  if (msg.text) msg.text = emoji.decode(msg.text)
+  
   // No user status, we give the main menu
   if (!state[msg.from.id]) {
     commandEvents.emit('/home', msg)
@@ -62,8 +63,12 @@ const router = msg => {
     // Call branch method
     const callBranch = branch => {
       const action = findBranch.children[branch]
+      const value = msg.location 
+        ? `${msg.location.latitude}|${msg.location.longitude}`
+        : msg.text
+
       // Call action
-      event.emit(action.event, msg, action, (value = msg.text) => {
+      event.emit(action.event, msg, action, () => {
         event.emit('location:next', msg, action, value)
       })
     }

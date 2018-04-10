@@ -388,3 +388,7 @@ exports.getAccountFollowers = async (session, login) => {
 // User search
 exports.searchUser = async (session, user) =>
   await Client.Account.searchForUser(session, user)
+
+// Search location
+exports.searchLocation = async (session, location) =>
+  await Client.Location.search(session, location)

@@ -117,11 +117,73 @@ module.exports = (event, state, map, send) => {
   event.on('task:select:follow+like:geo', (msg, action, next) => {
     send.keyboard(
       msg.from.id,
-      `В разработке, выберите другой тип источника`,
-      action
+      `🌎 Передайти геолокацию`,
+      ['Назад']
     )
     next && next()
-    event.emit('location:back', msg)
+  })
+
+  event.on('task:select:follow+like:geo:lat+long', async (msg, action, next) => {
+    try {
+      if (!msg.location) throw new Error('Передайте локацию')
+
+      const { login, password } = await Account.contains(
+        msg.from.id,
+        state[msg.from.id][1]
+      )
+      const session = await actions.auth(login, password)
+      const search = await actions.searchLocation(session, 'Дербент')
+
+      send.message(
+        msg.from.id,
+        `Профиль ${msg.text} найден, количество подписчиков: ${searchUser._params.followerCount}`
+      )
+
+      // Кол. действия
+      send.keyboard(msg.from.id, 'Введите количество Подписок', [
+        '2500',
+        '5000',
+        '7500',
+        'Назад'
+      ])
+      next && next()
+    } catch (e) {
+      next && next()
+      event.emit('location:back', msg)
+    }
+  })
+
+  // Location
+  event.on('task:select:follow+like:geo:find', async (msg, action, next) => {
+    try {
+      const { login, password } = await Account.contains(
+        msg.from.id,
+        state[msg.from.id][1]
+      )
+      const session = await actions.auth(login, password)
+      const searchUser = await actions.searchUser(session, msg.text)
+
+      send.message(
+        msg.from.id,
+        `Профиль ${msg.text} найден, количество подписчиков: ${searchUser._params.followerCount}`
+      )
+
+      // Кол. действия
+      send.keyboard(msg.from.id, 'Введите количество Подписок', [
+        '2500',
+        '5000',
+        '7500',
+        'Назад'
+      ])
+      next && next()
+    } catch (e) {
+      send.message(
+        msg.from.id,
+        `Пользователь ${msg.text} не найден, попробуйте еще раз`
+      )
+      next && next()
+      event.emit('location:back', msg)
+    }
   })
 
   // Hashtag

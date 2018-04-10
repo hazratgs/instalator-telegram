@@ -43,7 +43,41 @@ module.exports = {
                   }
                 },
                 Геолокация: {
-                  event: 'task:select:follow+like:geo'
+                  event: 'task:select:follow+like:geo',
+                  children: {
+                    '*': {
+                      event: 'task:select:follow+like:geo:lat+long',
+                      children: {
+                        '*': {
+                          event: 'task:select:follow+like:geo:find',
+                          children: {
+                            '*': {
+                              event: 'task:select:follow+like:source:action',
+                              children: {
+                                '*': {
+                                  event: 'task:select:follow+like:source:actionPerDay',
+                                  children: {
+                                    '*': {
+                                      event: 'task:select:follow+like:source:like'
+                                    }
+                                  }
+                                },
+                                Назад: {
+                                  event: 'location:back'
+                                }
+                              }
+                            },
+                            Назад: {
+                              event: 'location:back'
+                            }
+                          }
+                        },
+                        Назад: {
+                          event: 'location:back'
+                        }
+                      }
+                    }
+                  }
                 },
                 Хештэг: {
                   event: 'task:select:follow+like:hashtag'
