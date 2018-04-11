@@ -31,8 +31,8 @@ exports.auth = (login, password) => {
 // Assign to subscribe + like
 exports.followLike = async task => {
   try {
-    let account = await Account.contains(task.user, task.login)
-    let session = await this.auth(account.login, account.password)
+    const account = await Account.contains(task.user, task.login)
+    const session = await this.auth(account.login, account.password)
 
     switch (task.params.sourceType) {
       case 'Источники':

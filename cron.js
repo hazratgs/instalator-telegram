@@ -23,33 +23,49 @@ cron.schedule('28 */1 * * *', async () => {
           activeTask.push(id)
           actions
             .followLike(item)
-            .then(finish => {
+            .then(res => {
               // Remove from list
               const keyActiveTask = activeTask.indexOf(id)
               delete activeTask[keyActiveTask]
 
+              if (res.name === 'AuthenticationError') {
+                send.message(
+                  item.user,
+                  `⛔️ При входе в ${item.login} возникла ошибка, отредактируйте акккаунт!`
+                )
+                throw new Error('Ошибка авторизации')
+              }
+
               // notify the user when the task is completed
-              if (finish) {
+              if (res) {
                 send.message(
                   item.user,
                   `Задание ${item.type} завершено для аккаунта ${item.login}`
                 )
               }
             })
-            .catch(e => console.log(e.message))
+            .catch(e => console.log(e))
           break
 
         case 'Отписка':
           activeTask.push(id)
           actions
             .unFollow(item)
-            .then(finish => {
+            .then(res => {
               // Remove from list
               const keyActiveTask = activeTask.indexOf(id)
               delete activeTask[keyActiveTask]
 
+              if (res.name === 'AuthenticationError') {
+                send.message(
+                  item.user,
+                  `⛔️ При входе в ${item.login} возникла ошибка, отредактируйте акккаунт!`
+                )
+                throw new Error('Ошибка авторизации')
+              }
+
               // notify the user when the task is completed
-              if (finish) {
+              if (res) {
                 send.message(
                   item.user,
                   `Задание ${item.type} завершено для аккаунта ${item.login}`
