@@ -3,4 +3,3 @@ node_modules/
 *.txt
 *.log
 package-lock.json
-cookies/

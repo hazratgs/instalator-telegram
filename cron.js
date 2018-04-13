@@ -7,7 +7,7 @@ const actions = require('./app/actions')
 const activeTask = []
 
 // Run active tasks
-cron.schedule('28 */1 * * *', async () => {
+cron.schedule('12 */1 * * *', async () => {
   try {
     const list = await task.currentList()
     if (list === null) throw new Error('No active assignments')
