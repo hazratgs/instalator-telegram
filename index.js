@@ -74,6 +74,9 @@ const router = msg => {
     } else if (findBranch.children['*']) {
       // If there is no suitable branch, then we try to use a common branch
       callBranch('*')
+    } else {
+      // back
+      event.emit('location:back', msg)
     }
 
     // console trace

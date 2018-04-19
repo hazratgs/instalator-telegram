@@ -25,11 +25,7 @@ exports.containsAllUsers = async login => await Model.Account.find({ login: logi
 exports.remove = async (user, login) => {
   try {
     // Clearing Account Cookies
-    fs.unlink(path.resolve('.', './cookies') + `/${login}.txt`, err => {
-      if (err) {
-        throw new Error(err)
-      }
-    })
+    await fs.unlink(path.resolve('.', './cookies') + `/${login}.txt`)
     return Model.Account.remove({ user: user, login: login })
   } catch (e) {
     return e

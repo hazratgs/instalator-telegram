@@ -105,9 +105,10 @@ module.exports = (event, state, map, send) => {
       send.keyboard(msg.from.id, 'Выберите действия для ' + msg.text, action)
       next && next()
     } catch (e) {
-      send.message(
+      send.keyboard(
         msg.from.id,
-        `Аккаунт ${msg.text} не существует, выберите другой`
+        `Аккаунт ${msg.text} не существует, выберите другой`,
+        action
       )
     }
   })
