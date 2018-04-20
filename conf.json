@@ -1,5 +1,6 @@
 {
   "port": 3033,
+  "url": "https://instalator.hazratgs.com",
   "cron": "18 */1 * * *",
   "token": "593155352:AAFyB-VorWdUzOaUVlLOZAv23LtUrkhdN2A",
   "mongoose": {
