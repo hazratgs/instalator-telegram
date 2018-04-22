@@ -1,5 +1,6 @@
 const Client = require('instagram-private-api').V1
 const bot = require('../telegram')
+const send = require('./send')
 
 const Account = require('./controllers/account')
 const Source = require('./controllers/source')
@@ -32,6 +33,15 @@ exports.auth = (login, password) => {
 exports.followLike = async task => {
   try {
     const account = await Account.contains(task.user, task.login)
+    if (!account) {
+      // remove task if don't not account
+      await Task.cancel(task._id)
+      send.message(
+        task.user,
+        `Аккаунт ${task.login} не найден, задача ${task.type} отменена!`
+      )
+      throw new Error('empty account')
+    }
     const session = await this.auth(account.login, account.password)
 
     switch (task.params.sourceType) {
