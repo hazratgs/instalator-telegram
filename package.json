@@ -4,7 +4,7 @@
   "version": "2.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon index.js",
+    "dev": "DEV=true nodemon index.js",
     "start": "pm2 start index.js --name instalator -e err.log",
     "stop": "pm2 stop instalator"
   },
