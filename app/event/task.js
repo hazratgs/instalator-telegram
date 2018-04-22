@@ -242,7 +242,7 @@ module.exports = (event, state, map, send) => {
     'task:select:follow+like:source:actionPerDay',
     (msg, action, next) => {
       let length = parseInt(msg.text)
-      if (isNaN(length) || length > 1200) {
+      if (isNaN(length) || length > 1500) {
         send.message(
           msg.from.id,
           'Слишком много, могут заблокировать. Попробуй еще раз...'
@@ -322,8 +322,8 @@ module.exports = (event, state, map, send) => {
   // Unsubscription
   event.on('task:select:type:unfollow', (msg, action, next) => {
     let length = parseInt(msg.text)
-    if (isNaN(length) || length > 1200) {
-      send.message(msg.from.id, 'Не более 1200 отписок в одном задании')
+    if (isNaN(length) || length > 1500) {
+      send.message(msg.from.id, 'Не более 1500 отписок в одном задании')
       return null
     }
     next()
