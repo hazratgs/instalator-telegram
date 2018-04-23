@@ -1,8 +1,8 @@
 {
-  "port": 3033,
+  "port": 3056,
   "url": "https://instalator.hazratgs.com",
   "cron": "18 */1 * * *",
-  "token": "593155352:AAFyB-VorWdUzOaUVlLOZAv23LtUrkhdN2A",
+  "token": "583168942:AAHgAsyWjSJmdxBzGqM3xizKaba2HJcLDqw",
   "mongoose": {
     "uri": "mongodb://localhost/instalator"
   }
