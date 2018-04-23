@@ -119,7 +119,8 @@ module.exports = (event, state, map, send) => {
 
     try {
       // Check the existence of an account
-      await Account.contains(msg.from.id, login)
+      const account = await Account.contains(msg.from.id, login)
+      if (!account) throw new Error('Аккаунт не существует')
 
       try {
         // Delete
