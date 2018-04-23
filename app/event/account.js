@@ -74,21 +74,28 @@ module.exports = (event, state, map, send) => {
 
       try {
         // Availability check
-        await actions.auth(login, password)
+        const auth = await actions.auth(login, password)
 
         // Adding to the database
         await Account.add(msg.from.id, login, password)
 
         send.message(
           msg.from.id,
-          `Аккаунт ${login} успешно добавлен, войдите в Instagram и подтвердите, что это были вы`
+          `🔑 Аккаунт ${login} успешно добавлен, войдите в Instagram и подтвердите, что это были вы`
         )
         event.emit('location:home', msg)
       } catch (e) {
-        send.message(
-          msg.from.id,
-          'Возникла ошибка при авторизации, проверьте правильность логина/пароля'
-        )
+        if (e.name === 'SentryBlockError') {
+          send.message(
+            msg.from.id,
+            '⛔️ Instagram отказал в доступе, попробуйте позже'
+          )
+        } else {
+          send.message(
+            msg.from.id,
+            '⛔️ Возникла ошибка при авторизации, проверьте правильность логина/пароля'
+          )
+        }
       }
     } catch (e) {
       // Account added earlier
