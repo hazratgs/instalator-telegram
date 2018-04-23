@@ -100,15 +100,15 @@ module.exports = (event, state, map, send) => {
   event.on('account:select', async (msg, action, next) => {
     try {
       // Search for an account in the database
-      await Account.contains(msg.from.id, msg.text)
+      const account = await Account.contains(msg.from.id, msg.text)
+      if (!account) throw new Error('Аккаунт не существует')
 
       send.keyboard(msg.from.id, 'Выберите действия для ' + msg.text, action)
       next && next()
     } catch (e) {
-      send.keyboard(
+      send.message(
         msg.from.id,
-        `Аккаунт ${msg.text} не существует, выберите другой`,
-        action
+        `Аккаунт ${msg.text} не существует, выберите другой`
       )
     }
   })
@@ -143,7 +143,9 @@ module.exports = (event, state, map, send) => {
   // Edit account
   event.on('account:edit', async (msg, action, next) => {
     try {
-      send.keyboard(msg.from.id, 'Введите логин и пароль через пробел', ['Назад'])
+      send.keyboard(msg.from.id, 'Введите логин и пароль через пробел', [
+        'Назад'
+      ])
       next && next()
     } catch (e) {
       send.message(msg.from.id, 'Аккаунт не найден!')
@@ -155,7 +157,7 @@ module.exports = (event, state, map, send) => {
   event.on('account:edit:await', (msg, action, next) => {
     try {
       const [newLogin, newPassword] = msg.text.split(' ')
-      
+
       // Error handling
       if (!newLogin || !newPassword) throw new Error('Не передан логин/пароль')
 
@@ -170,7 +172,7 @@ module.exports = (event, state, map, send) => {
   // Save
   event.on('account:edit:save', async (msg, newLogin, newPassword) => {
     try {
-      const [,login] = state[msg.from.id]
+      const [, login] = state[msg.from.id]
       const check = await Account.containsAllUsers(login)
       if (check === null) throw new Error(`${login} уже используется!`)
 
@@ -183,10 +185,7 @@ module.exports = (event, state, map, send) => {
         // Adding to the database
         await Account.changeAccount(msg.from.id, login, newLogin, newPassword)
 
-        send.message(
-          msg.from.id,
-          `🎉 Аккаунт ${login} успешно отредактирован`
-        )
+        send.message(msg.from.id, `🎉 Аккаунт ${login} успешно отредактирован`)
         event.emit('location:home', msg)
       } catch (e) {
         send.message(
