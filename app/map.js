@@ -228,6 +228,14 @@ module.exports = {
           event: 'location:back'
         }
       }
+    },
+    Лимиты: {
+      event: 'limit:message',
+      children: {
+        Назад: {
+          event: 'location:back'
+        }
+      }
     }
   }
 }

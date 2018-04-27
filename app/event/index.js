@@ -10,6 +10,7 @@ const state = {}
 const account = require('./account')(event, state, map, send)
 const action = require('./action')(event, state, map, send)
 const task = require('./task')(event, state, map, send)
+const limit = require('./limit')(event, state, map, send)
 
 // Change the location of the user
 event.on('location:next', (msg, action, value) => {

@@ -2,10 +2,11 @@ const bot = require('../telegram')
 const emoji = require('./emoji')
 
 // Send message
-exports.message = (user, message) => bot.sendMessage(user, message)
+exports.message = (user, message, options = {}) =>
+  bot.sendMessage(user, message, options)
 
 // Sending Messages with the keyboard
-exports.keyboard = (user, message, data, inline = 2) => {
+exports.keyboard = (user, message, data, inline = 2, options = {}) => {
   let opt = [], arr = [], i = 0
 
   // If the map object entered, we take the data from the current branch
@@ -42,7 +43,8 @@ exports.keyboard = (user, message, data, inline = 2) => {
       keyboard: opt,
       resize_keyboard: true
       // one_time_keyboard: true
-    }
+    },
+    ...options
   })
 }
 
