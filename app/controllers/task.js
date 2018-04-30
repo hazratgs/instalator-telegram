@@ -4,11 +4,15 @@ const Model = require('../models/task')
 exports.create = async data => new Model.Task(data).save()
 
 // assignment Laik + Subscription
-exports.createFollowLike = async data =>
+exports.createFollowLike = async data => {
+  const date = new Date()
+  const minute = date.getMinutes()
+
   this.create({
     user: data.user,
     login: data.login,
     type: data.type,
+    start: minute,
     params: {
       sourceType: data.sourceType, // source type
       source: data.source, // a source
@@ -18,6 +22,8 @@ exports.createFollowLike = async data =>
       following: [] // who subscribed
     }
   })
+}
+   
 
 // assignment
 exports.createUnFollow = async data =>
@@ -44,10 +50,14 @@ exports.current = async (user, login) =>
   })
 
 // Active quests
-exports.currentList = async () =>
-  Model.Task.find({
-    status: 'active'
+exports.currentList = async () => {
+  const date = new Date()
+  const minute = date.getMinutes()
+  return Model.Task.find({
+    status: 'active',
+    start: minute
   })
+}
 
 // Completion of the assignment
 exports.finish = async id =>
