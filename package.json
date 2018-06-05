@@ -19,7 +19,7 @@
     "body-parser": "^1.18.2",
     "cors": "^2.8.4",
     "express": "^4.16.3",
-    "instagram-private-api": "^0.6.7",
+    "instagram-private-api": "^0.6.8",
     "mongoose": "^5.0.12",
     "node-cron": "^1.2.1",
     "node-telegram-bot-api": "^0.30.0"
