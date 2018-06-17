@@ -215,6 +215,14 @@ exports.followLikeSource = async (task, session, account) => {
           // substitute another
           await findUsers()
         }
+
+        if (err.name === 'ParseError') {
+          bot.sendMessage(
+            task.user,
+            '⛔️ Instagram предупредил о превышении лимита, пожалуйста уменьшите количество действий в день'
+          )
+          break
+        }
       }
     }
 
